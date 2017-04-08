@@ -95,5 +95,13 @@ function eproto.decode(name, data)
 	end
 end
 
+-- original msgpack api
+function eproto.pack(t)
+	return eproto_cpp.pack(t)
+end
+function eproto.unpack(s)
+	return eproto_cpp.unpack(s)
+end
+
 return eproto
 
