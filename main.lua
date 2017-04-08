@@ -14,7 +14,7 @@ local dump = require("dump")
 local eproto = require("eproto")
 local Address = {
 	[1] = "addr";
-	[2] = "name";
+	[2] = "num";
 	[3] = "phone";
 }
 local helloProto = {
