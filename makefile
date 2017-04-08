@@ -32,12 +32,6 @@ $(OBJS): %.o:%.cpp %.h
 main.o:main.cpp
 	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
 
-eproto.o:eproto.cpp eproto.h
-	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
-
-script.o:script.cpp script.h
-	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
-
 clean:
 	-$(RM) $(BIN)/$(TARGET)
 	-$(RM) *.o

@@ -8,8 +8,6 @@
 
 #include "script.h"
 
-NS_HIVE_BEGIN
-
 Script::Script(void) : m_pState(NULL) {
 
 }
@@ -38,5 +36,3 @@ void Script::setState(lua_State* pState){
 	// open eproto
 	luaopen_eproto_cpp(m_pState);
 }
-
-NS_HIVE_END
