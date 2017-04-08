@@ -9,6 +9,8 @@
 local t1,d,dt
 local count = 1000000
 
+local dump = require("dump")
+
 local eproto = require("eproto")
 local Address = {
 	[1] = "addr";
@@ -63,4 +65,6 @@ for k=1,count do
 	len,dt = eproto.decode("HelloWorld", d)
 end
 print("count", count, "decode cost", os.clock() - t1)
+
+dump(dt)
 
