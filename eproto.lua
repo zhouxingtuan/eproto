@@ -7,10 +7,11 @@
 --
 
 --[[
-#define PROTO_TYPE_LUA_TABLE 0
-#define PROTO_TYPE_PROTO_TABLE 1
-#define PROTO_TYPE_PROTO_ARRAY 2
-#define PROTO_TYPE_ELEMENT 3
+# string : the key name, support lua type (boolean/number/string/table)
+# table :
+	the 1 is the type(1 proto_table/ 2 proto_array),
+	the 2 is the key name,
+	the 3 is the proto name refer to
 
 local proto1 = {
 	[1] = "key1";
@@ -30,10 +31,8 @@ local print = print
 
 local eproto = {}
 
-eproto.lua_table 	= 0		-- could be a lua table or array, or normal lua datas (string,number,boolean)
 eproto.proto_table 	= 1		-- another proto message
 eproto.proto_array 	= 2		-- aonther proto message array
-eproto.element 		= 3		-- normal element of lua type, could be string/boolean/number/table
 
 local eproto_infos = {}
 local eproto_ids = {}

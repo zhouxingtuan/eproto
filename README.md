@@ -19,6 +19,13 @@ the test can be run on Linux
 # How to define a proto
 you can find the test in main.lua like bellow:
 
+	--[[
+	# string : the key name, support lua type (boolean/number/string/table)
+    # table :
+    	the 1 is the type(1 proto_table/ 2 proto_array),
+    	the 2 is the key name,
+    	the 3 is the proto name refer to
+    --]]
 	local eproto = require("eproto")
 	local Address = {
 		[1] = "addr";
