@@ -17,7 +17,7 @@ the test can be run on Linux
 	make
 
 # How to define a proto
-you can find the test in main.lua like follow:
+you can find the test in main.lua like bellow:
 
 	local eproto = require("eproto")
 	local Address = {
@@ -71,6 +71,13 @@ so, eproto supports msgpack api too.
 	eproto.pack or eproto_cpp.pack
 
 	eproto.unpack or eproto_cpp.unpack
+
+# Something you should know
+1) the original work by lua-msgpack-native is not support multi threads, now we support it.
+
+2) the maximum pack buffer was limited, you can change the define to suit yourself. define in eproto.cpp
+	
+	#define MSG_PACK_EXPAND_LENGTH 4194304
 
 
 
