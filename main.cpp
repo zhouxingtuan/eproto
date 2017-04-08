@@ -31,11 +31,11 @@ int main(int argc, const char * argv[]) {
 	Script script;
 	script.setState(NULL);
 
-	fprintf(stderr, "start loading main.lua t=%lld", get_time_us());
+	fprintf(stderr, "start loading main.lua t=%lld\n", get_time_us());
 
 	script.executeFile("main.lua");
 
-	fprintf(stderr, "end loading main.lua t=%lld", get_time_us());
+	fprintf(stderr, "end loading main.lua t=%lld\n", get_time_us());
 
     return 0;
 }
