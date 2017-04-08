@@ -31,7 +31,7 @@ serialise_key_dump = function(value, indent, depth)
 		return value
 	elseif type(value) == "nil" or type(value) == "number" or
 			type(value) == "boolean" then
-		return tostring(value)
+		return "[" ..tostring(value).. "]"
 	elseif type(value) == "table" then
 		return "[" .. serialise_table_dump(value, indent, depth) .. "]"
 	else
@@ -55,20 +55,23 @@ serialise_table_dump = function(value, indent, depth)
 		return serialise_table_map[value]
 	end
 	serialise_table_map[value] = "\"<loop table>\""
---	if depth > 50 then
---		return "Cannot serialise any further: too many nested tables"
---	end
+	--	if depth > 50 then
+	--		return "Cannot serialise any further: too many nested tables"
+	--	end
 
 	local comma = false
 	local fragment = { "{" .. spacing2 }
 	for k, v in pairs(value) do
 		if comma then
-			table_insert(fragment, "," .. spacing2)
+			table_insert(fragment, ";" .. spacing2)
 		end
 		table_insert(fragment,
 			string_format("%s = %s", serialise_key_dump(k, indent2, depth),
 				serialise_value_dump(v, indent2, depth)))
 		comma = true
+	end
+	if comma then
+		table_insert(fragment, ";")
 	end
 	table_insert(fragment, spacing .. "}")
 
