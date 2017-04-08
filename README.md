@@ -30,9 +30,31 @@ you can find the test in main.lua like follow:
 	eproto.register("HelloWorld", helloProto)
 
 # How to use the api
-
+	local addrArray = {
+		{
+			addr = "广东省深圳市XXX";
+			num = 123;
+			phone = "123456789";
+		};
+		{
+			addr = "广东省深圳市XXX";
+			num = 1234;
+			phone = "123456789";
+		};
+		{
+			addr = "广东省深圳市XXX";
+			num = 123456;
+			phone = "123456789";
+		};
+	}
+	local data = {
+		id = 123;
+		str = "你好！HelloWorld！";
+		opt = 1234;
+		time = os.time();
+		addrs = addrArray;
+	}
 	local str = eproto.encode("HelloWorld", data)
-
 	local len,dt = eproto.decode("HelloWorld", str)
 
 # Something more
