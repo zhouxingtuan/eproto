@@ -1,5 +1,5 @@
 # epsilonProto
-A protocol use in lua, faster than pbc-lua, and is as small as protobuf. 
+eproto (epsilonProto) is a protocol use in lua, faster than pbc-lua, and is as small as protobuf. 
 
 link https://github.com/zhouxingtuan/epsilonProto 
 
