@@ -9,6 +9,8 @@
 #ifndef __hive__script__
 #define __hive__script__
 
+#include <string>
+
 #include "lua.hpp"
 #include "eproto.h"
 
