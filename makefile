@@ -35,7 +35,7 @@ main.o:main.cpp
 eproto.o:eproto.cpp eproto.h
 	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
 
-script.o:eproto.o script.cpp script.h
+script.o:script.cpp script.h
 	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
 
 clean:
