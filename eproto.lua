@@ -11,7 +11,7 @@
 # table :
 	the 1 is the type(1 proto_table/ 2 proto_array),
 	the 2 is the key name,
-	the 3 is the proto name refer to
+	the 3 is the proto name refers to
 
 local proto1 = {
 	[1] = "key1";
