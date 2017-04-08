@@ -6,10 +6,6 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-local eproto_cpp = require("eproto_cpp")
-local print = print
-local class = require("class")
-
 --[[
 #define PROTO_TYPE_LUA_TABLE 0
 #define PROTO_TYPE_PROTO_TABLE 1
@@ -29,17 +25,18 @@ eproto.register("proto1", proto1)
 eproto.register("proto2", proto2)
 --]]
 
-local eproto = class("eproto")
+local eproto_cpp = require("eproto_cpp")
+local print = print
+
+local eproto = {}
 
 eproto.lua_table 	= 0		-- could be a lua table or array, or normal lua datas (string,number,boolean)
 eproto.proto_table 	= 1		-- another proto message
 eproto.proto_array 	= 2		-- aonther proto message array
 eproto.element 		= 3		-- normal element of lua type, could be string/boolean/number/table
 
-local eproto_infos = eproto.infos or {}
-eproto.infos = eproto_infos
-local eproto_ids = eproto.ids or {}
-eproto.ids = eproto_ids
+local eproto_infos = {}
+local eproto_ids = {}
 
 local function merge_info(info, oldInfo)
 	if oldInfo == nil then
