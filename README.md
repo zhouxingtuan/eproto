@@ -10,6 +10,12 @@ embedded the code into your program, now support with Lua5.1/LuaJIT only:
 	eproto.h
 	eproto.lua
 
+the test can be run on Linux
+
+	git clone --recursive https://github.com/zhouxingtuan/epsilonProto 
+	cd epsilonProto 
+	make
+
 # How to define a proto
 you can find the test in main.lua like follow:
 
