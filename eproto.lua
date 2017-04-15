@@ -31,36 +31,41 @@ local print = print
 
 local eproto = {}
 
+-- set global variables
+rawset(_G, "eproto", eproto)
+rawset(_G, "EPROTO_TABLE", 1)
+rawset(_G, "EPROTO_ARRAY", 2)
+
 eproto.proto_table 	= 1		-- another proto message
 eproto.proto_array 	= 2		-- aonther proto message array
 
-local eproto_infos = {}
+--local eproto_infos = {}
 local eproto_ids = {}
 
-local function merge_info(info, oldInfo)
-	if oldInfo == nil then
-		return info
-	end
-	for k=1,#info do
-		if oldInfo[k] == nil then
-			oldInfo[k] = info[k]
-		end
-	end
-	return oldInfo
-end
+--local function merge_info(info, oldInfo)
+--	if oldInfo == nil then
+--		return info
+--	end
+--	for k=1,#info do
+--		if oldInfo[k] == nil then
+--			oldInfo[k] = info[k]
+--		end
+--	end
+--	return oldInfo
+--end
 
 function eproto.register(name, info)
-	info = merge_info(info, eproto_infos[name])
-	eproto_infos[name] = info
+	--	info = merge_info(info, eproto_infos[name])
+	--	eproto_infos[name] = info
 	local id = eproto_cpp.proto(name, info)
 	eproto_ids[name] = id
 	print("eproto.register", name, id)
 	return id
 end
 
-function eproto.info(name)
-	return eproto_infos[name]
-end
+--function eproto.info(name)
+--	return eproto_infos[name]
+--end
 function eproto.id(name)
 	return eproto_ids[name]
 end
