@@ -567,6 +567,11 @@ static size_t mpwbuf_pack_anytype( mpwbuf_t *b, lua_State *L, int index ) {
 
 static size_t msgpack_encode_proto(mpwbuf_t *b, lua_State *L, int index, proto_element_vector* pVec);
 size_t msgpack_encode_proto_array(mpwbuf_t *b, lua_State *L, int index, proto_element_vector* pVec){
+	// 判断当前数据是否是nil
+	int t = lua_type(L,index);
+	if(t == LUA_TNIL){
+		return mpwbuf_pack_nil(b);
+	}
 	//获取数组的长度写入
 	size_t l = lua_objlen(L,index);
 	size_t wl=0;
@@ -819,14 +824,14 @@ static void mprbuf_unpack_anytype( mprbuf_t *b, lua_State *L ) {
     //        fprintf( stderr, "mprbuf_unpack_anytype: topbyte:%x ofs:%d len:%d\n",(int)t, (int)b->ofs, (int)b->len );
 
     b->ofs += 1; // for toptypebyte
-    
+
     if(t<0x80){ // fixed num
         lua_pushnumber(L,(lua_Number)t);
         return;
     }
 
     unsigned char *s = b->data + b->ofs;
-    
+
     if(t>=0x80 && t <=0x8f){ // fixed map
         size_t maplen = t & 0xf;
         mprbuf_unpack_map(b,L,maplen);
@@ -854,7 +859,7 @@ static void mprbuf_unpack_anytype( mprbuf_t *b, lua_State *L ) {
         lua_pushnumber(L,n);
         return;
     }
-    
+
     switch(t){
     case 0xc0: // nil
         lua_pushnil(L);
@@ -884,7 +889,7 @@ static void mprbuf_unpack_anytype( mprbuf_t *b, lua_State *L ) {
             return;
         }
         break;
-        
+
     case 0xcc: // 8bit large posi int
         if(mprbuf_left(b)>=1){
             lua_pushnumber(L,(unsigned char) s[0] );
@@ -1033,7 +1038,7 @@ static int msgpack_unpack_api( lua_State *L ) {
     mprbuf_unpack_anytype(&rb,L);
 
     //    fprintf(stderr, "mprbuf_unpack_anytype: ofs:%d len:%d err:%d\n", (int)rb.ofs, (int)rb.len, rb.err );
-    
+
     if( rb.ofs >0 && rb.err==0){
         lua_pushnumber(L,rb.ofs);
         lua_replace(L,-3); // replace dummy len
@@ -1045,8 +1050,8 @@ static int msgpack_unpack_api( lua_State *L ) {
         lua_pushnil(L);
         lua_replace(L,-3);
         lua_pushnil(L);
-        lua_replace(L,-2);        
-        return 2;        
+        lua_replace(L,-2);
+        return 2;
     }
 }
 
@@ -1079,6 +1084,10 @@ void msgpack_decode_proto_array(mprbuf_t *b, lua_State *L, proto_element_vector*
 	        b->err |= 1;
             return;
 		}
+	}else if(t==0xc0){ // nil
+		// 协议字段本身是nil
+		lua_pushnil(L);
+		return;
 	}
 	lua_createtable(L, arylen, 0);
     for(size_t i=0;i<arylen;++i){
@@ -1174,6 +1183,11 @@ static void msgpack_decode_proto(mprbuf_t *b, lua_State *L, proto_element_vector
             msgpack_decode_proto_element(b,L,elemnum,pVec);
             return;
         }
+	}
+	// 有可能proto协议本身是nil
+	if(t==0xc0){ // nil
+		lua_pushnil(L);
+		return;
 	}
 	b->err |= 1;
 }
