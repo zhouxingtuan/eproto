@@ -68,7 +68,7 @@ you can find the test in main.lua like bellow:
 		addrs = addrArray;
 	}
 	local str = eproto.encode("HelloWorld", data)
-	local len,dt = eproto.decode("HelloWorld", str)
+	local dt,len = eproto.decode("HelloWorld", str)
 
 # Something more
 eproto is base on msgpack serialization, and is change from https://github.com/kengonakajima/lua-msgpack-native.git 
