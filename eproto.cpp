@@ -1034,21 +1034,21 @@ static int msgpack_unpack_api( lua_State *L ) {
     mprbuf_t rb;
     mprbuf_init(&rb,(const unsigned char*)s,len);
 
-    lua_pushnumber(L,-123456); // push readlen and replace it later
+//    lua_pushnumber(L,-123456); // push readlen and replace it later
     mprbuf_unpack_anytype(&rb,L);
 
     //    fprintf(stderr, "mprbuf_unpack_anytype: ofs:%d len:%d err:%d\n", (int)rb.ofs, (int)rb.len, rb.err );
 
     if( rb.ofs >0 && rb.err==0){
         lua_pushnumber(L,rb.ofs);
-        lua_replace(L,-3); // replace dummy len
+//        lua_replace(L,-3); // replace dummy len
         //        fprintf(stderr, "msgpack_unpack_api: unpacked len: %d\n", (int)rb.ofs );
         return 2;
     } else{
         //        lua_pushfstring(L,"msgpack_unpack_api: unsupported type or buffer short. error code: %d\n", rb.err );
         //        lua_error(L);
         lua_pushnil(L);
-        lua_replace(L,-3);
+//        lua_replace(L,-3);
         lua_pushnil(L);
         lua_replace(L,-2);
         return 2;
@@ -1218,21 +1218,21 @@ static int msgpack_decode_api( lua_State *L ) {
     mprbuf_t rb;
     mprbuf_init(&rb,(const unsigned char*)s,len);
 
-    lua_pushnumber(L,-123456); // push readlen and replace it later
+//    lua_pushnumber(L,-123456); // push readlen and replace it later
 
 	proto_element_vector* pVec = get_proto_info_by_id(id);
     msgpack_decode_proto(&rb, L, pVec);
 
     if( rb.ofs >0 && rb.err==0){
         lua_pushnumber(L,rb.ofs);
-        lua_replace(L,-3); // replace dummy len
+//        lua_replace(L,-3); // replace dummy len
         //        fprintf(stderr, "msgpack_unpack_api: unpacked len: %d\n", (int)rb.ofs );
         return 2;
     } else{
         //        lua_pushfstring(L,"msgpack_unpack_api: unsupported type or buffer short. error code: %d\n", rb.err );
         //        lua_error(L);
         lua_pushnil(L);
-        lua_replace(L,-3);
+//        lua_replace(L,-3);
         lua_pushnil(L);
         lua_replace(L,-2);
         return 2;

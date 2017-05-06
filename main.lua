@@ -62,8 +62,9 @@ print("data length", #d)
 print("count", count, "encode cost", os.clock() - t1)
 t1 = os.clock();
 for k=1,count do
-	len,dt = eproto.decode("HelloWorld", d)
+	dt,len = eproto.decode("HelloWorld", d)
 end
+print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 
 dump(dt)
