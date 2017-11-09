@@ -20,6 +20,13 @@ namespace ep{
 #define ERRORBIT_TYPE_NO_PROTO 128
 #define ERRORBIT_TYPE_WRONG_PROTO 256
 
+void ep_rcopy( unsigned char *dest, unsigned char*from, size_t l ){
+    size_t i;
+    for(i=0;i<l;i++){
+        dest[l-i-1]=from[i];
+    }
+}
+
 inline void ep_pack_nil(WriteBuffer* pwb){
     pwb->push(0xc0);
 }
@@ -28,6 +35,50 @@ inline void ep_pack_bool(WriteBuffer* pwb, bool b){
 		pwb->push(0xc3);
 	}else{
 		pwb->push(0xc2);
+	}
+}
+inline void ep_pack_int(WriteBuffer* pwb, long long lv){
+	if(lv>=0){
+	    if(lv<128){
+	        pwb->push((unsigned char)lv);
+	    } else if(lv<256){
+	        unsigned char v = (char)lv;
+	        pwb->add(0xcc, v);
+	    } else if(lv<65536){
+	        short v = htons((short)lv);
+	        pwb->add(0xcd, (unsigned char*)&v, sizeof(v));
+	    } else if(lv<4294967296LL){
+	        long v = htonl((long)lv);
+	        pwb->add(0xce, (unsigned char*)&v, sizeof(v));
+	    } else {
+	        long long v = htonll((long long)lv);
+	        pwb->add(0xcf, (unsigned char*)&v, sizeof(v));
+	    }
+	} else {
+	    if(lv >= -32){
+	        unsigned char v = 0xe0 | (char)lv;
+	        pwb->push(v);
+	    } else if( lv >= -128 ){
+	        unsigned char v = (unsigned char)lv;
+	        pwb->add(0xd0, v);
+	    } else if( lv >= -32768 ){
+	        short v = htons(lv&0xffff);
+	        pwb->add(0xd1, (unsigned char*)&v, sizeof(v));
+	    } else if( lv >= -2147483648LL ){
+	        int v = htonl(lv&0xffffffff);
+	        pwb->add(0xd2, (unsigned char*)&v, sizeof(v));
+	    } else{
+	        long long v = htonll(lv);
+	        pwb->add(0xd3, (unsigned char*)&v, sizeof(v));
+	    }
+	}
+}
+inline void ep_pack_float(WriteBuffer* pwb, lua_Number n){
+	float f = (float)n;
+	if((double)f == n){
+		pwb->radd(0xca, (unsigned char*)&f, sizeof(float));
+	}else{
+		pwb->radd(0xcb, (unsigned char*)&n, sizeof(double));
 	}
 }
 static void ep_pack_number(WriteBuffer* pwb, lua_Number n){
@@ -52,47 +103,9 @@ static void ep_pack_number(WriteBuffer* pwb, lua_Number n){
         pwb->write(buf, 9);
     } else if(floor(n)==n){
         long long lv = (long long)n;
-        if(lv>=0){
-            if(lv<128){
-                pwb->push((unsigned char)lv);
-            } else if(lv<256){
-                unsigned char v = (char)lv;
-                pwb->add(0xcc, v);
-            } else if(lv<65536){
-                short v = htons((short)lv);
-                pwb->add(0xcd, (unsigned char*)&v, sizeof(v));
-            } else if(lv<4294967296LL){
-                long v = htonl((long)lv);
-                pwb->add(0xce, (unsigned char*)&v, sizeof(v));
-            } else {
-                long long v = htonll((long long)lv);
-                pwb->add(0xcf, (unsigned char*)&v, sizeof(v));
-            }
-        } else {
-            if(lv >= -32){
-                unsigned char v = 0xe0 | (char)lv;
-                pwb->push(v);
-            } else if( lv >= -128 ){
-                unsigned char v = (unsigned char)lv;
-                pwb->add(0xd0, v);
-            } else if( lv >= -32768 ){
-                short v = htons(lv&0xffff);
-                pwb->add(0xd1, (unsigned char*)&v, sizeof(v));
-            } else if( lv >= -2147483648LL ){
-                int v = htonl(lv&0xffffffff);
-                pwb->add(0xd2, (unsigned char*)&v, sizeof(v));
-            } else{
-                long long v = htonll(lv);
-                pwb->add(0xd3, (unsigned char*)&v, sizeof(v));
-            }
-        }
+        ep_pack_int(pwb, lv);
     } else { // floating point!
-		float f = (float)n;
-		if((double)f == n){
-			pwb->radd(0xca, (unsigned char*)&f, sizeof(float));
-		}else{
-			pwb->radd(0xcb, (unsigned char*)&n, sizeof(double));
-		}
+		ep_pack_float(pwb, n);
     }
 }
 static void ep_pack_string(WriteBuffer* pwb, const unsigned char *sval, size_t slen){
@@ -225,6 +238,223 @@ static void ep_pack_anytype(WriteBuffer* pwb, lua_State *L, int index){
     }
 }
 
+static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L);
+static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
+    lua_createtable(L, arylen, 0);
+    int i;
+    for(i=0;i<arylen;i++){
+        ep_unpack_anytype(prb, L); // array element
+        if(b->err) break;
+        lua_rawseti(L, -2, i+1);
+    }
+}
+static void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
+    lua_createtable(L, 0, maplen);
+    int i;
+    for(i=0;i<maplen;i++){
+        ep_unpack_anytype(prb, L); // key
+        ep_unpack_anytype(prb, L); // value
+        lua_rawset(L,-3);
+    }
+}
+static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L) {
+    if( prb->left() < 1){
+        prb->setError(1);
+        return;
+    }
+    unsigned char t = prb->moveNext();
+
+    if(t<0x80){ // fixed num
+        lua_pushnumber(L,(lua_Number)t);
+        return;
+    }
+
+    unsigned char *s = prb->offsetPtr();
+
+    if(t>=0x80 && t <=0x8f){ // fixed map
+        size_t maplen = t & 0xf;
+        ep_unpack_map(prb, L, maplen);
+        return;
+    }
+    if(t>=0x90 && t <=0x9f){ // fixed array
+        size_t arylen = t & 0xf;
+        ep_unpack_array(prb, L, arylen);
+        return;
+    }
+    if(t>=0xa0 && t<=0xbf){ // fixed string
+        size_t slen = t & 0x1f;
+        if( prb->left() < slen ){
+            b->err |= 1;
+            return;
+        }
+        lua_pushlstring(L,(const char*)s,slen);
+        prb->moveOffset(slen);
+        return;
+    }
+    if(t>0xdf){ // fixnum_neg (-32 ~ -1)
+        unsigned char ut = t;
+        lua_Number n = ( 256 - ut ) * -1;
+        lua_pushnumber(L,n);
+        return;
+    }
+
+    switch(t){
+    case 0xc0: // nil
+        lua_pushnil(L);
+        return;
+    case 0xc2: // false
+        lua_pushboolean(L,0);
+        return;
+    case 0xc3: // true
+        lua_pushboolean(L,1);
+        return;
+
+    case 0xca: // float
+        if(prb->left() >= 4){
+            float f;
+            ep_rcopy( (unsigned char*)(&f), s,4); // endianness
+            lua_pushnumber(L,f);
+            prb->moveOffset(4);
+            return;
+        }
+        break;
+    case 0xcb: // double
+        if(prb->left() >= 8){
+            double v;
+            ep_rcopy( (unsigned char*)(&v), s,8); // endianness
+            lua_pushnumber(L,v);
+            prb->moveOffset(8);
+            return;
+        }
+        break;
+
+    case 0xcc: // 8bit large posi int
+        if(prb->left() >= 1){
+            lua_pushnumber(L,(unsigned char) s[0] );
+            prb->moveOffset(1);
+            return;
+        }
+        break;
+    case 0xcd: // 16bit posi int
+        if(prb->left() >= 2){
+            unsigned short v = ntohs( *(short*)(s) );
+            lua_pushnumber(L,v);
+            prb->moveOffset(2);
+            return;
+        }
+        break;
+    case 0xce: // 32bit posi int
+        if(prb->left()>=4){
+            unsigned long v = ntohl( *(long*)(s) );
+            lua_pushnumber(L,v);
+            prb->moveOffset(4);
+            return;
+        }
+        break;
+    case 0xcf: // 64bit posi int
+        if(prb->left()>=8){
+            unsigned long long v = ntohll( *(long long*)(s));
+            lua_pushnumber(L,v);
+            prb->moveOffset(8);
+            return;
+        }
+        break;
+    case 0xd0: // 8bit neg int
+        if(prb->left()>=1){
+            lua_pushnumber(L, (signed char) s[0] );
+            prb->moveOffset(1);
+            return;
+        }
+        break;
+    case 0xd1: // 16bit neg int
+        if(prb->left()>=2){
+            short v = *(short*)(s);
+            v = ntohs(v);
+            lua_pushnumber(L,v);
+            prb->moveOffset(2);
+            return;
+        }
+        break;
+    case 0xd2: // 32bit neg int
+        if(prb->left()>=4){
+            int v = *(long*)(s);
+            v = ntohl(v);
+            lua_pushnumber(L,v);
+            prb->moveOffset(4);
+            return;
+        }
+        break;
+    case 0xd3: // 64bit neg int
+        if(prb->left()>=8){
+            long long v = *(long long*)(s);
+            v = ntohll(v);
+            lua_pushnumber(L,v);
+            prb->moveOffset(8);
+            return;
+        }
+        break;
+    case 0xda: // long string len<65536
+        if(prb->left()>=2){
+            size_t slen = ntohs(*((unsigned short*)(s)));
+            prb->moveOffset(2);
+            if(prb->left()>=slen){
+                lua_pushlstring(L,(const char*)b->data+b->ofs,slen);
+                prb->moveOffset(slen);
+                return;
+            }
+        }
+        break;
+    case 0xdb: // longer string
+        if(prb->left()>=4){
+            size_t slen = ntohl(*((unsigned int*)(s)));
+            prb->moveOffset(4);
+            if(prb->left()>=slen){
+                lua_pushlstring(L,(const char*)b->data+b->ofs,slen);
+                prb->moveOffset(slen);
+                return;
+            }
+        }
+
+        break;
+
+    case 0xdc: // ary16
+        if(prb->left()>=2){
+            unsigned short elemnum = ntohs( *((unsigned short*)(b->data+b->ofs) ) );
+            prb->moveOffset(2);
+            ep_unpack_array(b,L,elemnum);
+            return;
+        }
+        break;
+    case 0xdd: // ary32
+        if(prb->left()>=4){
+            unsigned int elemnum = ntohl( *((unsigned int*)(b->data+b->ofs)));
+            prb->moveOffset(4);
+            ep_unpack_array(b,L,elemnum);
+            return;
+        }
+        break;
+    case 0xde: // map16
+        if(prb->left()>=2){
+            unsigned short elemnum = ntohs( *((unsigned short*)(b->data+b->ofs)));
+            prb->moveOffset(2);
+            ep_unpack_map(b,L,elemnum);
+            return;
+        }
+        break;
+    case 0xdf: // map32
+        if(prb->left()>=4){
+            unsigned int elemnum = ntohl( *((unsigned int*)(b->data+b->ofs)));
+            prb->moveOffset(4);
+            ep_unpack_map(b,L,elemnum);
+            return;
+        }
+        break;
+    default:
+        break;
+    }
+    prb->setError(1);
+}
+
 static void ep_state_init(ProtoState *ps){
     ps->pWriteBuffer = new WriteBuffer();
     ps->pManager = new ProtoManager();
@@ -276,8 +506,28 @@ static int ep_pack_api(lua_State *L){
     return 0;
 }
 static int ep_unpack_api(lua_State *L){
-
-    return 1;
+    size_t len;
+    const char * s = luaL_checklstring(L,1,&len);
+    if(!s){
+        lua_pushstring(L,"arg must be a string");
+        lua_error(L);
+        return 2;
+    }
+    if(len==0){
+        lua_pushnil(L);
+        return 1;
+    }
+    ReadBuffer rb;
+    ep_unpack_anytype(&rb, L);
+    if(rb.err==0){
+        lua_pushnumber(L, rb.offset);
+        return 2;
+    } else{
+        lua_pushnil(L);
+        lua_pushnil(L);
+        lua_replace(L,-2);
+        return 2;
+    }
 }
 static int ep_register_api(lua_State *L){
 
