@@ -35,12 +35,43 @@ typedef enum DataType
     ep_type_message,
 }DataType;
 
-typedef std::vector<char> CharBuffer;
+typedef std::vector<unsigned char> UCharBuffer;
 typedef struct WriteBuffer{
-    CharBuffer buffer;
+    UCharBuffer buffer;
     int err;
-    WriteBuffer(void) : buffer(4096), err(0){}
-    inline char* data(void){ return buffer.data(); }
+    WriteBuffer(void) : buffer(4096), err(0){ buffer.clear(); }
+    inline unsigned char* data(void){ return (unsigned char*)buffer.data(); }
+    inline unsigned int size(void) const { return buffer.size(); }
+    inline void write(const unsigned char* ptr, unsigned int length){
+//      unsigned int offset = buffer.size();
+//		buffer.resize(offset + length);
+//		memcpy(buffer.data() + offset, ptr, length);
+		buffer.insert(buffer.end(), ptr, ptr + length);
+    }
+    inline void rwrite(const unsigned char* ptr, unsigned int length){
+        for(int i=(int)length-1; i>=0; --i){
+			buffer.push_back(ptr[i]);
+        }
+    }
+    inline void push(unsigned char b){ buffer.push_back(b); }
+    inline void add(unsigned char b, unsigned char v){
+        push(b);
+        push(v);
+    }
+    inline void add(unsigned char b, const unsigned char* ptr, unsigned int length){
+        push(b);
+        write(ptr, length);
+    }
+    inline void radd(unsigned char b, const unsigned char* ptr, unsigned int length){
+        push(b);
+        rwrite(ptr, length);
+    }
+    inline void clear(void){
+        buffer.clear();
+        err = 0;
+    }
+    inline void setError(int e){ err |= e; }
+    inline int getError(void) const { return err; }
 }WriteBuffer;
 
 typedef struct ReadBuffer{
@@ -50,6 +81,9 @@ typedef struct ReadBuffer{
     int err;
     ReadBuffer(void) : ptr(NULL), length(0), offset(0), err(0){}
     inline unsigned char* data(void){ return ptr; }
+    inline void moveOffset(unsigned int length){ offset += length; }
+    inline unsigned char* offsetPtr(void) { return ptr + offset; }
+    inline bool isOffsetEnd(void) const { return offset >= length; }
 }ReadBuffer;
 
 typedef struct ProtoElement{
