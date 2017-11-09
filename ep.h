@@ -84,6 +84,14 @@ typedef struct ReadBuffer{
     inline void moveOffset(unsigned int length){ offset += length; }
     inline unsigned char* offsetPtr(void) { return ptr + offset; }
     inline bool isOffsetEnd(void) const { return offset >= length; }
+    inline void clear(void){
+        ptr = NULL;
+        length = 0;
+        offset = 0;
+        err = 0;
+    }
+    inline void setError(int e){ err |= e; }
+    inline int getError(void) const { return err; }
 }ReadBuffer;
 
 typedef struct ProtoElement{
