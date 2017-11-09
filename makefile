@@ -7,7 +7,7 @@ STATIC_LIB := $(LUAJIT_STATICLIB)
 
 # static的依赖库要放在static的后面，比如luasocket依赖openssl
 LIBPATH = -L/usr/local/lib
-LIBS = -lssl -lcrypto -lz -lrt -lstdc++ -ldl
+LIBS = -lssl -lcrypto -lz -lrt -lstdc++ -ldl -lm
 
 INCLUDES = -I$(LUAJIT_INC)
 
