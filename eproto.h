@@ -195,7 +195,7 @@ public:
         return pe;
     }
     // 数据类型是 message
-    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, const std:string& valueName){
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, const std::string& valueName){
 		unsigned int valueID = registerProto(valueName);
 		registerElement(path, type, index, name, valueID);
     }
@@ -206,7 +206,7 @@ public:
         setElement(type, index, name, valueID, pVec);
     }
     // 注册map时使用，key为常用数据类型，value为message数据类型
-    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, unsigned int key, const std:string& valueName){
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, unsigned int key, const std::string& valueName){
         unsigned int valueID = registerProto(valueName);
         registerElement(path, type, index, name, key, valueID);
     }
