@@ -109,10 +109,12 @@ typedef struct ProtoElement{
 	unsigned int type : 8;
 	unsigned int index : 24;
 	union{
+		// map数据结构
 	    struct{
 	        unsigned int key : 16;
 	        unsigned int value : 16;
 	    };
+	    // 通用数据，message
         unsigned int id;
 	};
 	std::string name;
@@ -174,7 +176,7 @@ public:
         }
         return id;
     }
-    inline ProtoElement* setElement(unsigned int type, unsigned int index, unsigned int id, const std::string& name, ProtoElementVector* pVec){
+    inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int id, ProtoElementVector* pVec){
         ProtoElement* pe;
         if(index >= (unsigned int)pVec->size()){
             pVec->resize(index + 1);
@@ -183,7 +185,7 @@ public:
         pe->set(type, index, name, id);
         return pe;
     }
-    inline ProtoElement* setElement(unsigned int type, unsigned int index, unsigned int key, unsigned int value, const std::string& name, ProtoElementVector* pVec){
+    inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value, ProtoElementVector* pVec){
         ProtoElement* pe;
         if(index >= (unsigned int)pVec->size()){
             pVec->resize(index + 1);
@@ -192,15 +194,27 @@ public:
         pe->set(type, index, name, key, value);
         return pe;
     }
-    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, unsigned int id, const std::string& name){
-        unsigned int id = registerProto(path);
-        ProtoElementVector* pVec = findProto(id);
-        setElement(type, index, id, name, pVec);
+    // 数据类型是 message
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, const std:string& valueName){
+		unsigned int valueID = registerProto(valueName);
+		registerElement(path, type, index, name, valueID);
     }
-    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, unsigned int id, const std::string& name){
-        unsigned int id = registerProto(path);
-        ProtoElementVector* pVec = findProto(id);
-        setElement(type, index, id, name, pVec);
+    // 数据类型是 常用数据类型
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, unsigned int valueID){
+        unsigned int protoID = registerProto(path);
+        ProtoElementVector* pVec = findProto(protoID);
+        setElement(type, index, name, valueID, pVec);
+    }
+    // 注册map时使用，key为常用数据类型，value为message数据类型
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, unsigned int key, const std:string& valueName){
+        unsigned int valueID = registerProto(valueName);
+        registerElement(path, type, index, name, key, valueID);
+    }
+    // 注册map时使用，key，value都是常用数据类型
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value){
+        unsigned int protoID = registerProto(path);
+        ProtoElementVector* pVec = findProto(protoID);
+        setElement(type, index, name, key, value, pVec);
     }
 };
 
