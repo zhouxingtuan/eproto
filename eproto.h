@@ -20,7 +20,7 @@ namespace eproto{
 
 typedef enum DataType
 {
-    ep_type_nil = 0,
+    ep_type_nil = 1,
     ep_type_bool,
     ep_type_float,
     ep_type_double,
@@ -108,13 +108,26 @@ typedef struct ReadBuffer{
 typedef struct ProtoElement{
 	unsigned int type : 8;
 	unsigned int index : 24;
-	unsigned int id;
+	union{
+	    struct{
+	        unsigned int key : 16;
+	        unsigned int value : 16;
+	    };
+        unsigned int id;
+	};
 	std::string name;
 	ProtoElement(void) : type(0), index(0), id(0){}
-	inline void set(unsigned int type, unsigned int index, unsigned int id, const std::string& name){
+	inline void set(unsigned int type, unsigned int index, const std::string& name, unsigned int id){
 	    this->type = type;
 	    this->index = index;
         this->id = id;
+        this->name = name;
+	}
+	inline void set(unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value){
+	    this->type = type;
+	    this->index = index;
+        this->key = key;
+        this->value = value;
         this->name = name;
 	}
 }ProtoElement;
@@ -128,17 +141,18 @@ public:
     ProtoVector m_protoVector;
     ProtoIndexMap m_indexMap;
 public:
-    ProtoManager(void){ m_protoVector.resize(1); }
+    ProtoManager(void){}
     ~ProtoManager(void){}
 
     inline ProtoElementVector* findProto(const std::string& path){
         ProtoIndexMap::iterator itCur = m_indexMap.find(path);
         if(itCur != m_indexMap.end()){
-            return &(m_protoVector[itCur->second]);
+            return &(m_protoVector[itCur->second - ep_type_max]);
         }
         return NULL;
     }
     inline ProtoElementVector* findProto(unsigned int id){
+        id -= ep_type_max;
         if(id < m_protoVector.size()){
             return &(m_protoVector[id]);
         }
@@ -154,7 +168,7 @@ public:
     inline unsigned int registerProto(const std::string& path){
         unsigned int id = findProtoID(path);
         if(id == 0){
-            id = m_protoVector.size();
+            id = m_protoVector.size() + ep_type_max;
             m_protoVector.push_back(ProtoElementVector());
             m_indexMap.insert(std::make_pair(path, id));
         }
@@ -166,8 +180,27 @@ public:
             pVec->resize(index + 1);
         }
         pe = &((*pVec)[index]);
-        pe->set(type, index, id, name);
+        pe->set(type, index, name, id);
         return pe;
+    }
+    inline ProtoElement* setElement(unsigned int type, unsigned int index, unsigned int key, unsigned int value, const std::string& name, ProtoElementVector* pVec){
+        ProtoElement* pe;
+        if(index >= (unsigned int)pVec->size()){
+            pVec->resize(index + 1);
+        }
+        pe = &((*pVec)[index]);
+        pe->set(type, index, name, key, value);
+        return pe;
+    }
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, unsigned int id, const std::string& name){
+        unsigned int id = registerProto(path);
+        ProtoElementVector* pVec = findProto(id);
+        setElement(type, index, id, name, pVec);
+    }
+    inline void registerElement(const std::string& path, unsigned int type, unsigned int index, unsigned int id, const std::string& name){
+        unsigned int id = registerProto(path);
+        ProtoElementVector* pVec = findProto(id);
+        setElement(type, index, id, name, pVec);
     }
 };
 
