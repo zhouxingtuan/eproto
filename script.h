@@ -13,7 +13,7 @@
 
 #include "lua.hpp"
 #include "eproto.h"
-#include "ep.h"
+#include "epsilonproto.h"
 
 class Script
 {
