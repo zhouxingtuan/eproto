@@ -35,5 +35,5 @@ void Script::setState(lua_State* pState){
 	lua_settop( m_pState, 0 );
 	// open eproto
 	luaopen_eproto_cpp(m_pState);
-	luaopen_ep(m_pState);
+	luaopen_eproto(m_pState);
 }

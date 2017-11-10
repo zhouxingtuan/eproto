@@ -11,7 +11,7 @@ local count = 1000000
 
 local dump = require("dump")
 
-local eproto = require("eproto")
+local epsilonproto = require("epsilonproto")
 local Address = {
 	[1] = "addr";
 	[2] = "num";
@@ -22,10 +22,10 @@ local helloProto = {
 	[2] = "str";
 	[3] = "opt";
 	[4] = "time";
-	[5] = {eproto.proto_array, "addrs", "Address"};
+	[5] = {epsilonproto.proto_array, "addrs", "Address"};
 }
-eproto.register("Address", Address)
-eproto.register("HelloWorld", helloProto)
+epsilonproto.register("Address", Address)
+epsilonproto.register("HelloWorld", helloProto)
 
 -- test data
 local addrArray = {
@@ -56,18 +56,33 @@ local data = {
 local len
 t1 = os.clock();
 for k=1,count do
-	d = eproto.encode("HelloWorld", data)
+	d = epsilonproto.encode("HelloWorld", data)
 end
 print("data length", #d)
 print("count", count, "encode cost", os.clock() - t1)
 t1 = os.clock();
 for k=1,count do
-	dt,len = eproto.decode("HelloWorld", d)
+	dt,len = epsilonproto.decode("HelloWorld", d)
 end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 dump(dt)
 
+local len
+t1 = os.clock();
+for k=1,count do
+	d = epsilonproto.pack(data)
+end
+print("data length", #d)
+print("count", count, "pack cost", os.clock() - t1)
+t1 = os.clock();
+for k=1,count do
+	dt,len = epsilonproto.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
+
+local eproto = require("eproto")
 local len
 t1 = os.clock();
 for k=1,count do
@@ -78,21 +93,6 @@ print("count", count, "pack cost", os.clock() - t1)
 t1 = os.clock();
 for k=1,count do
 	dt,len = eproto.unpack(d)
-end
-print("decode length", len)
-print("count", count, "unpack cost", os.clock() - t1)
-
-local ep = require("ep")
-local len
-t1 = os.clock();
-for k=1,count do
-	d = ep.pack(data)
-end
-print("data length", #d)
-print("count", count, "pack cost", os.clock() - t1)
-t1 = os.clock();
-for k=1,count do
-	dt,len = ep.unpack(d)
 end
 print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)

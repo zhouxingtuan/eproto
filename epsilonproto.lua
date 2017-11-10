@@ -20,24 +20,24 @@ local proto1 = {
 local proto2 = {
 	[1] = "key3";
 	[2] = "key4";
-	[3] = {eproto.proto_table, "key5", "proto1"};
+	[3] = {epsilonproto.proto_table, "key5", "proto1"};
 }
-eproto.register("proto1", proto1)
-eproto.register("proto2", proto2)
+epsilonproto.register("proto1", proto1)
+epsilonproto.register("proto2", proto2)
 --]]
 
 local eproto_cpp = require("eproto_cpp")
 local print = print
 
-local eproto = {}
+local epsilonproto = {}
 
 -- set global variables
-rawset(_G, "eproto", eproto)
+rawset(_G, "epsilonproto", epsilonproto)
 rawset(_G, "EPROTO_TABLE", 1)
 rawset(_G, "EPROTO_ARRAY", 2)
 
-eproto.proto_table 	= 1		-- another proto message
-eproto.proto_array 	= 2		-- aonther proto message array
+epsilonproto.proto_table 	= 1		-- another proto message
+epsilonproto.proto_array 	= 2		-- aonther proto message array
 
 --local eproto_infos = {}
 local eproto_ids = {}
@@ -54,23 +54,23 @@ local eproto_ids = {}
 --	return oldInfo
 --end
 
-function eproto.register(name, info)
+function epsilonproto.register(name, info)
 	--	info = merge_info(info, eproto_infos[name])
 	--	eproto_infos[name] = info
 	local id = eproto_cpp.proto(name, info)
 	eproto_ids[name] = id
-	print("eproto.register", name, id)
+	print("epsilonproto.register", name, id)
 	return id
 end
 
---function eproto.info(name)
+--function epsilonproto.info(name)
 --	return eproto_infos[name]
 --end
-function eproto.id(name)
+function epsilonproto.id(name)
 	return eproto_ids[name]
 end
 
-function eproto.checkProtoID(name)
+function epsilonproto.checkProtoID(name)
 	local id = eproto_ids[name]
 	if id == nil then
 		id = eproto_cpp.protoID(name)
@@ -82,30 +82,30 @@ function eproto.checkProtoID(name)
 	return id
 end
 
-function eproto.encode(name, data)
-	local id = eproto.checkProtoID(name)
+function epsilonproto.encode(name, data)
+	local id = epsilonproto.checkProtoID(name)
 	if id ~= nil then
 		return eproto_cpp.encode(id, data)
 	else
-		print("eproto.encode not found", name)
+		print("epsilonproto.encode not found", name)
 	end
 end
-function eproto.decode(name, data)
-	local id = eproto.checkProtoID(name)
+function epsilonproto.decode(name, data)
+	local id = epsilonproto.checkProtoID(name)
 	if id ~= nil then
 		return eproto_cpp.decode(id, data)
 	else
-		print("eproto.decode not found", name)
+		print("epsilonproto.decode not found", name)
 	end
 end
 
 -- original msgpack api
-function eproto.pack(t)
+function epsilonproto.pack(t)
 	return eproto_cpp.pack(t)
 end
-function eproto.unpack(s)
+function epsilonproto.unpack(s)
 	return eproto_cpp.unpack(s)
 end
 
-return eproto
+return epsilonproto
 
