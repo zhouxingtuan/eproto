@@ -33,6 +33,7 @@ typedef enum DataType
     ep_type_array,
     ep_type_map,
     ep_type_message,
+    ep_type_max,
 }DataType;
 
 typedef std::vector<unsigned char> UCharBuffer;
@@ -130,27 +131,27 @@ public:
     ProtoManager(void){ m_protoVector.resize(1); }
     ~ProtoManager(void){}
 
-    ProtoElementVector* findProto(const std::string& path){
+    inline ProtoElementVector* findProto(const std::string& path){
         ProtoIndexMap::iterator itCur = m_indexMap.find(path);
         if(itCur != m_indexMap.end()){
             return &(m_protoVector[itCur->second]);
         }
         return NULL;
     }
-    ProtoElementVector* findProto(unsigned int id){
+    inline ProtoElementVector* findProto(unsigned int id){
         if(id < m_protoVector.size()){
             return &(m_protoVector[id]);
         }
         return NULL;
     }
-    unsigned int findProtoID(const std::string& path){
+    inline unsigned int findProtoID(const std::string& path){
         ProtoIndexMap::iterator itCur = m_indexMap.find(path);
         if(itCur != m_indexMap.end()){
             return itCur->second;
         }
         return 0;
     }
-    unsigned int registerProto(const std::string& path){
+    inline unsigned int registerProto(const std::string& path){
         unsigned int id = findProtoID(path);
         if(id == 0){
             id = m_protoVector.size();
@@ -159,7 +160,7 @@ public:
         }
         return id;
     }
-    ProtoElement* setElement(unsigned int type, unsigned int index, unsigned int id, const std::string& name, ProtoElementVector* pVec){
+    inline ProtoElement* setElement(unsigned int type, unsigned int index, unsigned int id, const std::string& name, ProtoElementVector* pVec){
         ProtoElement* pe;
         if(index >= (unsigned int)pVec->size()){
             pVec->resize(index + 1);
