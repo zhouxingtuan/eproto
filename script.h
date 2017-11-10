@@ -13,6 +13,7 @@
 
 #include "lua.hpp"
 #include "eproto.h"
+#include "ep.h"
 
 class Script
 {

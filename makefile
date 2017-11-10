@@ -20,7 +20,7 @@ RM = rm -f
 BIN = .
 TARGET = main
 
-OBJS = eproto.o script.o
+OBJS = ep.o eproto.o script.o
 
 $(TARGET): main.o $(OBJS)
 	$(MAKE) -C ./LuaJIT

@@ -66,6 +66,36 @@ for k=1,count do
 end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
+dump(dt)
+
+local len
+t1 = os.clock();
+for k=1,count do
+	d = eproto.pack(data)
+end
+print("data length", #d)
+print("count", count, "pack cost", os.clock() - t1)
+t1 = os.clock();
+for k=1,count do
+	dt,len = eproto.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
+
+local ep = require("ep")
+local len
+t1 = os.clock();
+for k=1,count do
+	d = ep.pack(data)
+end
+print("data length", #d)
+print("count", count, "pack cost", os.clock() - t1)
+t1 = os.clock();
+for k=1,count do
+	dt,len = ep.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
 
 dump(dt)
 
