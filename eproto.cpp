@@ -748,7 +748,79 @@ static int ep_register_file_api(lua_State *L){
 	return ep_register_api(L);
 }
 static int ep_proto_api(lua_State *L){
-
+	typedef std::unordered_map<unsigned int, std::string> ProtoNameMap;
+	ProtoNameMap nameMap;
+	nameMap.insert(std::make_pair(ep_type_nil, "nil"));
+	nameMap.insert(std::make_pair(ep_type_bool, "bool"));
+	nameMap.insert(std::make_pair(ep_type_float, "float"));
+	nameMap.insert(std::make_pair(ep_type_double, "double"));
+	nameMap.insert(std::make_pair(ep_type_int32, "int32"));
+	nameMap.insert(std::make_pair(ep_type_int64, "int64"));
+	nameMap.insert(std::make_pair(ep_type_uint32, "uint32"));
+	nameMap.insert(std::make_pair(ep_type_uint64, "uint64"));
+	nameMap.insert(std::make_pair(ep_type_string, "string"));
+	nameMap.insert(std::make_pair(ep_type_bytes, "bytes"));
+	nameMap.insert(std::make_pair(ep_type_array, "array"));
+	nameMap.insert(std::make_pair(ep_type_map, "map"));
+	nameMap.insert(std::make_pair(ep_type_message, "message"));
+	ProtoState* ps = default_ep_state(L);
+	ProtoManager* pManager = ps->pManager;
+	for(auto &kv : pManager->m_indexMap){
+		nameMap.insert(std::make_pair(kv.second, kv.first));
+	}
+	size_t maplen = pManager->m_indexMap.size();
+	ProtoVector& protoVec = pManager->m_protoVector;
+    lua_createtable(L, 0, maplen);
+    for(auto &kv : pManager->m_indexMap){
+		lua_pushstring(L, kv.first.c_str());        // proto name key
+		ProtoElementVector& elementVec = protoVec[kv.second];
+		size_t arrLen = elementVec.size();
+		lua_createtable(L, arrLen, 0);              // proto table array value
+		for(size_t i=0; i<arrLen; ++i){
+			ProtoElement& element = elementVec[i];
+			// current element table
+			lua_createtable(L, 0, 6);               // element table
+			lua_pushstring(L, "type");
+			lua_pushnumber(L, element.type);
+			lua_rawset(L, -3);
+			lua_pushstring(L, "index");
+			lua_pushnumber(L, element.index);
+			lua_rawset(L, -3);
+			if(element.type == ep_type_map){
+				ProtoNameMap::iterator it = nameMap.find(element.key);
+				lua_pushstring(L, "key");
+				if(it != nameMap.end()){
+					lua_pushstring(L, it.second.c_str());
+				}else{
+					lua_pushnumber(L, element.key);
+				}
+				lua_rawset(L, -3);
+				it = nameMap.find(element.value);
+				lua_pushstring(L, "value");
+				if(it != nameMap.end()){
+					lua_pushstring(L, it.second.c_str());
+				}else{
+					lua_pushnumber(L, element.value);
+				}
+				lua_rawset(L, -3);
+			}else{
+				ProtoNameMap::iterator it = nameMap.find(element.key);
+				lua_pushstring(L, "id");
+				if(it != nameMap.end()){
+					lua_pushstring(L, it.second.c_str());
+				}else{
+					lua_pushnumber(L, element.id);
+				}
+				lua_rawset(L, -3);
+			}
+			lua_pushstring(L, "name");
+			lua_pushstring(L, element.name.c_str());
+			lua_rawset(L, -3);
+			// save current element table
+			lua_rawseti(L, -2, i+1);
+		}
+		lua_rawset(L, -3);
+    }
 	return 1;
 }
 static int ep_encode_api(lua_State *L){
