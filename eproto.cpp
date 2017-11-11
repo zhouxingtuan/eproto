@@ -578,7 +578,7 @@ static int delete_ep_state(lua_State *L){
     }
     return 0;
 }
-static ProtoState *default_ep_state(lua_State *L){
+static ProtoState* default_ep_state(lua_State *L){
     ProtoState *ps;
     if (lua53_getfield(L, LUA_REGISTRYINDEX, EP_STATE) == LUA_TUSERDATA) {
         ps = (ProtoState*)lua_touserdata(L, -1);
@@ -615,11 +615,15 @@ static int ep_unpack_api(lua_State *L){
     if(!s){
         lua_pushstring(L,"arg must be a string");
         lua_error(L);
+        lua_pushnil(L);
+        lua_replace(L,1);
         return 2;
     }
     if(len==0){
         lua_pushnil(L);
-        return 1;
+        lua_pushnil(L);
+        lua_replace(L,1);
+        return 2;
     }
     ReadBuffer rb((unsigned char*)s, len);
     ep_unpack_anytype(&rb, L);
@@ -629,13 +633,123 @@ static int ep_unpack_api(lua_State *L){
     } else{
         lua_pushnil(L);
         lua_pushnil(L);
-        lua_replace(L,-2);
+        lua_replace(L,1);
         return 2;
     }
 }
+static unsigned int ep_register_get_number(lua_State *L, int nstack, int index){
+	lua_rawgeti(L, nstack, 1); // push table value to stack
+	unsigned int v = (unsigned int)lua_tonumber(L, -1);
+	lua_pop(L, 1); // repair stack
+	return v;
+}
+static std::string ep_register_get_string(lua_State *L, int nstack, int index){
+	lua_rawgeti(L, nstack, index); // push table value to stack
+	std::string v = lua_tostring(L, -1);
+	lua_pop(L, 1); // repair stack
+	return v;
+}
+static bool ep_register_element(ProtoState* ps, lua_State *L, const std::string& path){
+	int nstack = lua_gettop(L);
+    size_t l = lua_objlen(L, nstack);
+    if(l==4){
+		// normal element
+		unsigned int type = ep_register_get_number(L, nstack, 1);
+		if(type < ep_type_nil || type >= ep_type_max){
+			fprintf(stderr, "wrong element type = %d \n", type);
+			return false;
+		}
+		unsigned int index = ep_register_get_number(L, nstack, 2);
+		std::string name = ep_register_get_string(L, nstack, 3);
+		lua_rawgeti(L, nstack, 4); // push table value to stack
+		if(lua_type(L,-1) == LUA_TNUMBER){
+			unsigned int value = (unsigned int)lua_tonumber(L, -1);
+			ps->pManager->registerElement(path, type, index, name, value);
+		}else{
+			std::string valueName = lua_tostring(L, -1);
+			ps->pManager->registerElement(path, type, index, name, valueName);
+		}
+		lua_pop(L, 1); // repair stack
+    }else if(l==5){
+		// map element
+		unsigned int type = ep_register_get_number(L, nstack, 1);
+		if(type != ep_type_map){
+			fprintf(stderr, "5 param element but type != ep_type_map \n");
+			return false;
+		}
+		unsigned int index = ep_register_get_number(L, nstack, 2);
+		std::string name = ep_register_get_string(L, nstack, 3);
+		unsigned int key = ep_register_get_number(L, nstack, 4);
+		lua_rawgeti(L, nstack, 5); // push table value to stack
+		if(lua_type(L,-1) == LUA_TNUMBER){
+			unsigned int value = (unsigned int)lua_tonumber(L, -1);
+			ps->pManager->registerElement(path, type, index, name, key, value);
+		}else{
+			std::string valueName = lua_tostring(L, -1);
+			ps->pManager->registerElement(path, type, index, name, key, valueName);
+		}
+		lua_pop(L, 1); // repair stack
+    }else{
+        fprintf(stderr, "wrong element param number\n");
+        return false;
+    }
+    return true;
+}
 static int ep_register_api(lua_State *L){
-
+	ProtoState* ps = default_ep_state(L);
+	lua_settop(L, 1);
+	ep_unpack_api(L);
+	lua_pop(1); // pop unpack len
+	int t = lua_type(L,1);
+	if(t != LUA_TTABLE){
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	int nstack = lua_gettop(L);
+    lua_pushnil(L); // nil for first iteration on lua_next
+    while( lua_next(L,index)){
+		t = lua_type(L, nstack+2);
+		if(t != LUA_TTABLE){
+			lua_pushboolean(L, 0);
+			return 1;
+		}
+		std::string path = lua_tostring(L, nstack+1);   // -2:key
+		// register element
+		if( !ep_register_element(ps, L, path) ){        // -1:value
+			lua_pushboolean(L, 0);
+			return 1;
+		}
+        lua_pop(L,1); // remove value and keep key for next iteration
+    }
+	lua_pushboolean(L, 1);
     return 1;
+}
+static int ep_register_file_api(lua_State *L){
+	lua_settop(L, 1);
+	const char* filepath = lua_tostring(L, 1);
+	// read file data
+	FILE* pFile = fopen(filepath, "rb");
+	if(pFile == NULL){
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	fseek(pFile, 0, SEEK_END);
+	long long len = ftell(pFile);
+	char* buf = new char[len];
+	fseek(pFile, 0, SEE_SET);
+	fread(buf, 1, len, pFile);
+
+	lua_pushlstring(L, buf, len);
+	lua_replace(L, 1);
+
+	delete [] buf;
+	fclose(pFile);
+	// register buffer now
+	return ep_register_api(L);
+}
+static int ep_proto_api(lua_State *L){
+
+	return 1;
 }
 static int ep_encode_api(lua_State *L){
 
@@ -649,11 +763,13 @@ static int ep_decode_api(lua_State *L){
 using namespace eproto;
 
 static const luaL_Reg eproto_f[] = {
-    { "pack",           ep_pack_api },
-    { "unpack",         ep_unpack_api },
-    { "register",       ep_register_api },
-    { "encode",         ep_encode_api },
-    { "decode",         ep_decode_api },
+    { "pack",           ep_pack_api },          // table        -> buffer
+    { "unpack",         ep_unpack_api },        // buffer       -> table,len
+    { "encode",         ep_encode_api },        // path,table   -> buffer
+    { "decode",         ep_decode_api },        // path,buffer  -> table,len
+    { "register",       ep_register_api },      // buffer       -> bool
+    { "register_file",  ep_register_file_api }, // filepath     -> bool
+    { "proto",          ep_proto_api },         // none         -> table
     {NULL,NULL}
 };
 LUALIB_API int luaopen_eproto(lua_State *L){

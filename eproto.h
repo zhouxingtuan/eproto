@@ -8,6 +8,7 @@ extern "C" {
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 #include <arpa/inet.h>
 
 #include <vector>
