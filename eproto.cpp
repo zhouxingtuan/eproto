@@ -863,7 +863,7 @@ static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElement
 static int ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
 
 }
-static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
+static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
 	WriteBuffer* pws = ps->pWriteBuffer;
 	int t = lua_type(L,index);
 	if(t == LUA_TNIL){
@@ -876,7 +876,6 @@ static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElement
 	}
 	if(NULL == protoVec){
 		pws->setError(ERRORBIT_TYPE_NO_PROTO);
-		fprintf(stderr, "can not find proto for path=%s\n", path.c_str());
     	return;
 	}
 //	int value_index = index + 1;
