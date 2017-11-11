@@ -699,7 +699,7 @@ static int ep_register_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
 	lua_settop(L, 1);
 	ep_unpack_api(L);
-	lua_pop(1); // pop unpack len
+	lua_pop(L, 1); // pop unpack len
 	int t = lua_type(L,1);
 	if(t != LUA_TTABLE){
 		lua_pushboolean(L, 0);
@@ -707,7 +707,7 @@ static int ep_register_api(lua_State *L){
 	}
 	int nstack = lua_gettop(L);
     lua_pushnil(L); // nil for first iteration on lua_next
-    while( lua_next(L,index)){
+    while( lua_next(L, nstack) ){
 		t = lua_type(L, nstack+2);
 		if(t != LUA_TTABLE){
 			lua_pushboolean(L, 0);
@@ -736,7 +736,7 @@ static int ep_register_file_api(lua_State *L){
 	fseek(pFile, 0, SEEK_END);
 	long long len = ftell(pFile);
 	char* buf = new char[len];
-	fseek(pFile, 0, SEE_SET);
+	fseek(pFile, 0, SEEK_SET);
 	fread(buf, 1, len, pFile);
 
 	lua_pushlstring(L, buf, len);
