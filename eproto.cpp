@@ -790,7 +790,7 @@ static int ep_proto_api(lua_State *L){
 				ProtoNameMap::iterator it = nameMap.find(element.key);
 				lua_pushstring(L, "key");
 				if(it != nameMap.end()){
-					lua_pushstring(L, it.second.c_str());
+					lua_pushstring(L, it->second.c_str());
 				}else{
 					lua_pushnumber(L, element.key);
 				}
@@ -798,7 +798,7 @@ static int ep_proto_api(lua_State *L){
 				it = nameMap.find(element.value);
 				lua_pushstring(L, "value");
 				if(it != nameMap.end()){
-					lua_pushstring(L, it.second.c_str());
+					lua_pushstring(L, it->second.c_str());
 				}else{
 					lua_pushnumber(L, element.value);
 				}
@@ -807,7 +807,7 @@ static int ep_proto_api(lua_State *L){
 				ProtoNameMap::iterator it = nameMap.find(element.key);
 				lua_pushstring(L, "id");
 				if(it != nameMap.end()){
-					lua_pushstring(L, it.second.c_str());
+					lua_pushstring(L, it->second.c_str());
 				}else{
 					lua_pushnumber(L, element.id);
 				}
