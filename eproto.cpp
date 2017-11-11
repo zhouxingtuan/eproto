@@ -155,6 +155,38 @@ inline void ep_pack_number(WriteBuffer* pwb, lua_Number n){
 		ep_pack_float(pwb, n);
     }
 }
+inline void ep_pack_array(WriteBuffer* pwb, lua_State *L, size_t l){
+    unsigned char topbyte;
+    // array!(ignore map part.) 0x90|n , 0xdc+2byte, 0xdd+4byte
+    if(l<16){
+        topbyte = 0x90 | (unsigned char)l;
+        pwb->push(topbyte);
+    } else if( l<65536){
+        topbyte = 0xdc;
+        unsigned short elemnum = htons(l);
+        pwb->add(topbyte, (unsigned char*)&elemnum, 2);
+    } else if( l<4294967296LL-1){ // TODO: avoid C warn
+        topbyte = 0xdd;
+        unsigned int elemnum = htonl(l);
+        pwb->add(topbyte, (unsigned char*)&elemnum, 4);
+    }
+}
+inline void ep_pack_map(WriteBuffer* pwb, lua_State *L, size_t l){
+	unsigned char topbyte;
+    // map fixmap, 16,32 : 0x80|num, 0xde+2byte, 0xdf+4byte
+    if(l<16){
+        topbyte = 0x80 | (char)l;
+        pwb->push(topbyte);
+    }else if(l<65536){
+        topbyte = 0xde;
+        unsigned short elemnum = htons(l);
+        pwb->add(topbyte, (unsigned char*)&elemnum, 2);
+    }else if(l<4294967296LL-1){
+        topbyte = 0xdf;
+        unsigned int elemnum = htonl(l);
+        pwb->add(topbyte, (unsigned char*)&elemnum, 4);
+    }
+}
 // lua pack 静态方法，迭代
 static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
     size_t nstack = lua_gettop(L);
@@ -162,20 +194,21 @@ static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
 
     // try array first, and then map.
     if(l>0){
-        unsigned char topbyte;
-        // array!(ignore map part.) 0x90|n , 0xdc+2byte, 0xdd+4byte
-        if(l<16){
-            topbyte = 0x90 | (unsigned char)l;
-            pwb->push(topbyte);
-        } else if( l<65536){
-            topbyte = 0xdc;
-            unsigned short elemnum = htons(l);
-            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
-        } else if( l<4294967296LL-1){ // TODO: avoid C warn
-            topbyte = 0xdd;
-            unsigned int elemnum = htonl(l);
-            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
-        }
+//        unsigned char topbyte;
+//        // array!(ignore map part.) 0x90|n , 0xdc+2byte, 0xdd+4byte
+//        if(l<16){
+//            topbyte = 0x90 | (unsigned char)l;
+//            pwb->push(topbyte);
+//        } else if( l<65536){
+//            topbyte = 0xdc;
+//            unsigned short elemnum = htons(l);
+//            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
+//        } else if( l<4294967296LL-1){ // TODO: avoid C warn
+//            topbyte = 0xdd;
+//            unsigned int elemnum = htonl(l);
+//            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
+//        }
+		ep_pack_array(pwb, L, l);
         int i;
         for(i=1;i<=(int)l;i++){
             lua_rawgeti(L, index, i); // push table value to stack
@@ -190,20 +223,21 @@ static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
             l++;
             lua_pop(L,1);
         }
-        // map fixmap, 16,32 : 0x80|num, 0xde+2byte, 0xdf+4byte
-        unsigned char topbyte=0;
-        if(l<16){
-            topbyte = 0x80 | (char)l;
-            pwb->push(topbyte);
-        }else if(l<65536){
-            topbyte = 0xde;
-            unsigned short elemnum = htons(l);
-            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
-        }else if(l<4294967296LL-1){
-            topbyte = 0xdf;
-            unsigned int elemnum = htonl(l);
-            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
-        }
+//        // map fixmap, 16,32 : 0x80|num, 0xde+2byte, 0xdf+4byte
+//        unsigned char topbyte=0;
+//        if(l<16){
+//            topbyte = 0x80 | (char)l;
+//            pwb->push(topbyte);
+//        }else if(l<65536){
+//            topbyte = 0xde;
+//            unsigned short elemnum = htons(l);
+//            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
+//        }else if(l<4294967296LL-1){
+//            topbyte = 0xdf;
+//            unsigned int elemnum = htonl(l);
+//            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
+//        }
+		ep_pack_map(pwb, L, l);
         lua_pushnil(L); // nil for first iteration on lua_next
         while( lua_next(L,index)){
             ep_pack_anytype(pwb, L, nstack+1); // -2:key
@@ -748,6 +782,7 @@ static int ep_register_file_api(lua_State *L){
 	return ep_register_api(L);
 }
 static int ep_proto_api(lua_State *L){
+	ProtoState* ps = default_ep_state(L);
 	typedef std::unordered_map<unsigned int, std::string> ProtoNameMap;
 	ProtoNameMap nameMap;
 	nameMap.insert(std::make_pair(ep_type_nil, "nil"));
@@ -763,7 +798,7 @@ static int ep_proto_api(lua_State *L){
 	nameMap.insert(std::make_pair(ep_type_array, "array"));
 	nameMap.insert(std::make_pair(ep_type_map, "map"));
 	nameMap.insert(std::make_pair(ep_type_message, "message"));
-	ProtoState* ps = default_ep_state(L);
+
 	ProtoManager* pManager = ps->pManager;
 	for(auto &kv : pManager->m_indexMap){
 		nameMap.insert(std::make_pair(kv.second, kv.first));
@@ -823,9 +858,46 @@ static int ep_proto_api(lua_State *L){
     }
 	return 1;
 }
-static int ep_encode_api(lua_State *L){
 
-    return 1;
+static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
+static int ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
+
+}
+static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
+	WriteBuffer* pws = ps->pWriteBuffer;
+	int t = lua_type(L,index);
+	if(t == LUA_TNIL){
+		ep_pack_nil(pws);
+		return;
+	}
+	if( t != LUA_TTABLE ){
+		pws->setError(ERRORBIT_TYPE_WRONG_PROTO);
+		return;
+	}
+	if(NULL == protoVec){
+		pws->setError(ERRORBIT_TYPE_NO_PROTO);
+		fprintf(stderr, "can not find proto for path=%s\n", path.c_str());
+    	return;
+	}
+//	int value_index = index + 1;
+
+
+}
+static int ep_encode_api(lua_State *L){
+	ProtoState* ps = default_ep_state(L);
+	WriteBuffer* pws = ps->pWriteBuffer;
+	pws->clear();
+	std::string path = lua_tostring(L, 1);
+	ProtoManager* pManager = ps->pManager;
+	ProtoElementVector* protoVec = pManager->findProto(path);
+	ep_encode_proto(ps, L, 2, protoVec);
+	if(pws->getError() == 0){
+		lua_pushlstring(L, (const char*)(pws->data()), pws->size());
+		return 1;
+	}else{
+		fprintf(stderr, "eproto encode error = %d\n", pws->getError());
+	}
+    return 0;
 }
 static int ep_decode_api(lua_State *L){
 
