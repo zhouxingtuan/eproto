@@ -859,8 +859,8 @@ static int ep_proto_api(lua_State *L){
 	return 1;
 }
 
-static int ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
-static int ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
+static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
+static void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
 
 }
 static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
