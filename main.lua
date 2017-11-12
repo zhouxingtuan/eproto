@@ -35,18 +35,18 @@ local addrArray = {
 		phone = "123456789";
 	};
 	{
-		addr = "广东省深圳市XXX";
+--		addr = "广东省深圳市XXX";
 		num = 1234;
 		phone = "123456789";
 	};
 	{
 		addr = "广东省深圳市XXX";
 		num = 123456;
-		phone = "123456789";
+--		phone = "123456789";
 	};
 }
 local data = {
-	id = 123;
+--	id = 123;
 	str = "你好！HelloWorld！";
 	opt = 1234;
 	time = os.time();
@@ -147,4 +147,4 @@ end
 print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)
 
-dump(dt)
+--dump(dt)
