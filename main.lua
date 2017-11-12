@@ -141,3 +141,5 @@ end
 print("data length", #d)
 print("count", count, "encode cost", os.clock() - t1)
 
+local dt = eproto.unpack(d)
+
