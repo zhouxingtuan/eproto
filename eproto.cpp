@@ -867,7 +867,7 @@ static int ep_proto_api(lua_State *L){
 }
 
 static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
-inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int id){
+void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int id){
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	//获取数组的长度写入
 	size_t l = lua_objlen(L, index);
@@ -978,7 +978,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 	}
 	}
 }
-inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigned int key, unsigned int value){
+void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigned int key, unsigned int value){
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	size_t nstack = lua_gettop(L);
     size_t l=0;
@@ -1215,7 +1215,7 @@ static int ep_encode_api(lua_State *L){
 }
 
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
-inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
+void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1298,7 +1298,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
     }
 	}
 }
-inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
+void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1321,7 +1321,7 @@ inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     }
     }
 }
-inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
+void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1356,7 +1356,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
         lua_rawseti(L, -2, i+1);
     }
 }
-inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
+void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1379,7 +1379,7 @@ inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     }
     }
 }
-inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned int key, ProtoElementVector* protoVec){
+void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned int key, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1415,7 +1415,7 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
         lua_rawset(L, -3);
     }
 }
-inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
+void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
     size_t maplen = protoVec->size();
     ProtoManager* pManager = ps->pManager;
     ProtoElement* pe;
