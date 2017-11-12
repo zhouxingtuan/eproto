@@ -840,7 +840,7 @@ static int ep_proto_api(lua_State *L){
     lua_createtable(L, 0, maplen);
     for(auto &kv : pManager->m_indexMap){
 		lua_pushstring(L, kv.first.c_str());        // proto name key
-		ProtoElementVector& elementVec = protoVec[kv.second];
+		ProtoElementVector& elementVec = protoVec[kv.second-ep_type_max];
 		size_t arrLen = elementVec.size();
 		lua_createtable(L, arrLen, 0);              // proto table array value
 		for(size_t i=0; i<arrLen; ++i){
@@ -871,7 +871,7 @@ static int ep_proto_api(lua_State *L){
 				}
 				lua_rawset(L, -3);
 			}else{
-				ProtoNameMap::iterator it = nameMap.find(element.key);
+				ProtoNameMap::iterator it = nameMap.find(element.id);
 				lua_pushstring(L, "id");
 				if(it != nameMap.end()){
 					lua_pushstring(L, it->second.c_str());
@@ -881,7 +881,7 @@ static int ep_proto_api(lua_State *L){
 				lua_rawset(L, -3);
 			}
 			lua_pushstring(L, "name");
-			lua_pushstring(L, element.name.c_str());
+			lua_pushlstring(L, element.name.c_str(), element.name.length());
 			lua_rawset(L, -3);
 			// save current element table
 			lua_rawseti(L, -2, i+1);
