@@ -1269,7 +1269,7 @@ static int ep_encode_api(lua_State *L){
 }
 
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
-inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
+static void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
         return;
