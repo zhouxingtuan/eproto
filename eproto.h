@@ -152,9 +152,9 @@ typedef struct ReadBuffer{
     inline void setError(int e){ err |= e; }
     inline int getError(void) const { return err; }
     inline unsigned int left(void) {
-        if(offset > length){
-            return 0;
-        }
+//        if(offset > length){
+//            return 0;
+//        }
         return length - offset;
     }
 }ReadBuffer;
