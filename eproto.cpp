@@ -1125,7 +1125,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 	size_t l = protoVec->size();
 	ep_pack_array(pwb, L, l);
 	for(size_t i=0; i<l; ++i){
-		ProtoElement& element = protoVec[i];
+		ProtoElement& element = protoVec->at(i);
 		if(element.type <= ep_type_nil){
 			ep_pack_nil(pwb);
 			continue;
