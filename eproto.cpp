@@ -543,14 +543,19 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         return;
     }
     unsigned char t = prb->moveNext();
+    if(t <= 0x7f){
+        ep_unpack_fixint(prb, L, t);
+        return;
+    }
+    if(t >= 0xa0 && t <= 0xbf){
+        ep_unpack_fixstr(prb, L, t);
+        return;
+    }
     if(t >= 0xc0 && t <=0xdf){
         switch(t){
         case 0xc0: ep_unpack_nil(prb, L, t); return;
         case 0xc2: ep_unpack_false(prb, L, t); return;
         case 0xc3: ep_unpack_true(prb, L, t); return;
-        case 0xc4: ep_unpack_bin8(prb, L, t); return;
-        case 0xc5: ep_unpack_bin16(prb, L, t); return;
-        case 0xc6: ep_unpack_bin32(prb, L, t); return;
         case 0xca: ep_unpack_float(prb, L, t); return;
         case 0xcb: ep_unpack_double(prb, L, t); return;
         case 0xcc: ep_unpack_uint8(prb, L, t); return;
@@ -568,12 +573,11 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         case 0xdd: ep_unpack_array32(prb, L, t); return;
         case 0xde: ep_unpack_map16(prb, L, t); return;
         case 0xdf: ep_unpack_map32(prb, L, t); return;
+        case 0xc4: ep_unpack_bin8(prb, L, t); return;
+        case 0xc5: ep_unpack_bin16(prb, L, t); return;
+        case 0xc6: ep_unpack_bin32(prb, L, t); return;
         default: prb->setError(1); break;
         }
-        return;
-    }
-    if(t <= 0x7f){
-        ep_unpack_fixint(prb, L, t);
         return;
     }
     if(t >= 0x80 && t <= 0x8f){
@@ -582,10 +586,6 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
     }
     if(t >= 0x90 && t <= 0x9f){
         ep_unpack_fixarray(prb, L, t);
-        return;
-    }
-    if(t >= 0xa0 && t <= 0xbf){
-        ep_unpack_fixstr(prb, L, t);
         return;
     }
     if(t >= 0xe0){
@@ -1405,8 +1405,8 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
 	}
     lua_createtable(L, 0, maplen);
     for(size_t i=0;i<maplen;i++){
-//        ep_unpack_anytype(prb, L); // key
-        ep_decode_proto_normal(prb, L, key);
+        ep_unpack_anytype(prb, L); // key
+//        ep_decode_proto_normal(prb, L, key);
         ep_decode_proto(ps, prb, L, protoVec);	// value
         lua_rawset(L, -3);
     }
@@ -1424,15 +1424,15 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 		}
 		if(NULL == pe || pe->type == 0){
 			lua_pushnumber(L, i+1);
-//			ep_unpack_anytype(prb, L);
-			ep_decode_proto_normal(prb, L, pe->type);
+			ep_unpack_anytype(prb, L);
+//			ep_decode_proto_normal(prb, L, pe->type);
 		}else{
 			lua_pushlstring(L,pe->name.c_str(), pe->name.length());
 			switch(pe->type){
 			case ep_type_array:{
 				if(pe->id < ep_type_max){
-//					ep_unpack_anytype(prb, L);
-					ep_decode_proto_normal(prb, L, pe->id);
+					ep_unpack_anytype(prb, L);
+//					ep_decode_proto_normal(prb, L, pe->id);
 				}else{
 					ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
 					ep_decode_proto_array(ps, prb, L, otherProtoVec);
@@ -1455,8 +1455,8 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 				break;
 			}
 			default:{
-//				ep_unpack_anytype(prb, L); // array element
-				ep_decode_proto_normal(prb, L, pe->type);
+				ep_unpack_anytype(prb, L); // array element
+//				ep_decode_proto_normal(prb, L, pe->type);
 				break;
 			}
 			}
