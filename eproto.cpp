@@ -678,7 +678,7 @@ static int ep_unpack_api(lua_State *L){
     }
 }
 static unsigned int ep_register_get_number(lua_State *L, int nstack, int index){
-	lua_rawgeti(L, nstack, 1); // push table value to stack
+	lua_rawgeti(L, nstack, index); // push table value to stack
 	unsigned int v = (unsigned int)lua_tonumber(L, -1);
 	lua_pop(L, 1); // repair stack
 	return v;
