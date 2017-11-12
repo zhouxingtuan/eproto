@@ -741,9 +741,11 @@ static bool ep_register_element_array(ProtoState* ps, lua_State *L, const std::s
         lua_rawgeti(L, nstack, i); // push table value to stack
         t = lua_type(L, value_index);
         if(t != LUA_TTABLE){
+            fprintf(stderr, "register element array failed path=%s i=%d\n", path.c_str(), (int)i);
             return false;
         }
         if( !ep_register_element(ps, L, path) ){
+            fprintf(stderr, "register element failed path=%s i=%d\n", path.c_str(), (int)i);
             return false;
         }
         lua_pop(L,1); // repair stack
@@ -758,6 +760,7 @@ static int ep_register_api(lua_State *L){
 	int t = lua_type(L,1);
 	if(t != LUA_TTABLE){
 		lua_pushboolean(L, 0);
+		fprintf(stderr, "unpack buffer failed\n");
 		return 1;
 	}
 	int nstack = lua_gettop(L);
@@ -767,12 +770,14 @@ static int ep_register_api(lua_State *L){
 		t = lua_type(L, nstack+2);
 		if(t != LUA_TTABLE){
 			lua_pushboolean(L, 0);
+			fprintf(stderr, "path value is not a table\n");
 			return 1;
 		}
 		std::string path = lua_tostring(L, key_index);   // -2:key
 		// register element
 		if( !ep_register_element_array(ps, L, path) ){        // -1:value
 			lua_pushboolean(L, 0);
+			fprintf(stderr, "register element array failed path=%s\n", path.c_str());
 			return 1;
 		}
         lua_pop(L,1); // remove value and keep key for next iteration
