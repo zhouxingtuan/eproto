@@ -7,7 +7,7 @@
 --
 
 local t1,d,dt
-local count = 2000000
+local count = 100000
 
 local dump = require("dump")
 
