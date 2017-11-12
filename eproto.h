@@ -137,7 +137,7 @@ typedef struct ReadBuffer{
     ReadBuffer(void) : ptr(NULL), length(0), offset(0), err(0){}
     ReadBuffer(unsigned char *p, unsigned int len) : ptr(p), length(len), offset(0), err(0){}
     inline unsigned char* data(void){ return ptr; }
-    inline void moveOffset(unsigned int length){ offset += length; }
+    inline void moveOffset(unsigned int len){ offset += len; }
     inline unsigned char moveNext(void){
         return ptr[offset++];
     }
