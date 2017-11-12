@@ -760,7 +760,7 @@ static int ep_register_api(lua_State *L){
 	int t = lua_type(L,1);
 	if(t != LUA_TTABLE){
 		lua_pushboolean(L, 0);
-		fprintf(stderr, "unpack buffer failed\n");
+		fprintf(stderr, "unpack buffer failed t=%d\n", t);
 		return 1;
 	}
 	int nstack = lua_gettop(L);
