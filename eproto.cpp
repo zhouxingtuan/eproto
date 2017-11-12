@@ -1416,6 +1416,7 @@ static int ep_decode_api(lua_State *L){
 	if(len == 0){
 		lua_createtable(L, 0, 0);
 		lua_pushnumber(L, 0);
+		fprintf(stderr, "decode api buffer len=0\n");
 		return 2;
 	}
 	ProtoManager* pManager = ps->pManager;
