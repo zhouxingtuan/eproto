@@ -1310,6 +1310,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
     case 0xc6: ep_unpack_bin32(prb, L, t); return;
     default:{
         prb->setError(1);
+        return;
     }
     }
 
