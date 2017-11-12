@@ -1456,11 +1456,9 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
         return;
     }
     unsigned char t = prb->moveNext();
-    bool findArray = false;
     size_t arrLen = 0;
     if(t >= 0x90 && t <= 0x9f){
         arrLen = t & 0xf;
-        findArray = true;
 //        ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 //        return;
     }else if(t==0xdc){
@@ -1470,7 +1468,6 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
         }
 	    arrLen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
 	    prb->moveOffset(2);
-	    findArray = true;
 //		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 //        return;
     }else if(t==0xdd){
@@ -1480,20 +1477,22 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
 	    }
 	    arrLen = ntohl( *((unsigned int*)(prb->offsetPtr())));
 	    prb->moveOffset(4);
-	    findArray = true;
 //		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 //        return;
-    }
-    if(findArray){
-		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
-		return;
-    }
-	// 有可能proto协议本身是nil
-	if(t==0xc0){ // nil
+    }else if(t==0xc0){ // nil
+        // 有可能proto协议本身是nil
 		lua_pushnil(L);
 		return;
-	}
-	prb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    }else{
+        prb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    }
+    ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
+//	// 有可能proto协议本身是nil
+//	if(t==0xc0){ // nil
+//		lua_pushnil(L);
+//		return;
+//	}
+//	prb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 }
 static int ep_decode_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
