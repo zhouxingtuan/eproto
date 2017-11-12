@@ -143,5 +143,6 @@ local reg_buf = eproto.pack(reg_info)
 local result = eproto.register(reg_buf)
 print("register result", result)
 local infos = eproto.proto()
+dump(infos)
 
 
