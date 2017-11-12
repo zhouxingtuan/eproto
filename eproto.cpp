@@ -1215,7 +1215,7 @@ static int ep_encode_api(lua_State *L){
 }
 
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
-void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
+inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1298,7 +1298,7 @@ void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     }
 	}
 }
-void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
+inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1321,7 +1321,7 @@ void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     }
     }
 }
-void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
+inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1356,7 +1356,7 @@ void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoE
         lua_rawseti(L, -2, i+1);
     }
 }
-void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
+inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1379,7 +1379,7 @@ void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     }
     }
 }
-void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned int key, ProtoElementVector* protoVec){
+inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned int key, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1415,7 +1415,7 @@ void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned
         lua_rawset(L, -3);
     }
 }
-void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
+inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
     size_t maplen = protoVec->size();
     ProtoManager* pManager = ps->pManager;
     ProtoElement* pe;
