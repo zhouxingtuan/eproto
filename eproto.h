@@ -155,6 +155,9 @@ public:
         return NULL;
     }
     inline ProtoElementVector* findProto(unsigned int id){
+        if(id < ep_type_max){
+            return NULL;
+        }
         id -= ep_type_max;
         if(id < m_protoVector.size()){
             return &(m_protoVector[id]);

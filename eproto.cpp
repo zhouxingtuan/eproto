@@ -210,9 +210,10 @@ static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
 //        }
 		ep_pack_array(pwb, L, l);
         int i;
+        size_t value_index = nstack+1;
         for(i=1;i<=(int)l;i++){
             lua_rawgeti(L, index, i); // push table value to stack
-            ep_pack_anytype(pwb, L, nstack+1);
+            ep_pack_anytype(pwb, L, value_index);
             lua_pop(L, 1); // repair stack
         }
     } else {
@@ -237,11 +238,13 @@ static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
 //            unsigned int elemnum = htonl(l);
 //            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
 //        }
+		size_t key_index = nstack+1;
+		size_t value_index = nstack+2;
 		ep_pack_map(pwb, L, l);
         lua_pushnil(L); // nil for first iteration on lua_next
         while( lua_next(L,index)){
-            ep_pack_anytype(pwb, L, nstack+1); // -2:key
-            ep_pack_anytype(pwb, L, nstack+2); // -1:value
+            ep_pack_anytype(pwb, L, key_index); // -2:key
+            ep_pack_anytype(pwb, L, value_index); // -1:value
             lua_pop(L,1); // remove value and keep key for next iteration
         }
     }
@@ -631,14 +634,14 @@ static ProtoState* default_ep_state(lua_State *L){
 }
 static int ep_pack_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
-	WriteBuffer* pws = ps->pWriteBuffer;
-	pws->clear();
-	ep_pack_anytype(pws, L, 1);
-	if(pws->getError() == 0){
-		lua_pushlstring(L, (const char*)(pws->data()), pws->size());
+	WriteBuffer* pwb = ps->pWriteBuffer;
+	pwb->clear();
+	ep_pack_anytype(pwb, L, 1);
+	if(pwb->getError() == 0){
+		lua_pushlstring(L, (const char*)(pwb->data()), pwb->size());
 		return 1;
 	}else{
-		fprintf(stderr, "eproto pack error = %d\n", pws->getError());
+		fprintf(stderr, "eproto pack error = %d\n", pwb->getError());
 	}
     return 0;
 }
@@ -740,6 +743,7 @@ static int ep_register_api(lua_State *L){
 		return 1;
 	}
 	int nstack = lua_gettop(L);
+	size_t key_index = nstack+1;
     lua_pushnil(L); // nil for first iteration on lua_next
     while( lua_next(L, nstack) ){
 		t = lua_type(L, nstack+2);
@@ -747,7 +751,7 @@ static int ep_register_api(lua_State *L){
 			lua_pushboolean(L, 0);
 			return 1;
 		}
-		std::string path = lua_tostring(L, nstack+1);   // -2:key
+		std::string path = lua_tostring(L, key_index);   // -2:key
 		// register element
 		if( !ep_register_element(ps, L, path) ){        // -1:value
 			lua_pushboolean(L, 0);
@@ -860,41 +864,369 @@ static int ep_proto_api(lua_State *L){
 }
 
 static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
-static void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
-
+inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int id){
+	WriteBuffer* pwb = ps->pWriteBuffer;
+	//获取数组的长度写入
+	size_t l = lua_objlen(L, index);
+	ep_pack_array(pwb, L, l);
+	// 写入数组中的proto数据
+	int value_index = index + 1;
+	int t;
+	switch(id){
+	case ep_type_bool:{
+		for(size_t i=1; i<=l; ++i){
+			lua_rawgeti(L,index,i); // push table value to stack
+			t = lua_type(L, value_index);
+			if(t == LUA_TNIL){
+				ep_pack_nil(pwb);
+				lua_pop(L,1); // repair stack
+				continue;
+			}
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, value_index);
+			ep_pack_bool(pwb, iv);
+			lua_pop(L,1); // repair stack
+		}
+		break;
+	}
+	case ep_type_float:
+	case ep_type_double:{
+		for(size_t i=1; i<=l; ++i){
+			lua_rawgeti(L,index,i); // push table value to stack
+			t = lua_type(L, value_index);
+			if(t == LUA_TNIL){
+				ep_pack_nil(pwb);
+				lua_pop(L,1); // repair stack
+				continue;
+			}
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			lua_Number n = lua_tonumber(L, value_index);
+			ep_pack_float(pwb, n);
+			lua_pop(L,1); // repair stack
+		}
+		break;
+	}
+	case ep_type_int32:
+	case ep_type_int64:
+	case ep_type_uint32:
+	case ep_type_uint64:{
+		for(size_t i=1; i<=l; ++i){
+			lua_rawgeti(L,index,i); // push table value to stack
+			t = lua_type(L, value_index);
+			if(t == LUA_TNIL){
+				ep_pack_nil(pwb);
+				lua_pop(L,1); // repair stack
+				continue;
+			}
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			long long lv = lua_tonumber(L, value_index);
+			ep_pack_int(pwb, lv);
+			lua_pop(L,1); // repair stack
+		}
+		break;
+	}
+	case ep_type_string:
+	case ep_type_bytes:{
+		for(size_t i=1; i<=l; ++i){
+			lua_rawgeti(L,index,i); // push table value to stack
+			t = lua_type(L, value_index);
+			if(t == LUA_TNIL){
+				ep_pack_nil(pwb);
+				lua_pop(L,1); // repair stack
+				continue;
+			}
+			if(t != LUA_TSTRING){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+	        size_t slen;
+	        const char *sval = lua_tolstring(L, value_index, &slen);
+	        ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			lua_pop(L,1); // repair stack
+		}
+		break;
+	}
+	default:{
+		if(id < ep_type_max){
+			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			return;
+		}
+		ProtoElementVector* otherProtoVec = ps->pManager->findProto(id);
+		for(size_t i=1; i<=l; ++i){
+    		lua_rawgeti(L,index,i); // push table value to stack
+    		t = lua_type(L, value_index);
+    		if(t == LUA_TNIL){
+    			ep_pack_nil(pwb);
+    			lua_pop(L,1); // repair stack
+    			continue;
+    		}
+    		if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ep_encode_proto(ps, L, value_index, otherProtoVec);
+    		lua_pop(L,1); // repair stack
+    	}
+		break;
+	}
+	}
+}
+inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigned int key, unsigned int value){
+	WriteBuffer* pwb = ps->pWriteBuffer;
+	size_t nstack = lua_gettop(L);
+    size_t l=0;
+    int t;
+	size_t key_index = nstack+1;
+	size_t value_index = nstack+2;
+    lua_pushnil(L);
+    while(lua_next(L,index)){
+        l++;
+        lua_pop(L,1);
+    }
+	ep_pack_map(pwb, L, l);
+	ProtoElementVector* otherProtoVec = ps->pManager->findProto(value);
+    lua_pushnil(L); // nil for first iteration on lua_next
+    while( lua_next(L,index)){
+        t = lua_type(L, key_index);
+        switch(key){
+        case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, key_index);
+			ep_pack_bool(pwb, iv);
+			break;
+        }
+        case ep_type_float:
+        case ep_type_double:{
+            if(t != LUA_TNUMBER){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+            lua_Number n = lua_tonumber(L, key_index);
+            ep_pack_float(pwb, n);
+			break;
+        }
+		case ep_type_int32:
+		case ep_type_int64:
+		case ep_type_uint32:
+		case ep_type_uint64:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			long long lv = lua_tonumber(L, key_index);
+			ep_pack_int(pwb, lv);
+			break;
+		}
+		case ep_type_string:
+		case ep_type_bytes:{
+			if(t != LUA_TSTRING){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+	        size_t slen;
+	        const char *sval = lua_tolstring(L, key_index, &slen);
+	        ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			break;
+		}
+		default:{
+			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			return;
+		}
+        }
+		t = lua_type(L, value_index);
+		switch(value){
+		case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, value_index);
+			ep_pack_bool(pwb, iv);
+			break;
+		}
+		case ep_type_float:
+		case ep_type_double:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			lua_Number n = lua_tonumber(L, value_index);
+			ep_pack_float(pwb, n);
+			break;
+		}
+		case ep_type_int32:
+		case ep_type_int64:
+		case ep_type_uint32:
+		case ep_type_uint64:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			long long lv = lua_tonumber(L, value_index);
+			ep_pack_int(pwb, lv);
+			break;
+		}
+		case ep_type_string:
+		case ep_type_bytes:{
+			if(t != LUA_TSTRING){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+	        size_t slen;
+	        const char *sval = lua_tolstring(L, value_index, &slen);
+	        ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			break;
+		}
+		default:{
+			if(value < ep_type_max){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+            if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ep_encode_proto(ps, L, value_index, otherProtoVec);
+			break;
+		}
+		}
+        lua_pop(L,1); // remove value and keep key for next iteration
+    }
 }
 static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec){
-	WriteBuffer* pws = ps->pWriteBuffer;
-	int t = lua_type(L,index);
+	WriteBuffer* pwb = ps->pWriteBuffer;
+	int t = lua_type(L, index);
 	if(t == LUA_TNIL){
-		ep_pack_nil(pws);
+		ep_pack_nil(pwb);
 		return;
 	}
 	if( t != LUA_TTABLE ){
-		pws->setError(ERRORBIT_TYPE_WRONG_PROTO);
+		pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 		return;
 	}
 	if(NULL == protoVec){
-		pws->setError(ERRORBIT_TYPE_NO_PROTO);
+		pwb->setError(ERRORBIT_TYPE_NO_PROTO);
     	return;
 	}
-//	int value_index = index + 1;
-
-
+	int value_index = index + 1;
+	// 写入数组长度
+	size_t l = protoVec->size();
+	ep_pack_array(pwb, L, l);
+	for(size_t i=0; i<l; ++i){
+		ProtoElement& element = protoVec[i];
+		if(element.type <= ep_type_nil){
+			ep_pack_nil(pwb);
+			continue;
+		}
+		lua_pushlstring(L, element.name.c_str(), element.name.length()); // [table, key]
+		lua_gettable(L, index); // [table, value]
+		t = lua_type(L, value_index);
+		if(t == LUA_TNIL){
+			ep_pack_nil(pwb);
+			lua_pop(L,1); // repair stack
+			continue;
+		}
+		switch(element.type){
+		case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, value_index);
+			ep_pack_bool(pwb, iv);
+			break;
+		}
+		case ep_type_float:
+		case ep_type_double:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			lua_Number n = lua_tonumber(L, value_index);
+			ep_pack_float(pwb, n);
+			break;
+		}
+		case ep_type_int32:
+		case ep_type_int64:
+		case ep_type_uint32:
+		case ep_type_uint64:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			long long lv = lua_tonumber(L, value_index);
+			ep_pack_int(pwb, lv);
+			break;
+		}
+		case ep_type_string:
+		case ep_type_bytes:{
+			if(t != LUA_TSTRING){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+            size_t slen;
+            const char *sval = lua_tolstring(L, value_index, &slen);
+            ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			break;
+		}
+		case ep_type_array:{
+			if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ep_encode_proto_array(ps, L, value_index, element.id);
+			break;
+		}
+		case ep_type_map:{
+			if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ep_encode_proto_map(ps, L, value_index, element.key, element.value);
+			break;
+		}
+		case ep_type_message:{
+			if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ProtoElementVector* otherProtoVec = ps->pManager->findProto(element.id);
+			ep_encode_proto(ps, L, value_index, otherProtoVec);
+			break;
+		}
+		default:{
+			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			return;
+		}
+		}
+		lua_pop(L,1); // repair stack
+	}
 }
 static int ep_encode_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
-	WriteBuffer* pws = ps->pWriteBuffer;
-	pws->clear();
+	WriteBuffer* pwb = ps->pWriteBuffer;
+	pwb->clear();
 	std::string path = lua_tostring(L, 1);
 	ProtoManager* pManager = ps->pManager;
 	ProtoElementVector* protoVec = pManager->findProto(path);
 	ep_encode_proto(ps, L, 2, protoVec);
-	if(pws->getError() == 0){
-		lua_pushlstring(L, (const char*)(pws->data()), pws->size());
+	if(pwb->getError() == 0){
+		lua_pushlstring(L, (const char*)(pwb->data()), pwb->size());
 		return 1;
 	}else{
-		fprintf(stderr, "eproto encode error = %d\n", pws->getError());
+		fprintf(stderr, "eproto encode error = %d\n", pwb->getError());
 	}
     return 0;
 }
