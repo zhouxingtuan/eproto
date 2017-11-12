@@ -9,6 +9,7 @@ extern "C" {
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <arpa/inet.h>
 
 #include <vector>
@@ -32,43 +33,100 @@ typedef enum DataType
     ep_type_max,
 }DataType;
 
-typedef std::vector<unsigned char> UCharBuffer;
+#define WRITE_BUFFER_SIZE 4096
 typedef struct WriteBuffer{
-    UCharBuffer buffer;
-    int err;
-    WriteBuffer(void) : buffer(4096), err(0){ buffer.clear(); }
-    inline unsigned char* data(void){ return (unsigned char*)buffer.data(); }
-    inline unsigned int size(void) const { return buffer.size(); }
-    inline void write(const unsigned char* ptr, unsigned int length){
-//      unsigned int offset = buffer.size();
-//		buffer.resize(offset + length);
-//		memcpy(buffer.data() + offset, ptr, length);
-		buffer.insert(buffer.end(), ptr, ptr + length);
-    }
-    inline void rwrite(const unsigned char* ptr, unsigned int length){
-        for(int i=(int)length-1; i>=0; --i){
-			buffer.push_back(ptr[i]);
-        }
-    }
-    inline void push(unsigned char b){ buffer.push_back(b); }
-    inline void add(unsigned char b, unsigned char v){
-        push(b);
-        push(v);
-    }
-    inline void add(unsigned char b, const unsigned char* ptr, unsigned int length){
-        push(b);
-        write(ptr, length);
-    }
-    inline void radd(unsigned char b, const unsigned char* ptr, unsigned int length){
-        push(b);
-        rwrite(ptr, length);
-    }
-    inline void clear(void){
-        buffer.clear();
-        err = 0;
-    }
-    inline void setError(int e){ err |= e; }
-    inline int getError(void) const { return err; }
+	unsigned char* buffer;
+	unsigned int bufferSize;
+	unsigned int offset;
+	int err;
+
+	WriteBuffer(void) : buffer(NULL), bufferSize(0), offset(0), err(0) {
+		buffer = (unsigned char*)malloc(WRITE_BUFFER_SIZE);
+		bufferSize = WRITE_BUFFER_SIZE;
+	}
+	inline unsigned char* data(void){ return (unsigned char*)buffer; }
+	inline unsigned int size(void) const { return offset; }
+	inline void write(const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + length);
+		memcpy(buffer + offset, ptr, length);
+		offset += length;
+	}
+	inline void rwrite(const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + length);
+		for(int i=(int)length-1; i>=0; --i){
+			buffer[offset++] = ptr[i];
+		}
+	}
+	inline void push(unsigned char b){
+		allocBuffer(offset + 1);
+		buffer[offset++] = b;
+	}
+	inline void add(unsigned char b, unsigned char v){
+		allocBuffer(offset + 2);
+		buffer[offset++] = b;
+		buffer[offset++] = v;
+	}
+	inline void add(unsigned char b, const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + 1 + length);
+		buffer[offset++] = b;
+		memcpy(buffer + offset, ptr, length);
+		offset += length;
+	}
+	inline void add(unsigned char b, unsigned char v, const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + 2 + length);
+		buffer[offset++] = b;
+		buffer[offset++] = v;
+		memcpy(buffer + offset, ptr, length);
+		offset += length;
+	}
+	inline void add(unsigned char b, unsigned short v, const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + 3 + length);
+		buffer[offset++] = b;
+		*((unsigned short*)(buffer+offset)) = v;
+		offset += 2;
+		memcpy(buffer + offset, ptr, length);
+		offset += length;
+	}
+	inline void add(unsigned char b, unsigned int v, const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + 5 + length);
+		buffer[offset++] = b;
+		*((unsigned int*)(buffer+offset)) = v;
+		offset += 4;
+		memcpy(buffer + offset, ptr, length);
+		offset += length;
+	}
+	inline void radd(unsigned char b, const unsigned char* ptr, unsigned int length){
+		allocBuffer(offset + 1 + length);
+		buffer[offset++] = b;
+		for(int i=(int)length-1; i>=0; --i){
+			buffer[offset++] = ptr[i];
+		}
+	}
+	inline void clear(void){
+		offset = 0;
+		err = 0;
+	}
+	inline void allocBuffer(unsigned int size){
+		if(size < bufferSize){
+			return;
+		}
+		unsigned int new_length = bufferSize + WRITE_BUFFER_SIZE;
+		if(new_length < size){
+			new_length = size;
+		}
+		unsigned char* new_buf = (unsigned char*)realloc(buffer, new_length);
+		if(NULL != new_buf){
+			buffer = new_buf;
+		}else{
+			new_buf = (unsigned char*)malloc(new_length);
+			memcpy(new_buf, buffer, bufferSize);
+			free(buffer);
+			buffer = new_buf;
+		}
+		bufferSize = new_length;
+	}
+	inline void setError(int e){ err |= e; }
+	inline int getError(void) const { return err; }
 }WriteBuffer;
 
 typedef struct ReadBuffer{

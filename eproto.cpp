@@ -108,21 +108,24 @@ inline void ep_pack_string(WriteBuffer* pwb, const unsigned char *sval, size_t s
     }else if(slen<256){
         topbyte = 0xd9;
         unsigned char l = slen;
-        pwb->push(topbyte);
-        pwb->push(l);
-		pwb->write(sval, slen);
+        pwb->add(topbyte, l, sval, slen);
+//        pwb->push(topbyte);
+//        pwb->push(l);
+//		pwb->write(sval, slen);
     } else if(slen<65536){
         topbyte = 0xda;
         unsigned short l = htons(slen);
-        pwb->push(topbyte);
-        pwb->write((unsigned char*)&l, 2);
-		pwb->write(sval, slen);
+        pwb->add(topbyte, l, sval, slen);
+//        pwb->push(topbyte);
+//        pwb->write((unsigned char*)&l, 2);
+//		pwb->write(sval, slen);
     } else if(slen<4294967296LL-1){ // TODO: -1 for avoiding (condition is always true warning)
         topbyte = 0xdb;
         unsigned int l = htonl(slen);
-        pwb->push(topbyte);
-        pwb->write((unsigned char*)&l, 4);
-        pwb->write(sval, slen);
+        pwb->add(topbyte, l, sval, slen);
+//        pwb->push(topbyte);
+//        pwb->write((unsigned char*)&l, 4);
+//        pwb->write(sval, slen);
     } else {
         pwb->setError(ERRORBIT_STRINGLEN);
     }
