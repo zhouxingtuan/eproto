@@ -654,12 +654,14 @@ static int ep_unpack_api(lua_State *L){
         lua_error(L);
         lua_pushnil(L);
         lua_replace(L,1);
+        fprintf(stderr, "unpack api arg must be a string\n");
         return 2;
     }
     if(len==0){
         lua_pushnil(L);
         lua_pushnil(L);
         lua_replace(L,1);
+        fprintf(stderr, "unpack api len==0\n");
         return 2;
     }
     ReadBuffer rb((unsigned char*)s, len);
@@ -671,6 +673,7 @@ static int ep_unpack_api(lua_State *L){
         lua_pushnil(L);
         lua_pushnil(L);
         lua_replace(L,1);
+        fprintf(stderr, "unpack api error=%d\n", rb.err);
         return 2;
     }
 }
