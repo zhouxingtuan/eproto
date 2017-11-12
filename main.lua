@@ -31,13 +31,13 @@ epsilonproto.register("HelloWorld", helloProto)
 local addrArray = {
 	{
 		addr = "广东省深圳市XXX";
---		num = 123;
+		num = 123;
 		phone = "123456789";
 	};
 	{
 		addr = "广东省深圳市XXX";
 		num = 1234;
---		phone = "123456789";
+		phone = "123456789";
 	};
 	{
 		addr = "广东省深圳市XXX";
@@ -47,7 +47,7 @@ local addrArray = {
 }
 local data = {
 	id = 123;
---	str = "你好！HelloWorld！";
+	str = "你好！HelloWorld！";
 	opt = 1234;
 	time = os.time();
 	addrs = addrArray;
