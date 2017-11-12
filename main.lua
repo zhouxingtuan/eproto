@@ -102,16 +102,11 @@ print("count", count, "unpack cost", os.clock() - t1)
 local ep_type_nil = 1
 local ep_type_bool = 2
 local ep_type_float = 3
-local ep_type_double = 4
-local ep_type_int32 = 5
-local ep_type_int64 = 6
-local ep_type_uint32 = 7
-local ep_type_uint64 = 8
-local ep_type_string = 9
-local ep_type_bytes = 10
-local ep_type_array = 11
-local ep_type_map = 12
-local ep_type_message = 13
+local ep_type_int = 4
+local ep_type_string = 5
+local ep_type_array = 6
+local ep_type_map = 7
+local ep_type_message = 8
 local reg_info = {
 	HelloWorld = {
 		{ep_type_int32, 1, "id", 0};
