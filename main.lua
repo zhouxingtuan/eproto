@@ -142,4 +142,11 @@ end
 print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)
 
---dump(dt)
+t1 = os.clock();
+for k=1,count do
+	dt,len = eproto.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
+
+dump(dt)
