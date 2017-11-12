@@ -1276,123 +1276,123 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
     }
     unsigned char t = prb->moveNext();
 
-//    if(t > 0x9f && t < 0xc0){
-//        ep_unpack_fixstr(prb, L, t);
-//        return;
-//    }
-//    if(t < 0x80){
-//        ep_unpack_fixint(prb, L, t);
-//        return;
-//    }
-//    if(t > 0xdf){
-//        ep_unpack_fixint_negative(prb, L, t);
-//        return;
-//    }
-//    switch(t){
-//	case 0xc0: ep_unpack_nil(prb, L, t); return;
-//    case 0xc2: ep_unpack_false(prb, L, t); return;
-//    case 0xc3: ep_unpack_true(prb, L, t); return;
-//    case 0xcc: ep_unpack_uint8(prb, L, t); return;
-//    case 0xcd: ep_unpack_uint16(prb, L, t); return;
-//    case 0xce: ep_unpack_uint32(prb, L, t); return;
-//    case 0xcf: ep_unpack_uint64(prb, L, t); return;
-//    case 0xd0: ep_unpack_int8(prb, L, t); return;
-//    case 0xd1: ep_unpack_int16(prb, L, t); return;
-//    case 0xd2: ep_unpack_int32(prb, L, t); return;
-//    case 0xd3: ep_unpack_int64(prb, L, t); return;
-//    case 0xd9: ep_unpack_str8(prb, L, t); return;
-//    case 0xda: ep_unpack_str16(prb, L, t); return;
-//    case 0xdb: ep_unpack_str32(prb, L, t); return;
-//    case 0xca: ep_unpack_float(prb, L, t); return;
-//    case 0xcb: ep_unpack_double(prb, L, t); return;
-//    case 0xc4: ep_unpack_bin8(prb, L, t); return;
-//    case 0xc5: ep_unpack_bin16(prb, L, t); return;
-//    case 0xc6: ep_unpack_bin32(prb, L, t); return;
-//    default:{
-//        prb->setError(1);
-//    }
-//    }
-
-    if(t == 0xc0){
-        ep_unpack_nil(prb, L, t);
+    if(t > 0x9f && t < 0xc0){
+        ep_unpack_fixstr(prb, L, t);
         return;
     }
-	switch(type){
-	case ep_type_bool:{
-		switch(t){
-        case 0xc2: ep_unpack_false(prb, L, t); return;
-        case 0xc3: ep_unpack_true(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-		}
-		break;
-	}
-    case ep_type_string:
-    case ep_type_bytes:{
-	    if(t > 0x9f && t < 0xc0){
-	        ep_unpack_fixstr(prb, L, t);
-	        return;
-	    }
-	    switch(t){
-        case 0xd9: ep_unpack_str8(prb, L, t); return;
-        case 0xda: ep_unpack_str16(prb, L, t); return;
-        case 0xdb: ep_unpack_str32(prb, L, t); return;
-        case 0xc4: ep_unpack_bin8(prb, L, t); return;
-        case 0xc5: ep_unpack_bin16(prb, L, t); return;
-        case 0xc6: ep_unpack_bin32(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-	    }
-        break;
+    if(t < 0x80){
+        ep_unpack_fixint(prb, L, t);
+        return;
     }
-    case ep_type_int32:
-    case ep_type_int64:
-    case ep_type_uint32:
-    case ep_type_uint64:{
-	    if(t < 0x80){
-            ep_unpack_fixint(prb, L, t);
-            return;
-        }
-	    if(t > 0xdf){
-	        ep_unpack_fixint_negative(prb, L, t);
-	        return;
-	    }
-        switch(t){
-        case 0xcc: ep_unpack_uint8(prb, L, t); return;
-        case 0xcd: ep_unpack_uint16(prb, L, t); return;
-        case 0xce: ep_unpack_uint32(prb, L, t); return;
-        case 0xcf: ep_unpack_uint64(prb, L, t); return;
-        case 0xd0: ep_unpack_int8(prb, L, t); return;
-        case 0xd1: ep_unpack_int16(prb, L, t); return;
-        case 0xd2: ep_unpack_int32(prb, L, t); return;
-        case 0xd3: ep_unpack_int64(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-        }
-        break;
+    if(t > 0xdf){
+        ep_unpack_fixint_negative(prb, L, t);
+        return;
     }
-	case ep_type_float:
-	case ep_type_double:{
-		switch(t){
-        case 0xca: ep_unpack_float(prb, L, t); return;
-        case 0xcb: ep_unpack_double(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-		}
-		break;
-	}
+    switch(t){
+	case 0xc0: ep_unpack_nil(prb, L, t); return;
+    case 0xc2: ep_unpack_false(prb, L, t); return;
+    case 0xc3: ep_unpack_true(prb, L, t); return;
+    case 0xcc: ep_unpack_uint8(prb, L, t); return;
+    case 0xcd: ep_unpack_uint16(prb, L, t); return;
+    case 0xce: ep_unpack_uint32(prb, L, t); return;
+    case 0xcf: ep_unpack_uint64(prb, L, t); return;
+    case 0xd0: ep_unpack_int8(prb, L, t); return;
+    case 0xd1: ep_unpack_int16(prb, L, t); return;
+    case 0xd2: ep_unpack_int32(prb, L, t); return;
+    case 0xd3: ep_unpack_int64(prb, L, t); return;
+    case 0xd9: ep_unpack_str8(prb, L, t); return;
+    case 0xda: ep_unpack_str16(prb, L, t); return;
+    case 0xdb: ep_unpack_str32(prb, L, t); return;
+    case 0xca: ep_unpack_float(prb, L, t); return;
+    case 0xcb: ep_unpack_double(prb, L, t); return;
+    case 0xc4: ep_unpack_bin8(prb, L, t); return;
+    case 0xc5: ep_unpack_bin16(prb, L, t); return;
+    case 0xc6: ep_unpack_bin32(prb, L, t); return;
     default:{
         prb->setError(1);
     }
-	}
+    }
+
+//    if(t == 0xc0){
+//        ep_unpack_nil(prb, L, t);
+//        return;
+//    }
+//	switch(type){
+//	case ep_type_bool:{
+//		switch(t){
+//        case 0xc2: ep_unpack_false(prb, L, t); return;
+//        case 0xc3: ep_unpack_true(prb, L, t); return;
+//        default:{
+//            prb->setError(1);
+//            return;
+//        }
+//		}
+//		break;
+//	}
+//    case ep_type_string:
+//    case ep_type_bytes:{
+//	    if(t > 0x9f && t < 0xc0){
+//	        ep_unpack_fixstr(prb, L, t);
+//	        return;
+//	    }
+//	    switch(t){
+//        case 0xd9: ep_unpack_str8(prb, L, t); return;
+//        case 0xda: ep_unpack_str16(prb, L, t); return;
+//        case 0xdb: ep_unpack_str32(prb, L, t); return;
+//        case 0xc4: ep_unpack_bin8(prb, L, t); return;
+//        case 0xc5: ep_unpack_bin16(prb, L, t); return;
+//        case 0xc6: ep_unpack_bin32(prb, L, t); return;
+//        default:{
+//            prb->setError(1);
+//            return;
+//        }
+//	    }
+//        break;
+//    }
+//    case ep_type_int32:
+//    case ep_type_int64:
+//    case ep_type_uint32:
+//    case ep_type_uint64:{
+//	    if(t < 0x80){
+//            ep_unpack_fixint(prb, L, t);
+//            return;
+//        }
+//	    if(t > 0xdf){
+//	        ep_unpack_fixint_negative(prb, L, t);
+//	        return;
+//	    }
+//        switch(t){
+//        case 0xcc: ep_unpack_uint8(prb, L, t); return;
+//        case 0xcd: ep_unpack_uint16(prb, L, t); return;
+//        case 0xce: ep_unpack_uint32(prb, L, t); return;
+//        case 0xcf: ep_unpack_uint64(prb, L, t); return;
+//        case 0xd0: ep_unpack_int8(prb, L, t); return;
+//        case 0xd1: ep_unpack_int16(prb, L, t); return;
+//        case 0xd2: ep_unpack_int32(prb, L, t); return;
+//        case 0xd3: ep_unpack_int64(prb, L, t); return;
+//        default:{
+//            prb->setError(1);
+//            return;
+//        }
+//        }
+//        break;
+//    }
+//	case ep_type_float:
+//	case ep_type_double:{
+//		switch(t){
+//        case 0xca: ep_unpack_float(prb, L, t); return;
+//        case 0xcb: ep_unpack_double(prb, L, t); return;
+//        default:{
+//            prb->setError(1);
+//            return;
+//        }
+//		}
+//		break;
+//	}
+//    default:{
+//        prb->setError(1);
+//    }
+//	}
 }
 inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
 	unsigned char t = prb->moveNext();
