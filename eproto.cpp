@@ -553,8 +553,23 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         ep_unpack_fixstr(prb, L, t);
         return;
     }
+//    if(t >= 0x80 && t <= 0x8f){
+    if(t > 0x7f && t < 0x90){
+        ep_unpack_fixmap(prb, L, t);
+        return;
+    }
+//    if(t >= 0x90 && t <= 0x9f){
+    if(t > 0x8f && t < 0xa0){
+        ep_unpack_fixarray(prb, L, t);
+        return;
+    }
+//    if(t >= 0xe0){
+    if(t > 0xdf){
+        ep_unpack_fixint_negative(prb, L, t);
+        return;
+    }
 //    if(t >= 0xc0 && t <=0xdf){
-    if(t > 0xbf && t < 0xe0){
+//    if(t > 0xbf && t < 0xe0){
         switch(t){
         case 0xc0: ep_unpack_nil(prb, L, t); return;
         case 0xc2: ep_unpack_false(prb, L, t); return;
@@ -584,22 +599,7 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         default: prb->setError(1); break;
         }
         return;
-    }
-//    if(t >= 0x80 && t <= 0x8f){
-    if(t > 0x7f && t < 0x90){
-        ep_unpack_fixmap(prb, L, t);
-        return;
-    }
-//    if(t >= 0x90 && t <= 0x9f){
-    if(t > 0x8f && t < 0xa0){
-        ep_unpack_fixarray(prb, L, t);
-        return;
-    }
-//    if(t >= 0xe0){
-    if(t > 0xdf){
-        ep_unpack_fixint_negative(prb, L, t);
-        return;
-    }
+//    }
     prb->setError(1);
 }
 
