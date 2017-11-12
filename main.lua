@@ -140,7 +140,7 @@ for k=1,count do
 	dt,len = eproto.decode("HelloWorld", d)
 end
 print("decode length", len)
-print("count", count, "unpack cost", os.clock() - t1)
+print("count", count, "decode cost", os.clock() - t1)
 
 
 t1 = os.clock();
