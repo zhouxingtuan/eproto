@@ -543,21 +543,22 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         return;
     }
     unsigned char t = prb->moveNext();
-    if(t <= 0x7f){
+//    if(t <= 0x7f){
+    if(t < 0x80){
         ep_unpack_fixint(prb, L, t);
         return;
     }
-    if(t >= 0xa0 && t <= 0xbf){
+//    if(t >= 0xa0 && t <= 0xbf){
+    if(t > 0x9f && t < 0xc0){
         ep_unpack_fixstr(prb, L, t);
         return;
     }
-    if(t >= 0xc0 && t <=0xdf){
+//    if(t >= 0xc0 && t <=0xdf){
+    if(t > 0xbf && t < 0xe0){
         switch(t){
         case 0xc0: ep_unpack_nil(prb, L, t); return;
         case 0xc2: ep_unpack_false(prb, L, t); return;
         case 0xc3: ep_unpack_true(prb, L, t); return;
-        case 0xca: ep_unpack_float(prb, L, t); return;
-        case 0xcb: ep_unpack_double(prb, L, t); return;
         case 0xcc: ep_unpack_uint8(prb, L, t); return;
         case 0xcd: ep_unpack_uint16(prb, L, t); return;
         case 0xce: ep_unpack_uint32(prb, L, t); return;
@@ -569,6 +570,10 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         case 0xd9: ep_unpack_str8(prb, L, t); return;
         case 0xda: ep_unpack_str16(prb, L, t); return;
         case 0xdb: ep_unpack_str32(prb, L, t); return;
+
+        case 0xca: ep_unpack_float(prb, L, t); return;
+        case 0xcb: ep_unpack_double(prb, L, t); return;
+
         case 0xdc: ep_unpack_array16(prb, L, t); return;
         case 0xdd: ep_unpack_array32(prb, L, t); return;
         case 0xde: ep_unpack_map16(prb, L, t); return;
@@ -580,15 +585,18 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         }
         return;
     }
-    if(t >= 0x80 && t <= 0x8f){
+//    if(t >= 0x80 && t <= 0x8f){
+    if(t > 0x7f && t < 0x90){
         ep_unpack_fixmap(prb, L, t);
         return;
     }
-    if(t >= 0x90 && t <= 0x9f){
+//    if(t >= 0x90 && t <= 0x9f){
+    if(t > 0x8f && t < 0xa0){
         ep_unpack_fixarray(prb, L, t);
         return;
     }
-    if(t >= 0xe0){
+//    if(t >= 0xe0){
+    if(t > 0xdf){
         ep_unpack_fixint_negative(prb, L, t);
         return;
     }
