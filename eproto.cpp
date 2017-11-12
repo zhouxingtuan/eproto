@@ -1262,7 +1262,7 @@ static int ep_encode_api(lua_State *L){
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
 inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
 	unsigned char t = prb->moveNext();
-	size_t arylen;
+	size_t arylen = 0;
     if(t >= 0x90 && t <= 0x9f){
         arylen = t & 0xf;
     }else if(t == 0xdc){
@@ -1292,7 +1292,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
 }
 inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
 	unsigned char t = prb->moveNext();
-	size_t maplen;
+	size_t maplen = 0;
     if(t >= 0x80 && t <= 0x8f){
         maplen = t & 0xf;
     }else if(t == 0xde){
