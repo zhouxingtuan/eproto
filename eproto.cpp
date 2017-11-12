@@ -1266,14 +1266,19 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         return;
     }
     unsigned char t = prb->moveNext();
+    if(t <= 0x7f){
+        ep_unpack_fixint(prb, L, t);
+        return;
+    }
+    if(t >= 0xa0 && t <= 0xbf){
+        ep_unpack_fixstr(prb, L, t);
+        return;
+    }
     if(t >= 0xc0 && t <=0xdf){
         switch(t){
         case 0xc0: ep_unpack_nil(prb, L, t); return;
         case 0xc2: ep_unpack_false(prb, L, t); return;
         case 0xc3: ep_unpack_true(prb, L, t); return;
-        case 0xc4: ep_unpack_bin8(prb, L, t); return;
-        case 0xc5: ep_unpack_bin16(prb, L, t); return;
-        case 0xc6: ep_unpack_bin32(prb, L, t); return;
         case 0xca: ep_unpack_float(prb, L, t); return;
         case 0xcb: ep_unpack_double(prb, L, t); return;
         case 0xcc: ep_unpack_uint8(prb, L, t); return;
@@ -1291,12 +1296,11 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xdd: ep_unpack_array32(prb, L, t); return;
         case 0xde: ep_unpack_map16(prb, L, t); return;
         case 0xdf: ep_unpack_map32(prb, L, t); return;
+        case 0xc4: ep_unpack_bin8(prb, L, t); return;
+        case 0xc5: ep_unpack_bin16(prb, L, t); return;
+        case 0xc6: ep_unpack_bin32(prb, L, t); return;
         default: prb->setError(1); break;
         }
-        return;
-    }
-    if(t <= 0x7f){
-        ep_unpack_fixint(prb, L, t);
         return;
     }
     if(t >= 0x80 && t <= 0x8f){
@@ -1305,10 +1309,6 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
     }
     if(t >= 0x90 && t <= 0x9f){
         ep_unpack_fixarray(prb, L, t);
-        return;
-    }
-    if(t >= 0xa0 && t <= 0xbf){
-        ep_unpack_fixstr(prb, L, t);
         return;
     }
     if(t >= 0xe0){
