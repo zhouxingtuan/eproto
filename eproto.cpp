@@ -1269,7 +1269,7 @@ static int ep_encode_api(lua_State *L){
 }
 
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
-static void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
+inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
         return;
@@ -1451,7 +1451,6 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
 	}
     lua_createtable(L, 0, maplen);
     for(size_t i=0;i<maplen;i++){
-//        ep_unpack_anytype(prb, L); // key
         ep_decode_proto_normal(prb, L, key);
         ep_decode_proto(ps, prb, L, protoVec);	// value
         lua_rawset(L, -3);
@@ -1470,41 +1469,62 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 		}
 		if(NULL == pe || pe->type == 0){
 			lua_pushnumber(L, i+1);
-//			ep_unpack_anytype(prb, L);
 			ep_decode_proto_normal(prb, L, pe->type);
 		}else{
 			lua_pushlstring(L,pe->name.c_str(), pe->name.length());
-			switch(pe->type){
-			case ep_type_array:{
+			if(pe->type < ep_type_array){
+				ep_decode_proto_normal(prb, L, pe->type);
+			}else if(pe->type == ep_type_message){
+				ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
+				ep_decode_proto(ps, prb, L, otherProtoVec);
+			}else if(pe->type == ep_type_array){
 				if(pe->id < ep_type_max){
-//					ep_unpack_anytype(prb, L);
 					ep_decode_proto_normal(prb, L, pe->id);
 				}else{
 					ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
 					ep_decode_proto_array(ps, prb, L, otherProtoVec);
 				}
-				break;
-			}
-			case ep_type_map:{
+			}else if(pe->type == ep_type_map){
 				if(pe->value < ep_type_max){
 					ep_unpack_anytype(prb, L);
 				}else{
 					ProtoElementVector* otherProtoVec = pManager->findProto(pe->value);
                     ep_decode_proto_map(ps, prb, L, pe->key, otherProtoVec);
 				}
-				break;
-			};
-			case ep_type_message:{
-				ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
-				ep_decode_proto(ps, prb, L, otherProtoVec);
-				break;
+			}else{
+				prb->setError(1);
+				fprintf(stderr, "error type in proto manager\n");
+				return;
 			}
-			default:{
-//				ep_unpack_anytype(prb, L); // array element
-				ep_decode_proto_normal(prb, L, pe->type);
-				break;
-			}
-			}
+//			switch(pe->type){
+//			case ep_type_array:{
+//				if(pe->id < ep_type_max){
+//					ep_decode_proto_normal(prb, L, pe->id);
+//				}else{
+//					ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
+//					ep_decode_proto_array(ps, prb, L, otherProtoVec);
+//				}
+//				break;
+//			}
+//			case ep_type_map:{
+//				if(pe->value < ep_type_max){
+//					ep_unpack_anytype(prb, L);
+//				}else{
+//					ProtoElementVector* otherProtoVec = pManager->findProto(pe->value);
+//                    ep_decode_proto_map(ps, prb, L, pe->key, otherProtoVec);
+//				}
+//				break;
+//			};
+//			case ep_type_message:{
+//				ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
+//				ep_decode_proto(ps, prb, L, otherProtoVec);
+//				break;
+//			}
+//			default:{
+//				ep_decode_proto_normal(prb, L, pe->type);
+//				break;
+//			}
+//			}
 		}
 		lua_rawset(L,-3);
 	}
