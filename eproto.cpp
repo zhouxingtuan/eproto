@@ -653,14 +653,14 @@ static int ep_unpack_api(lua_State *L){
         lua_pushstring(L,"arg must be a string");
         lua_error(L);
         lua_pushnil(L);
-        lua_replace(L,1);
+        lua_replace(L,-3);
         fprintf(stderr, "unpack api arg must be a string\n");
         return 2;
     }
     if(len==0){
         lua_pushnil(L);
         lua_pushnil(L);
-        lua_replace(L,1);
+        lua_replace(L,-3);
         fprintf(stderr, "unpack api len==0\n");
         return 2;
     }
@@ -672,7 +672,7 @@ static int ep_unpack_api(lua_State *L){
     } else{
         lua_pushnil(L);
         lua_pushnil(L);
-        lua_replace(L,1);
+        lua_replace(L,-3);
         fprintf(stderr, "unpack api error=%d\n", rb.err);
         return 2;
     }
@@ -759,7 +759,8 @@ static int ep_register_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
 	lua_settop(L, 1);
 	ep_unpack_api(L);
-	lua_pop(L, 1); // pop unpack len
+	lua_pop(L, 1);      // pop unpack len
+	lua_replace(L, 1);  // set the table to stack 1
 	int t = lua_type(L,1);
 	if(t != LUA_TTABLE){
 		lua_pushboolean(L, 0);
@@ -768,9 +769,10 @@ static int ep_register_api(lua_State *L){
 	}
 	int nstack = lua_gettop(L);
 	size_t key_index = nstack+1;
+	size_t value_index = nstack+2;
     lua_pushnil(L); // nil for first iteration on lua_next
     while( lua_next(L, nstack) ){
-		t = lua_type(L, nstack+2);
+		t = lua_type(L, value_index);
 		if(t != LUA_TTABLE){
 			lua_pushboolean(L, 0);
 			fprintf(stderr, "path value is not a table\n");
