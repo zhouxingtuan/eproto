@@ -303,10 +303,10 @@ static void ep_pack_anytype(WriteBuffer* pwb, lua_State *L, int index){
 
 // unpack前置声明
 static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L);
-//inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen);
-//inline void ep_unpack_array(ReadBuffer* prb, lua_State *L, int maplen);
+static void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen);
+static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int maplen);
 // unpack 方法
-inline void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
+static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
     lua_createtable(L, arylen, 0);
     int i;
     for(i=0;i<arylen;i++){
@@ -315,7 +315,7 @@ inline void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
         lua_rawseti(L, -2, i+1);
     }
 }
-inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
+static void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
     lua_createtable(L, 0, maplen);
     int i;
     for(i=0;i<maplen;i++){
