@@ -867,7 +867,7 @@ static int ep_proto_api(lua_State *L){
 }
 
 static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElementVector* protoVec);
-void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int id){
+inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int id){
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	//获取数组的长度写入
 	size_t l = lua_objlen(L, index);
@@ -978,7 +978,7 @@ void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsigned int
 	}
 	}
 }
-void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigned int key, unsigned int value){
+inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigned int key, unsigned int value){
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	size_t nstack = lua_gettop(L);
     size_t l=0;
