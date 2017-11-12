@@ -1457,7 +1457,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     }
     unsigned char t = prb->moveNext();
     bool findArray = false;
-    size_t arrLen;
+    size_t arrLen = 0;
     if(t >= 0x90 && t <= 0x9f){
         arrLen = t & 0xf;
         findArray = true;
@@ -1468,7 +1468,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
             prb->setError(1);
             return;
         }
-	    unsigned short arrLen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
+	    arrLen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
 	    prb->moveOffset(2);
 	    findArray = true;
 //		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
@@ -1478,7 +1478,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
 	        prb->setError(1);
 	        return;
 	    }
-	    unsigned int arrLen = ntohl( *((unsigned int*)(prb->offsetPtr())));
+	    arrLen = ntohl( *((unsigned int*)(prb->offsetPtr())));
 	    prb->moveOffset(4);
 	    findArray = true;
 //		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
