@@ -1411,7 +1411,6 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
         lua_rawset(L, -3);
     }
 }
-
 inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
     size_t maplen = protoVec->size();
     ProtoManager* pManager = ps->pManager;
