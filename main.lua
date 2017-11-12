@@ -151,7 +151,7 @@ print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)
 t1 = os.clock();
 for k=1,count do
-	d = eproto.encode("HelloWorld", dt)
+	d = eproto.pack(dt)
 end
 print("data length", #d)
 print("count", count, "pack cost", os.clock() - t1)
