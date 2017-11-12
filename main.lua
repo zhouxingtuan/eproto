@@ -131,7 +131,7 @@ local reg_buf = eproto.pack(reg_info)
 local result = eproto.register(reg_buf)
 print("register result", result)
 local infos = eproto.proto()
-dump(infos)
+--dump(infos)
 
 local len
 t1 = os.clock();
@@ -142,4 +142,4 @@ print("data length", #d)
 print("count", count, "encode cost", os.clock() - t1)
 
 local dt = eproto.unpack(d)
-
+dump(dt)
