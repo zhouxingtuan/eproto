@@ -1259,8 +1259,8 @@ static int ep_encode_api(lua_State *L){
     return 0;
 }
 
-static void ep_decode_proto(ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
-inline void ep_decode_proto_array(ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
+static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
+inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
 	unsigned char t = prb->moveNext();
 	size_t arylen;
     if(t >= 0x90 && t <= 0x9f){
@@ -1277,7 +1277,7 @@ inline void ep_decode_proto_array(ReadBuffer* prb, lua_State *L, ProtoElementVec
 	        prb->setError(1);
 	        return;
 	    }
-	    unsigned int arylen = ntohl( *((unsigned int*)(prb->offsetPtr())));
+	    arylen = ntohl( *((unsigned int*)(prb->offsetPtr())));
 	    prb->moveOffset(4);
 	}else if(t==0xc0){ // nil
 		// 协议字段本身是nil
@@ -1286,11 +1286,11 @@ inline void ep_decode_proto_array(ReadBuffer* prb, lua_State *L, ProtoElementVec
 	}
 	lua_createtable(L, arylen, 0);
     for(size_t i=0;i<arylen;++i){
-    	ep_decode_proto(prb, L, protoVec);	// array element
+    	ep_decode_proto(ps, prb, L, protoVec);	// array element
         lua_rawseti(L, -2, i+1);
     }
 }
-inline void ep_decode_proto_map(ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
+inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
 	unsigned char t = prb->moveNext();
 	size_t maplen;
     if(t >= 0x80 && t <= 0x8f){
@@ -1315,20 +1315,20 @@ inline void ep_decode_proto_map(ReadBuffer* prb, lua_State *L, ProtoElementVecto
 		return;
 	}
     lua_createtable(L, 0, maplen);
-    int i;
-    for(i=0;i<maplen;i++){
+    for(size_t i=0;i<maplen;i++){
         ep_unpack_anytype(prb, L); // key
-        ep_decode_proto(prb, L, protoVec);	// value
+        ep_decode_proto(ps, prb, L, protoVec);	// value
         lua_rawset(L, -3);
     }
 }
-inline void ep_decode_proto_element(ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
+inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec, size_t arrLen){
     size_t maplen = protoVec->size();
+    ProtoManager* pManager = ps->pManager;
     ProtoElement* pe;
 	lua_createtable(L, 0, maplen);
-	for(size_t i=0;i<arrlen; ++i){
+	for(size_t i=0;i<arrLen; ++i){
 		if(i < maplen){
-			pe = protoVec->at(i);
+			pe = &((*protoVec)[i]);
 		}else{
 			pe = NULL;
 		}
@@ -1342,8 +1342,8 @@ inline void ep_decode_proto_element(ReadBuffer* prb, lua_State *L, ProtoElementV
 				if(pe->id < ep_type_max){
 					ep_unpack_anytype(prb, L);
 				}else{
-					ProtoElementVector* otherProtoVec = ps->pManager->findProto(pe->id);
-					ep_decode_proto_array(prb, L, otherProtoVec);
+					ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
+					ep_decode_proto_array(ps, prb, L, otherProtoVec);
 				}
 				break;
 			}
@@ -1351,14 +1351,14 @@ inline void ep_decode_proto_element(ReadBuffer* prb, lua_State *L, ProtoElementV
 				if(pe->value < ep_type_max){
 					ep_unpack_anytype(prb, L);
 				}else{
-					ProtoElementVector* otherProtoVec = ps->pManager->findProto(pe->value);
-                    ep_decode_proto_map(prb, L, otherProtoVec);
+					ProtoElementVector* otherProtoVec = pManager->findProto(pe->value);
+                    ep_decode_proto_map(ps, prb, L, otherProtoVec);
 				}
 				break;
 			};
 			case ep_type_message:{
-				ProtoElementVector* otherProtoVec = ps->pManager->findProto(pe->id);
-				ep_decode_proto(prb, L, otherProtoVec);
+				ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
+				ep_decode_proto(ps, prb, L, otherProtoVec);
 				break;
 			}
 			default:{
@@ -1370,7 +1370,7 @@ inline void ep_decode_proto_element(ReadBuffer* prb, lua_State *L, ProtoElementV
 		lua_rawset(L,-3);
 	}
 }
-static void ep_decode_proto(ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
+static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
     if( NULL == protoVec ){
         prb->setError(ERRORBIT_TYPE_NO_PROTO);
         return;
@@ -1378,7 +1378,7 @@ static void ep_decode_proto(ReadBuffer* prb, lua_State *L, ProtoElementVector* p
     unsigned char t = prb->moveNext();
     if(t >= 0x90 && t <= 0x9f){
         size_t arrLen = t & 0xf;
-        ep_decode_proto_element(prb, L, protoVec, arrLen);
+        ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
         return;
     }
     if(t==0xdc){
@@ -1388,7 +1388,7 @@ static void ep_decode_proto(ReadBuffer* prb, lua_State *L, ProtoElementVector* p
         }
 	    unsigned short arrLen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
 	    prb->moveOffset(2);
-		ep_decode_proto_element(prb, L, protoVec, arrLen);
+		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
         return;
     }
     if(t==0xdd){
@@ -1398,7 +1398,7 @@ static void ep_decode_proto(ReadBuffer* prb, lua_State *L, ProtoElementVector* p
 	    }
 	    unsigned int arrLen = ntohl( *((unsigned int*)(prb->offsetPtr())));
 	    prb->moveOffset(4);
-		ep_decode_proto_element(prb, L, protoVec, arrLen);
+		ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
         return;
     }
 	// 有可能proto协议本身是nil
@@ -1421,7 +1421,7 @@ static int ep_decode_api(lua_State *L){
 	ProtoManager* pManager = ps->pManager;
 	ProtoElementVector* protoVec = pManager->findProto(path);
     ReadBuffer rb((unsigned char*)s, len);
-    ep_decode_proto(&rb, L, protoVec);
+    ep_decode_proto(ps, &rb, L, protoVec);
     if(rb.err==0){
         lua_pushnumber(L, rb.offset);
         return 2;
