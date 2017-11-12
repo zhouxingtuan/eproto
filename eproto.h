@@ -181,20 +181,26 @@ public:
         return id;
     }
     inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int id, ProtoElementVector* pVec){
-        ProtoElement* pe;
-        if(index >= (unsigned int)pVec->size()){
-            pVec->resize(index + 1);
+        if(index == 0){
+            return NULL;
         }
-        pe = &((*pVec)[index]);
+        ProtoElement* pe;
+        if(index > (unsigned int)pVec->size()){
+            pVec->resize(index);
+        }
+        pe = &((*pVec)[index-1]);
         pe->set(type, index, name, id);
         return pe;
     }
     inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value, ProtoElementVector* pVec){
-        ProtoElement* pe;
-        if(index >= (unsigned int)pVec->size()){
-            pVec->resize(index + 1);
+        if(index == 0){
+            return NULL;
         }
-        pe = &((*pVec)[index]);
+        ProtoElement* pe;
+        if(index > (unsigned int)pVec->size()){
+            pVec->resize(index);
+        }
+        pe = &((*pVec)[index-1]);
         pe->set(type, index, name, key, value);
         return pe;
     }
