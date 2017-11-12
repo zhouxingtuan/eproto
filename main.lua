@@ -98,18 +98,6 @@ print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)
 
 --dump(dt)
-local Address = {
-	[1] = "addr";
-	[2] = "num";
-	[3] = "phone";
-}
-local helloProto = {
-	[1] = "id";
-	[2] = "str";
-	[3] = "opt";
-	[4] = "time";
-	[5] = {epsilonproto.proto_array, "addrs", "Address"};
-}
 
 local ep_type_nil = 1
 local ep_type_bool = 2
@@ -145,4 +133,11 @@ print("register result", result)
 local infos = eproto.proto()
 dump(infos)
 
+local len
+t1 = os.clock();
+for k=1,count do
+	d = eproto.encode("HelloWorld", data)
+end
+print("data length", #d)
+print("count", count, "encode cost", os.clock() - t1)
 
