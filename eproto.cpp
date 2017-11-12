@@ -1328,7 +1328,8 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
     }
 	unsigned char t = prb->moveNext();
 	size_t arylen = 0;
-    if(t >= 0x90 && t <= 0x9f){
+//    if(t >= 0x90 && t <= 0x9f){
+    if(t > 0x8f && t < 0xa0){
         arylen = t & 0xf;
     }else if(t == 0xdc){
         if(prb->left() < 2){
@@ -1385,7 +1386,8 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
     }
 	unsigned char t = prb->moveNext();
 	size_t maplen = 0;
-    if(t >= 0x80 && t <= 0x8f){
+//    if(t >= 0x80 && t <= 0x8f){
+    if(t > 0x7f && t < 0x90){
         maplen = t & 0xf;
     }else if(t == 0xde){
 	    if(prb->left() < 2){
@@ -1465,7 +1467,8 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     }
     unsigned char t = prb->moveNext();
     size_t arrLen = 0;
-    if(t >= 0x90 && t <= 0x9f){
+//    if(t >= 0x90 && t <= 0x9f){
+    if(t > 0x8f && t < 0xa0){
         arrLen = t & 0xf;
     }else if(t==0xdc){
         if(prb->left() < 2){
