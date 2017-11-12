@@ -188,26 +188,11 @@ inline void ep_pack_map(WriteBuffer* pwb, lua_State *L, size_t l){
     }
 }
 // lua pack 静态方法，迭代
-static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
+inline void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
     size_t nstack = lua_gettop(L);
     size_t l = lua_objlen(L,index);
-
     // try array first, and then map.
     if(l>0){
-//        unsigned char topbyte;
-//        // array!(ignore map part.) 0x90|n , 0xdc+2byte, 0xdd+4byte
-//        if(l<16){
-//            topbyte = 0x90 | (unsigned char)l;
-//            pwb->push(topbyte);
-//        } else if( l<65536){
-//            topbyte = 0xdc;
-//            unsigned short elemnum = htons(l);
-//            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
-//        } else if( l<4294967296LL-1){ // TODO: avoid C warn
-//            topbyte = 0xdd;
-//            unsigned int elemnum = htonl(l);
-//            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
-//        }
 		ep_pack_array(pwb, L, l);
         int i;
         size_t value_index = nstack+1;
@@ -224,20 +209,6 @@ static void ep_pack_table(WriteBuffer* pwb, lua_State *L, int index){
             l++;
             lua_pop(L,1);
         }
-//        // map fixmap, 16,32 : 0x80|num, 0xde+2byte, 0xdf+4byte
-//        unsigned char topbyte=0;
-//        if(l<16){
-//            topbyte = 0x80 | (char)l;
-//            pwb->push(topbyte);
-//        }else if(l<65536){
-//            topbyte = 0xde;
-//            unsigned short elemnum = htons(l);
-//            pwb->add(topbyte, (unsigned char*)&elemnum, 2);
-//        }else if(l<4294967296LL-1){
-//            topbyte = 0xdf;
-//            unsigned int elemnum = htonl(l);
-//            pwb->add(topbyte, (unsigned char*)&elemnum, 4);
-//        }
 		size_t key_index = nstack+1;
 		size_t value_index = nstack+2;
 		ep_pack_map(pwb, L, l);
@@ -303,10 +274,10 @@ static void ep_pack_anytype(WriteBuffer* pwb, lua_State *L, int index){
 
 // unpack前置声明
 static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L);
-static void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen);
-static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int maplen);
+inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen);
+inline void ep_unpack_array(ReadBuffer* prb, lua_State *L, int maplen);
 // unpack 方法
-static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
+inline void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
     lua_createtable(L, arylen, 0);
     int i;
     for(i=0;i<arylen;i++){
@@ -315,7 +286,7 @@ static void ep_unpack_array(ReadBuffer* prb, lua_State *L, int arylen) {
         lua_rawseti(L, -2, i+1);
     }
 }
-static void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
+inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
     lua_createtable(L, 0, maplen);
     int i;
     for(i=0;i<maplen;i++){
@@ -1469,7 +1440,7 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 		}
 		if(NULL == pe || pe->type == 0){
 			lua_pushnumber(L, i+1);
-			ep_decode_proto_normal(prb, L, pe->type);
+			ep_unpack_anytype(prb, L);
 		}else{
 			lua_pushlstring(L,pe->name.c_str(), pe->name.length());
 			if(pe->type < ep_type_array){
@@ -1496,35 +1467,6 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 				fprintf(stderr, "error type in proto manager\n");
 				return;
 			}
-//			switch(pe->type){
-//			case ep_type_array:{
-//				if(pe->id < ep_type_max){
-//					ep_decode_proto_normal(prb, L, pe->id);
-//				}else{
-//					ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
-//					ep_decode_proto_array(ps, prb, L, otherProtoVec);
-//				}
-//				break;
-//			}
-//			case ep_type_map:{
-//				if(pe->value < ep_type_max){
-//					ep_unpack_anytype(prb, L);
-//				}else{
-//					ProtoElementVector* otherProtoVec = pManager->findProto(pe->value);
-//                    ep_decode_proto_map(ps, prb, L, pe->key, otherProtoVec);
-//				}
-//				break;
-//			};
-//			case ep_type_message:{
-//				ProtoElementVector* otherProtoVec = pManager->findProto(pe->id);
-//				ep_decode_proto(ps, prb, L, otherProtoVec);
-//				break;
-//			}
-//			default:{
-//				ep_decode_proto_normal(prb, L, pe->type);
-//				break;
-//			}
-//			}
 		}
 		lua_rawset(L,-3);
 	}
