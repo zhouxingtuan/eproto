@@ -741,11 +741,9 @@ static bool ep_register_element_array(ProtoState* ps, lua_State *L, const std::s
         lua_rawgeti(L, nstack, i); // push table value to stack
         t = lua_type(L, value_index);
         if(t != LUA_TTABLE){
-            pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
             return false;
         }
         if( !ep_register_element(ps, L, path) ){
-			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
             return false;
         }
         lua_pop(L,1); // repair stack
