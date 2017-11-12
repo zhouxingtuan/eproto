@@ -732,6 +732,26 @@ static bool ep_register_element(ProtoState* ps, lua_State *L, const std::string&
     }
     return true;
 }
+static bool ep_register_element_array(ProtoState* ps, lua_State *L, const std::string& path){
+	int nstack = lua_gettop(L);
+	int value_index = nstack + 1;
+	int t;
+    size_t l = lua_objlen(L, nstack);
+    for(size_t i=1; i<=l; ++i){
+        lua_rawgeti(L, nstack, i); // push table value to stack
+        t = lua_type(L, value_index);
+        if(t != LUA_TTABLE){
+            pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+            return false;
+        }
+        if( !ep_register_element(ps, L, path) ){
+			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+            return false;
+        }
+        lua_pop(L,1); // repair stack
+    }
+	return true;
+}
 static int ep_register_api(lua_State *L){
 	ProtoState* ps = default_ep_state(L);
 	lua_settop(L, 1);
@@ -753,7 +773,7 @@ static int ep_register_api(lua_State *L){
 		}
 		std::string path = lua_tostring(L, key_index);   // -2:key
 		// register element
-		if( !ep_register_element(ps, L, path) ){        // -1:value
+		if( !ep_register_element_array(ps, L, path) ){        // -1:value
 			lua_pushboolean(L, 0);
 			return 1;
 		}

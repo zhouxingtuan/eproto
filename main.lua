@@ -66,7 +66,7 @@ for k=1,count do
 end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
-dump(dt)
+--dump(dt)
 
 local len
 t1 = os.clock();
@@ -97,5 +97,51 @@ end
 print("decode length", len)
 print("count", count, "unpack cost", os.clock() - t1)
 
-dump(dt)
+--dump(dt)
+local Address = {
+	[1] = "addr";
+	[2] = "num";
+	[3] = "phone";
+}
+local helloProto = {
+	[1] = "id";
+	[2] = "str";
+	[3] = "opt";
+	[4] = "time";
+	[5] = {epsilonproto.proto_array, "addrs", "Address"};
+}
+
+local ep_type_nil = 1
+local ep_type_bool = 2
+local ep_type_float = 3
+local ep_type_double = 4
+local ep_type_int32 = 5
+local ep_type_int64 = 6
+local ep_type_uint32 = 7
+local ep_type_uint64 = 8
+local ep_type_string = 9
+local ep_type_bytes = 10
+local ep_type_array = 11
+local ep_type_map = 12
+local ep_type_message = 13
+local reg_info = {
+	HelloWorld = {
+		{ep_type_int32, 1, "id", 0};
+		{ep_type_string, 2, "str", 0};
+		{ep_type_int32, 3, "opt", 0};
+		{ep_type_int32, 4, "time", 0};
+		{ep_type_array, 5, "addrs", "Address"};
+	};
+	Address = {
+		{ep_type_string, 1, "addr", 0};
+		{ep_type_int32, 2, "num", 0};
+		{ep_type_string, 3, "phone", 0};
+	};
+}
+
+local reg_buf = eproto.pack(reg_info)
+local result = eproto.register(reg_buf)
+print("register result", result)
+local infos = eproto.proto()
+
 
