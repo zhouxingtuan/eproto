@@ -800,14 +800,8 @@ static int ep_proto_api(lua_State *L){
 	nameMap.insert(std::make_pair(ep_type_nil, "nil"));
 	nameMap.insert(std::make_pair(ep_type_bool, "bool"));
 	nameMap.insert(std::make_pair(ep_type_float, "float"));
-//	nameMap.insert(std::make_pair(ep_type_double, "double"));
 	nameMap.insert(std::make_pair(ep_type_int, "int"));
-//	nameMap.insert(std::make_pair(ep_type_int32, "int32"));
-//	nameMap.insert(std::make_pair(ep_type_int64, "int64"));
-//	nameMap.insert(std::make_pair(ep_type_uint32, "uint32"));
-//	nameMap.insert(std::make_pair(ep_type_uint64, "uint64"));
 	nameMap.insert(std::make_pair(ep_type_string, "string"));
-//	nameMap.insert(std::make_pair(ep_type_bytes, "bytes"));
 	nameMap.insert(std::make_pair(ep_type_array, "array"));
 	nameMap.insert(std::make_pair(ep_type_map, "map"));
 	nameMap.insert(std::make_pair(ep_type_message, "message"));
@@ -882,49 +876,6 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 	int value_index = index + 1;
 	int t;
 	switch(id){
-	case ep_type_bool:{
-		for(size_t i=1; i<=l; ++i){
-			lua_rawgeti(L,index,i); // push table value to stack
-			t = lua_type(L, value_index);
-			if(t == LUA_TNIL){
-				ep_pack_nil(pwb);
-				lua_pop(L,1); // repair stack
-				continue;
-			}
-			if(t != LUA_TBOOLEAN){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			int iv = lua_toboolean(L, value_index);
-			ep_pack_bool(pwb, iv);
-			lua_pop(L,1); // repair stack
-		}
-		break;
-	}
-	case ep_type_float:{
-//	case ep_type_double:{
-		for(size_t i=1; i<=l; ++i){
-			lua_rawgeti(L,index,i); // push table value to stack
-			t = lua_type(L, value_index);
-			if(t == LUA_TNIL){
-				ep_pack_nil(pwb);
-				lua_pop(L,1); // repair stack
-				continue;
-			}
-			if(t != LUA_TNUMBER){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			lua_Number n = lua_tonumber(L, value_index);
-			ep_pack_float(pwb, n);
-			lua_pop(L,1); // repair stack
-		}
-		break;
-	}
-//	case ep_type_int32:
-//	case ep_type_int64:
-//	case ep_type_uint32:
-//	case ep_type_uint64:{
 	case ep_type_int:{
 		for(size_t i=1; i<=l; ++i){
 			lua_rawgeti(L,index,i); // push table value to stack
@@ -945,7 +896,6 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 		break;
 	}
 	case ep_type_string:{
-//	case ep_type_bytes:{
 		for(size_t i=1; i<=l; ++i){
 			lua_rawgeti(L,index,i); // push table value to stack
 			t = lua_type(L, value_index);
@@ -965,6 +915,44 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 		}
 		break;
 	}
+	case ep_type_bool:{
+    		for(size_t i=1; i<=l; ++i){
+    			lua_rawgeti(L,index,i); // push table value to stack
+    			t = lua_type(L, value_index);
+    			if(t == LUA_TNIL){
+    				ep_pack_nil(pwb);
+    				lua_pop(L,1); // repair stack
+    				continue;
+    			}
+    			if(t != LUA_TBOOLEAN){
+    				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    				return;
+    			}
+    			int iv = lua_toboolean(L, value_index);
+    			ep_pack_bool(pwb, iv);
+    			lua_pop(L,1); // repair stack
+    		}
+    		break;
+    	}
+	case ep_type_float:{
+    		for(size_t i=1; i<=l; ++i){
+    			lua_rawgeti(L,index,i); // push table value to stack
+    			t = lua_type(L, value_index);
+    			if(t == LUA_TNIL){
+    				ep_pack_nil(pwb);
+    				lua_pop(L,1); // repair stack
+    				continue;
+    			}
+    			if(t != LUA_TNUMBER){
+    				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    				return;
+    			}
+    			lua_Number n = lua_tonumber(L, value_index);
+    			ep_pack_float(pwb, n);
+    			lua_pop(L,1); // repair stack
+    		}
+    		break;
+    	}
 	default:{
 		if(id < ep_type_max){
 			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
@@ -1008,29 +996,6 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
     while( lua_next(L,index)){
         t = lua_type(L, key_index);
         switch(key){
-        case ep_type_bool:{
-			if(t != LUA_TBOOLEAN){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			int iv = lua_toboolean(L, key_index);
-			ep_pack_bool(pwb, iv);
-			break;
-        }
-        case ep_type_float:{
-//        case ep_type_double:{
-            if(t != LUA_TNUMBER){
-                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-                return;
-            }
-            lua_Number n = lua_tonumber(L, key_index);
-            ep_pack_float(pwb, n);
-			break;
-        }
-//		case ep_type_int32:
-//		case ep_type_int64:
-//		case ep_type_uint32:
-//		case ep_type_uint64:{
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
@@ -1041,7 +1006,6 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 			break;
 		}
 		case ep_type_string:{
-//		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 				return;
@@ -1051,6 +1015,24 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 	        ep_pack_string(pwb, (const unsigned char*)sval, slen);
 			break;
 		}
+        case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, key_index);
+			ep_pack_bool(pwb, iv);
+			break;
+        }
+        case ep_type_float:{
+            if(t != LUA_TNUMBER){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+            lua_Number n = lua_tonumber(L, key_index);
+            ep_pack_float(pwb, n);
+			break;
+        }
 		default:{
 			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 			return;
@@ -1058,29 +1040,6 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
         }
 		t = lua_type(L, value_index);
 		switch(value){
-		case ep_type_bool:{
-			if(t != LUA_TBOOLEAN){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			int iv = lua_toboolean(L, value_index);
-			ep_pack_bool(pwb, iv);
-			break;
-		}
-		case ep_type_float:{
-//		case ep_type_double:{
-			if(t != LUA_TNUMBER){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			lua_Number n = lua_tonumber(L, value_index);
-			ep_pack_float(pwb, n);
-			break;
-		}
-//		case ep_type_int32:
-//		case ep_type_int64:
-//		case ep_type_uint32:
-//		case ep_type_uint64:{
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
@@ -1091,7 +1050,6 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 			break;
 		}
 		case ep_type_string:{
-//		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 				return;
@@ -1099,6 +1057,24 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 	        size_t slen;
 	        const char *sval = lua_tolstring(L, value_index, &slen);
 	        ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			break;
+		}
+		case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, value_index);
+			ep_pack_bool(pwb, iv);
+			break;
+		}
+		case ep_type_float:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			lua_Number n = lua_tonumber(L, value_index);
+			ep_pack_float(pwb, n);
 			break;
 		}
 		default:{
@@ -1151,29 +1127,6 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 			continue;
 		}
 		switch(element.type){
-		case ep_type_bool:{
-			if(t != LUA_TBOOLEAN){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			int iv = lua_toboolean(L, value_index);
-			ep_pack_bool(pwb, iv);
-			break;
-		}
-		case ep_type_float:{
-//		case ep_type_double:{
-			if(t != LUA_TNUMBER){
-				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-				return;
-			}
-			lua_Number n = lua_tonumber(L, value_index);
-			ep_pack_float(pwb, n);
-			break;
-		}
-//		case ep_type_int32:
-//		case ep_type_int64:
-//		case ep_type_uint32:
-//		case ep_type_uint64:{
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
@@ -1184,7 +1137,6 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 			break;
 		}
 		case ep_type_string:{
-//		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
 				return;
@@ -1192,6 +1144,33 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
             size_t slen;
             const char *sval = lua_tolstring(L, value_index, &slen);
             ep_pack_string(pwb, (const unsigned char*)sval, slen);
+			break;
+		}
+		case ep_type_message:{
+			if(t != LUA_TTABLE){
+                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                return;
+            }
+			ProtoElementVector* otherProtoVec = ps->pManager->findProto(element.id);
+			ep_encode_proto(ps, L, value_index, otherProtoVec);
+			break;
+		}
+		case ep_type_bool:{
+			if(t != LUA_TBOOLEAN){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			int iv = lua_toboolean(L, value_index);
+			ep_pack_bool(pwb, iv);
+			break;
+		}
+		case ep_type_float:{
+			if(t != LUA_TNUMBER){
+				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				return;
+			}
+			lua_Number n = lua_tonumber(L, value_index);
+			ep_pack_float(pwb, n);
 			break;
 		}
 		case ep_type_array:{
@@ -1208,15 +1187,6 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
                 return;
             }
 			ep_encode_proto_map(ps, L, value_index, element.key, element.value);
-			break;
-		}
-		case ep_type_message:{
-			if(t != LUA_TTABLE){
-                pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
-                return;
-            }
-			ProtoElementVector* otherProtoVec = ps->pManager->findProto(element.id);
-			ep_encode_proto(ps, L, value_index, otherProtoVec);
 			break;
 		}
 		default:{
@@ -1295,41 +1265,6 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         return;
     }
 	switch(type){
-	case ep_type_bool:{
-		switch(t){
-        case 0xc2: ep_unpack_false(prb, L, t); return;
-        case 0xc3: ep_unpack_true(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-		}
-		break;
-	}
-    case ep_type_string:{
-//    case ep_type_bytes:{
-	    if(t > 0x9f && t < 0xc0){
-	        ep_unpack_fixstr(prb, L, t);
-	        return;
-	    }
-	    switch(t){
-        case 0xd9: ep_unpack_str8(prb, L, t); return;
-        case 0xda: ep_unpack_str16(prb, L, t); return;
-        case 0xdb: ep_unpack_str32(prb, L, t); return;
-        case 0xc4: ep_unpack_bin8(prb, L, t); return;
-        case 0xc5: ep_unpack_bin16(prb, L, t); return;
-        case 0xc6: ep_unpack_bin32(prb, L, t); return;
-        default:{
-            prb->setError(1);
-            return;
-        }
-	    }
-        break;
-    }
-//    case ep_type_int32:
-//    case ep_type_int64:
-//    case ep_type_uint32:
-//    case ep_type_uint64:{
     case ep_type_int:{
 	    if(t < 0x80){
             ep_unpack_fixint(prb, L, t);
@@ -1355,8 +1290,37 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         }
         break;
     }
+    case ep_type_string:{
+	    if(t > 0x9f && t < 0xc0){
+	        ep_unpack_fixstr(prb, L, t);
+	        return;
+	    }
+	    switch(t){
+        case 0xd9: ep_unpack_str8(prb, L, t); return;
+        case 0xda: ep_unpack_str16(prb, L, t); return;
+        case 0xdb: ep_unpack_str32(prb, L, t); return;
+        case 0xc4: ep_unpack_bin8(prb, L, t); return;
+        case 0xc5: ep_unpack_bin16(prb, L, t); return;
+        case 0xc6: ep_unpack_bin32(prb, L, t); return;
+        default:{
+            prb->setError(1);
+            return;
+        }
+	    }
+        break;
+    }
+	case ep_type_bool:{
+		switch(t){
+        case 0xc2: ep_unpack_false(prb, L, t); return;
+        case 0xc3: ep_unpack_true(prb, L, t); return;
+        default:{
+            prb->setError(1);
+            return;
+        }
+		}
+		break;
+	}
 	case ep_type_float:{
-//	case ep_type_double:{
 		switch(t){
         case 0xca: ep_unpack_float(prb, L, t); return;
         case 0xcb: ep_unpack_double(prb, L, t); return;
