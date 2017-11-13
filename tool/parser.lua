@@ -61,21 +61,42 @@ function parser:parseData(data)
 	return self.m_full_message
 end
 function parser:parseLines(linesArr)
-    for _,line in ipairs(linesArr) do
-        self:findAnyThingInLine(line)
+    for _,arr in ipairs(linesArr) do
+        self:findAnyThingInLine(arr)
     end
 end
-function parser:findAnyThingInLine(line)
+function parser:findAnyThingInLine(arr)
+    local first = arr[1]
+    if first == "message" then
+        self:pushMessage(arr[2])
+    elseif first == "{" then
 
+    elseif first == "}" then
+        self:popMessage()
+    elseif first == "optional" then
+
+    elseif first == "repeated" then
+
+    elseif first == "required" then
+
+    elseif first == "map" then
+
+    end
 end
-function parser:pushElement(store_type, data_type, name, index)
+function parser:pushElement(data_type, index, name, key, value)
     local info = self:topMessage()
-
+    local param
+    if value == nil then
+        param = {data_type, index, name, key}
+    else
+        param = {data_type, index, name, key, value}
+    end
+    table.insert(info.elements, param)
 end
 function parser:pushMessage(name)
     local info = {
         name = name;
-        infoArr = {};
+        elements = {};
         full_name = nil;
         path_name = nil;
     }
@@ -85,6 +106,10 @@ function parser:pushMessage(name)
 end
 function parser:popMessage()
     local m_message_stack = self.m_message_stack
+    if m_message_stack[#m_message_stack] == nil then
+
+        return
+    end
     m_message_stack[#m_message_stack] = nil
 end
 function parser:topMessage()
@@ -95,7 +120,7 @@ function parser:setCurrentMessage(name, info)
     local full_name,path_name = self:getFullName(name, false)
     info.full_name = full_name
     info.path_name = path_name
-    self.m_full_message[full_name] = info.infoArr
+    self.m_full_message[full_name] = info.elements
     self.m_current_message[path_name] = info
 end
 function parser:getCurrentMessage()
