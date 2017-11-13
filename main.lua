@@ -142,6 +142,9 @@ end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 
+local result = eproto.register_file("tool/invitemgr_client.pb")
+print("register_file result", result)
+
 
 --t1 = os.clock();
 --for k=1,count do

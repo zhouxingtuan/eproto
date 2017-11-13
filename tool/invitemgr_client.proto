@@ -1,9 +1,18 @@
 ﻿package invitemgr;
 
+enum DataType
+{
+    data_type_nil = 1;
+    data_type_int = 2;
+    data_type_string = 3;
+    data_type_double = 4;
+}
+
 message user_info{
     optional int32 uid = 1;                         // 玩家的ID
     optional int32 signup_time = 2;                 // 报名的时间
     map<int32, string> data = 3;
+    optional DataType dt = 4;
 }
 message table_info{
     optional int32 game_id = 1;                     // 游戏id
