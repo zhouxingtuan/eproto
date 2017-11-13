@@ -44,6 +44,12 @@ typedef struct WriteBuffer{
 		buffer = (unsigned char*)malloc(WRITE_BUFFER_SIZE);
 		bufferSize = WRITE_BUFFER_SIZE;
 	}
+	~WriteBuffer(void){
+	    if(buffer != NULL){
+	        free(buffer);
+	        buffer = NULL;
+	    }
+	}
 	inline unsigned char* data(void){ return (unsigned char*)buffer; }
 	inline unsigned int size(void) const { return offset; }
 	inline void write(const unsigned char* ptr, unsigned int length){
