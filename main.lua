@@ -83,6 +83,9 @@ print("count", count, "decode cost", os.clock() - t1)
 --print("count", count, "unpack cost", os.clock() - t1)
 
 local eproto = require("eproto")
+local result = eproto.register_file("tool/invitemgr_client.pb")
+print("register_file result", result)
+
 --local len
 --t1 = os.clock();
 --for k=1,count do
@@ -142,8 +145,7 @@ end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 
-local result = eproto.register_file("tool/invitemgr_client.pb")
-print("register_file result", result)
+
 
 
 --t1 = os.clock();
