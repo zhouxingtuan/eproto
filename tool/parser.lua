@@ -36,6 +36,7 @@ local protobuf_to_eproto = {
 local print = print
 local io = io
 local table = table
+local pairs = pairs
 local ipairs = ipairs
 local string = string
 local tonumber = tonumber
@@ -73,6 +74,8 @@ function parser:parseFile(file, save_file)
 		return
 	end
 
+	self:printOutput(protos)
+
 	local buf = MessagePack.pack(protos)
 	self:setFileData(save_file, buf)
 
@@ -82,10 +85,26 @@ function parser:parseFile(file, save_file)
 
 	return protos
 end
+function parser:printOutput(protos)
+	local sortFunc = function(a, b)
+		return a[2] < b[2]
+	end
+	local str_arr = {}
+	for name,arr in pairs(protos) do
+		table.insert(str_arr, name)
+		table.sort(arr, sortFunc)
+		for _,info in ipairs(arr) do
+			local s = "\t" .. table.concat(info, "\t")
+			table.insert(str_arr, s)
+		end
+	end
+	local str = table.concat(str_arr, "\n")
+	print(str)
+end
 function parser:parseData(data)
     local lines = self:splitLines(data)
     local linesArr = self:splitEmptyMark(lines)
-    dump(linesArr)
+--    dump(linesArr)
     self:findPackage(linesArr)
     self:parseLines(linesArr)
 	return self.m_full_message
