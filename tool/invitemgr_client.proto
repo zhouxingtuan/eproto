@@ -1,0 +1,155 @@
+﻿package invitemgr;
+
+message user_info{
+    optional int32 uid = 1;                         // 玩家的ID
+    optional int32 signup_time = 2;                 // 报名的时间
+    map<int32, string> data = 3;
+}
+message table_info{
+    optional int32 game_id = 1;                     // 游戏id
+    optional string game_name = 2;                  // 游戏名称
+    optional int32 player_number = 3;               // 玩家数量
+    optional int32 owner_uid = 4;                   // 创建玩家uid
+    optional string owner_name = 5;                 // 创建玩家昵称
+    optional int32 tid = 6;                         // 桌子tid
+    optional int32 create_time = 7;                 // 创建时间
+    optional int32 state = 8;                       // 1 准备，2 进行中，3 结束， 4 解散
+    optional string game_info = 9;                  // 客户端选项的json字符串
+    repeated user_info signup_users = 10;            // 报名的玩家
+    optional bool ss = 11;            // 报名的玩家
+}
+
+// 0x2001 创建邀请赛
+message request_create_match
+{
+    optional int32 region_code = 1;                 // 地区ID
+    optional int32 game_id = 2;                     // 子游戏ID
+    optional string version = 3;                    // 客户端版本
+    optional int32 owner_uid = 4;                   // 房主uid
+    optional string owner_name = 5;                 // 房主昵称
+    optional string game_info = 6;                  // 客户端选项的json字符串
+}
+message response_create_match
+{
+    optional int32 result = 1;                      // 创建房间结果
+    optional table_info table_info = 2;              // 桌子信息
+    optional int32 prop_type = 3;                   // 扣除的道具的类型
+    optional int32 prop_num = 4;                    // 扣除的道具的数量
+}
+// 0x2002 查询邀请赛
+message request_query_match
+{
+    optional int32 tid = 1;
+}
+message response_query_match
+{
+    optional int32 result = 1;                      // 请求查询的结果，0为正常
+    optional int32 tid = 2;                         // 房间的tid
+    optional int32 owner_uid = 3;                   // 房主的uid
+    optional int32 game_id = 4;                     // 游戏的game_id
+    optional int32 node_type = 5;                   // 所在服务的type
+    optional int32 node_id = 6;                     // 所在服务的id
+}
+// 0x2003 拉取邀请赛的子游戏配置
+message request_invite_config
+{
+    optional int32 region_code = 1;                 // 地区ID
+    optional string version = 2;                    // 客户端版本
+}
+message match_price
+{
+    optional int32 id = 1;                          // 组内ID
+    optional int32 type = 2;                        // 类型
+    optional int32 value = 3;                       // 数量
+    optional string name = 4;                       // 名称
+    optional int32 agent_value = 5;                 // 代理数量
+    optional string agent_name = 6;                 // 代理显示名称
+}
+message invite_game
+{
+    optional int32 game_id = 1;                     // 子游戏game_id
+    optional string game_name = 2;                  // 子游戏名称
+    optional int32 showtag = 3;                     // 0不展示 1展示 2部分展示
+    optional int32 play_countdown = 4;              // 出牌倒计时，秒
+    optional int32 operate_countdown = 5;           // 操作倒计时，秒
+    repeated string showtag2_version = 6;           // 不显示的版本
+    optional string game_info = 7;                  // json字符串
+    optional int32 player_number = 8;               // 子游戏的人数
+    optional int32 is_new = 9;                      // 是否是新游戏 0否 1是
+    optional int32 sort_id = 10;                    // 排序的ID
+    repeated match_price match_price = 11;           // 价格数据
+}
+message response_invite_config
+{
+    optional int32 result = 1;                      // 请求代码
+    optional int32 region_code = 2;                 // 地区ID
+    repeated invite_game games = 3;                   // 子游戏的数据
+}
+// 0x2004 查询玩家的创建信息
+message request_pull_user_matches
+{
+
+}
+message response_pull_user_matches
+{
+    repeated table_info table_info = 1;             // 玩家创建的桌子数据
+}
+// 0x2008 加入比赛
+message request_join_match
+{
+    optional int32 tid = 1;                         // 桌子ID
+}
+message response_join_match
+{
+    optional int32 result = 1;                      // 操作结果
+}
+// 0x2009 离开比赛
+message request_leave_match
+{
+    optional int32 tid = 1;                         // 桌子ID
+}
+message response_leave_match
+{
+    optional int32 result = 1;                      // 操作结果
+}
+// 0x200B 房主开赛
+message request_start_match
+{
+    optional int32 tid = 1;                         // 桌子ID
+}
+message response_start_match
+{
+    optional int32 result = 1;                      // 操作结果
+    optional int32 tid = 2;                         // 桌子ID
+}
+// 0x200A 房主解散房间
+message request_dismiss_match_by_owner
+{
+    optional int32 tid = 1;                         // 桌子ID
+}
+message response_dismiss_match_by_owner
+{
+    optional int32 result = 1;                      // 操作结果
+    optional int32 tid = 2;                         // 桌子ID
+}
+// 0x200C 房主踢人
+message request_kick_user
+{
+    optional int32 tid = 1;                         // 桌子ID
+    optional int32 uid = 2;                         // 玩家ID
+}
+message response_kick_user
+{
+    optional int32 result = 1;                      // 操作结果
+    optional int32 tid = 2;                         // 桌子ID
+}
+
+
+
+
+
+
+
+
+
+
