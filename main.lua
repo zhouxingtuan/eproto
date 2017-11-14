@@ -11,7 +11,7 @@ local count = 1000000
 
 local dump = require("dump")
 
-local epsilonproto = require("epsilonproto")
+local epsilonproto = require("old.epsilonproto")
 local Address = {
 	[1] = "addr";
 	[2] = "num";
