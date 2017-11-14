@@ -57,7 +57,7 @@ function parser:ctor(path)
     self.m_current_message = {}
 end
 
-function parser:parseFile(file, save_file)
+function parser:parseFile(file, save_file, print_flag)
 	local name = util.getFileName(file)
 	if save_file == nil then
 		save_file = name..".pb"
@@ -74,7 +74,7 @@ function parser:parseFile(file, save_file)
 		return
 	end
 
-	self:printOutput(protos)
+	self:printOutput(protos, print_flag)
 
 	local buf = MessagePack.pack(protos)
 	self:setFileData(save_file, buf)
@@ -85,21 +85,25 @@ function parser:parseFile(file, save_file)
 
 	return protos
 end
-function parser:printOutput(protos)
+function parser:printOutput(protos, print_flag)
 	local sortFunc = function(a, b)
 		return a[2] < b[2]
 	end
 	local str_arr = {}
 	for name,arr in pairs(protos) do
-		table.insert(str_arr, name)
 		table.sort(arr, sortFunc)
-		for _,info in ipairs(arr) do
-			local s = "\t" .. table.concat(info, "\t")
-			table.insert(str_arr, s)
+		if print_flag then
+			table.insert(str_arr, name)
+			for _,info in ipairs(arr) do
+				local s = "\t" .. table.concat(info, "\t")
+				table.insert(str_arr, s)
+			end
 		end
 	end
-	local str = table.concat(str_arr, "\n")
-	print(str)
+	if print_flag then
+		local str = table.concat(str_arr, "\n")
+		print(str)
+	end
 end
 function parser:parseData(data)
     local lines = self:splitLines(data)

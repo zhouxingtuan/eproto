@@ -9,7 +9,7 @@ STATIC_LIB := $(LUAJIT_STATICLIB)
 LIBPATH = -L/usr/local/lib
 LIBS = -lz -lstdc++ -ldl -lm
 
-INCLUDES = -I$(LUAJIT_INC)
+INCLUDES = -I$(LUAJIT_INC) -I./old/
 
 # 注意，这里的 -ldl 需要放在flag的最后才能生效
 CFLAGS = -O2 -Wall -Wstrict-overflow=3 -std=c++11 $(INCLUDES) $(LIBPATH) $(LIBS)
@@ -20,7 +20,7 @@ RM = rm -f
 BIN = .
 TARGET = main
 
-OBJS = epsilonproto.o eproto.o script.o
+OBJS = old/epsilonproto.o eproto.o script.o
 
 $(TARGET): main.o $(OBJS)
 	$(MAKE) -C ./LuaJIT

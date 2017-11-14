@@ -6,6 +6,8 @@
 -- To change this template use File | Settings | File Templates.
 --
 
+local args = {...}
+
 local info = debug.getinfo(1, "S") -- 第二个参数 "S" 表示仅返回 source,short_src等字段， 其他还可以 "n", "f", "I", "L"等 返回不同的字段信息
 for k,v in pairs(info) do
     print(k,v)
@@ -17,10 +19,14 @@ print("dir=", path)
 path = path or "./"
 package.path = package.path..";"..path.."?.lua;"
 
+local file = args[1]
+local print_flag = args[2]
+print("param", file, print_flag)
+
 local parser = require("parser")
 
 local obj = parser.new(path)
-obj:parseFile("invitemgr_client.proto")
+obj:parseFile(file, nil, print_flag)
 
 
 
