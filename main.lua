@@ -68,37 +68,37 @@ print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 --dump(dt)
 
---local len
---t1 = os.clock();
---for k=1,count do
---	d = epsilonproto.pack(data)
---end
---print("data length", #d)
---print("count", count, "pack cost", os.clock() - t1)
---t1 = os.clock();
---for k=1,count do
---	dt,len = epsilonproto.unpack(d)
---end
---print("decode length", len)
---print("count", count, "unpack cost", os.clock() - t1)
+local len
+t1 = os.clock();
+for k=1,count do
+	d = epsilonproto.pack(data)
+end
+print("data length", #d)
+print("count", count, "pack cost", os.clock() - t1)
+t1 = os.clock();
+for k=1,count do
+	dt,len = epsilonproto.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
 
 local eproto = require("eproto")
 local result = eproto.register_file("tool/invitemgr_client.pb")
 print("register_file result", result)
 
---local len
---t1 = os.clock();
---for k=1,count do
---	d = eproto.pack(data)
---end
---print("data length", #d)
---print("count", count, "pack cost", os.clock() - t1)
---t1 = os.clock();
---for k=1,count do
---	dt,len = eproto.unpack(d)
---end
---print("decode length", len)
---print("count", count, "unpack cost", os.clock() - t1)
+local len
+t1 = os.clock();
+for k=1,count do
+	d = eproto.pack(data)
+end
+print("data length", #d)
+print("count", count, "pack cost", os.clock() - t1)
+t1 = os.clock();
+for k=1,count do
+	dt,len = eproto.unpack(d)
+end
+print("decode length", len)
+print("count", count, "unpack cost", os.clock() - t1)
 
 --dump(dt)
 
@@ -146,20 +146,6 @@ print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 
 
-
-
---t1 = os.clock();
---for k=1,count do
---	dt,len = eproto.unpack(d)
---end
---print("decode length", len)
---print("count", count, "unpack cost", os.clock() - t1)
---t1 = os.clock();
---for k=1,count do
---	d = eproto.pack(dt)
---end
---print("data length", #d)
---print("count", count, "pack cost", os.clock() - t1)
 
 
 --dump(dt)
