@@ -58,13 +58,19 @@ function parser:ctor(path)
 end
 
 function parser:parseFile(file, save_file, print_flag)
+	print_flag = tonumber(print_flag)
+	print_flag = print_flag or 0
 	local name = util.getFileName(file)
 	if save_file == nil then
 		save_file = name..".pb"
 	end
 	local data = self:getFileData(file)
     -- first 3 byte is something magic
-    data = string.sub(data, 4, #data)
+    local pos = string.find(data, "package")
+    print("package pos", pos)
+    if pos and pos > 4 then
+        data = string.sub(data, 4, #data)
+    end
 --    local b,e  = string.find(data, "package")
 --    print("package", b, e)
 --    dump(data)
@@ -92,7 +98,7 @@ function parser:printOutput(protos, print_flag)
 	local str_arr = {}
 	for name,arr in pairs(protos) do
 		table.sort(arr, sortFunc)
-		if print_flag then
+		if print_flag == 1 then
 			table.insert(str_arr, name)
 			for _,info in ipairs(arr) do
 				local s = "\t" .. table.concat(info, "\t")
@@ -100,7 +106,7 @@ function parser:printOutput(protos, print_flag)
 			end
 		end
 	end
-	if print_flag then
+	if print_flag == 1 then
 		local str = table.concat(str_arr, "\n")
 		print(str)
 	end
@@ -355,10 +361,17 @@ function parser:getFullName(name, skipTop)
     if name and name ~= "" then
         table.insert(arr, name)
     end
-    local path_name = table.concat(arr, ".")
+    local path_name
+    if #arr > 1 then
+        path_name = table.concat(arr, ".")
+    else
+        path_name = arr[1]
+    end
     local full_name
     if self.m_package ~= nil then
         full_name = self.m_package.."."..path_name
+    else
+        full_name = path_name
     end
     return full_name,path_name
 end
