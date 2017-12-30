@@ -35,8 +35,8 @@ the test can be run on Linux
         eproto.unpack(buf)
 
 # How to use in javascript
-    in the tool directory, after run command to gen a pb file, you can find the js file:
-        xxx.js
+	in the tool directory, after run command to gen a pb file, you can find the js file:
+		xxx.js
 	including the xxx.js into your codes, check the example in index.html:
 		<script type="text/javascript" src="eproto.min.js" ></script>
 		<script type="text/javascript" src="invitemgr_client.js" ></script>
