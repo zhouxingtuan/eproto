@@ -1,5 +1,5 @@
 # eproto
-eproto is base on msgpack. support protobuf description file format (.proto)
+eproto is base on msgpack. support protobuf description file format (.proto). support lua and javascript.
 
 link https://github.com/zhouxingtuan/eproto
 
@@ -32,6 +32,15 @@ the test can be run on Linux
     pack:
         eproto.pack(tab)
     unpack:
-        eproto.unpack(tab)
+        eproto.unpack(buf)
+	
+# How to use in javascript
+    in the tool directory, after run command to gen a pb file, you can find the js file:
+        xxx.js
+    including the xxx.js into your codes, see the example in index.html:
+        var buf = eproto.encode("packageName.messageName", tab);
+	var tab = eproto.decode("packageName.messageName", buf);
+        var buf = eproto.pack(tab);
+	var tab = eproto.unpack(buf);
 
 
