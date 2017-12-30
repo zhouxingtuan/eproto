@@ -33,7 +33,7 @@ the test can be run on Linux
         eproto.pack(tab)
     unpack:
         eproto.unpack(buf)
-	
+
 # How to use in javascript
     in the tool directory, after run command to gen a pb file, you can find the js file:
         xxx.js
