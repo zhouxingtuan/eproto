@@ -207,5 +207,5 @@ var eproto = {
 			}
 		}
 		return tab;
-	},
-}
+	}
+};
