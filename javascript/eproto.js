@@ -30,7 +30,6 @@ var eproto = {
 		var info = this.infos[name];
 		if (info === undefined){
 			throw new Error("can not find proto "+name);
-			return null;
 		}
 		var arr = new Array(info.length);
 		// 获取info中的所以数据，保存到数组中
@@ -51,7 +50,6 @@ var eproto = {
 						arr[key[1]] = value;
 					}else{
 						throw new Error("type error boolean in proto "+name+" "+key[2]+" get "+t);
-						return null;
 					}
 					break;
 				}
@@ -61,7 +59,6 @@ var eproto = {
                         arr[key[1]] = value;
                     }else{
                         throw new Error("type error number in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -70,7 +67,6 @@ var eproto = {
                         arr[key[1]] = value;
                     }else{
                         throw new Error("type error string in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -87,7 +83,6 @@ var eproto = {
 						}
                     }else{
                         throw new Error("type error array in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -104,7 +99,6 @@ var eproto = {
 						}
                     }else{
                         throw new Error("type error map in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -113,13 +107,11 @@ var eproto = {
                         arr[key[1]] = this.copyArr(key[3], value);
                     }else{
                         throw new Error("type error message in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
 				default:{
 					throw new Error("unknown type in proto "+name+" "+key[2]+" get "+key[0]);
-					return null;
 				}
 			}
 		}
@@ -129,7 +121,6 @@ var eproto = {
 		var info = this.infos[name];
 		if (info === undefined){
 			throw new Error("can not find proto "+name);
-			return null;
 		}
 		var tab = {};
 		for(var i=0; i<info.length; ++i){
@@ -148,7 +139,6 @@ var eproto = {
 						tab[key[2]] = value;
 					}else{
 						throw new Error("type error boolean in proto "+name+" "+key[2]+" get "+t);
-						return null;
 					}
 					break;
 				}
@@ -158,7 +148,6 @@ var eproto = {
                         tab[key[2]] = value;
                     }else{
                         throw new Error("type error number in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -167,7 +156,6 @@ var eproto = {
                         tab[key[2]] = value;
                     }else{
                         throw new Error("type error string in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -185,7 +173,6 @@ var eproto = {
 						}
                     }else{
                         throw new Error("type error array in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -203,7 +190,6 @@ var eproto = {
 						}
                     }else{
                         throw new Error("type error map in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
@@ -212,13 +198,11 @@ var eproto = {
                         tab[key[2]] = this.copyTable(key[3], value);
                     }else{
                         throw new Error("type error message in proto "+name+" "+key[2]+" get "+t);
-                        return null;
                     }
 					break;
 				}
 				default:{
 					throw new Error("unknown type in proto "+name+" "+key[2]+" get "+key[0]);
-					return null;
 				}
 			}
 		}
