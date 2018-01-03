@@ -93,7 +93,7 @@ function parser:parseFile(file, save_file, print_flag)
 var %s=%s;
 for(var name in %s){
 	eproto.register(name, %s[name]);
-};
+}
 ]]
 	local js_file = name..".js"
 	local js_buf = string.format(js_temp, name, json_buf, name, name)
