@@ -8,23 +8,18 @@ var eproto = {
 		return msgpack.encode(tab);
 	},
 	unpack: function(buf){
+		if(buf instanceof ArrayBuffer){
+			buf = new Uint8Array(buf);
+		}
 		return msgpack.decode(buf);
 	},
 	encode: function(name, tab){
-		try{
-			var arr = this.copyArr(name, tab);
-			return msgpack.encode(arr);
-		}catch(e){
-			throw e;
-		}
+        var arr = this.copyArr(name, tab);
+        return this.pack(arr);
 	},
-	decode: function(name, data){
-		try{
-			var arr = msgpack.decode(data);
-			return this.copyTable(name, arr);
-		}catch(e){
-			throw e;
-		}
+	decode: function(name, buf){
+        var arr = this.unpack(buf);
+        return this.copyTable(name, arr);
 	},
 	copyArr: function(name, tab){
 		var info = this.infos[name];
