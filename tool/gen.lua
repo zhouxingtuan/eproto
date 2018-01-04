@@ -18,6 +18,7 @@ path = string.match(path, "^.*\\") -- 捕获最后一个 "/" 之前的部分�
 print("dir=", path)
 path = path or "./"
 package.path = package.path..";"..path.."?.lua;"
+package.path = package.path..";"..path.."tool/?.lua;"
 
 local file = args[1]
 local print_flag = args[2]
