@@ -68,7 +68,8 @@ function parser:parseFile(file, save_file, print_flag)
     -- first 3 byte is something magic
     local pos = string.find(data, "package")
     print("package pos", pos)
-    if pos and pos > 4 then
+    if pos and pos >= 4 then
+		print("current sub 4 bytes from head")
         data = string.sub(data, 4, #data)
     end
 --    local b,e  = string.find(data, "package")
