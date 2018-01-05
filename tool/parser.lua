@@ -400,7 +400,9 @@ function parser:getFullName(name, skipTop)
 end
 function parser:splitEmptyMark(lines)
     local linesArr = {}
-    for _,line in ipairs(lines) do
+    for _,info in ipairs(lines) do
+        local line = info[1]
+        local desc = info[2]
         line = string.gsub(line, "<", " ")
         line = string.gsub(line, ">", " ")
         line = string.gsub(line, ",", " ")
@@ -409,6 +411,7 @@ function parser:splitEmptyMark(lines)
             for k,v in ipairs(arr) do
                 arr[k] = util.trim(v)
             end
+            table.insert(arr, desc)
             table.insert(linesArr, arr)
         end
     end
@@ -441,7 +444,9 @@ function parser:splitLines(data)
         local line = arr[k]
         -- find // and remove every thing after that
         local b,e = string.find(line, "//")
+        local desc
         if b then
+            desc = string.sub(line, e+1, #line)
             line = string.sub(line, 1, b-1)
         end
         line = string.gsub(line, "=", "")
@@ -451,16 +456,16 @@ function parser:splitLines(data)
             local la = find_mark_split(line, "{")
             if #la > 0 then
                 for _,s in ipairs(la) do
-                    table.insert(lines, s)
+                    table.insert(lines, {s, desc})
                 end
             else
                 local la = find_mark_split(line, "}")
                 if #la > 0 then
                     for _,s in ipairs(la) do
-                        table.insert(lines, s)
+                        table.insert(lines, {s, desc})
                     end
                 else
-                    table.insert(lines, line)
+                    table.insert(lines, {line, desc})
                 end
             end
         end
