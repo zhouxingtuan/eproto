@@ -625,8 +625,10 @@ static int ep_pack_api(lua_State *L){
 		return 1;
 	}else{
 		fprintf(stderr, "eproto pack error = %d\n", pwb->getError());
+		lua_pushnil(L);
+		lua_pushnumber(L, (lua_Number)pwb->getError());
 	}
-    return 0;
+    return 2;
 }
 static int ep_unpack_api(lua_State *L){
     size_t len;
@@ -653,7 +655,8 @@ static int ep_unpack_api(lua_State *L){
         lua_pushnumber(L, rb.offset);
         return 2;
     } else{
-        lua_pushnil(L);
+//        lua_pushnil(L);
+        lua_pushnumber(L, rb.err);
         lua_pushnil(L);
         lua_replace(L,-3);
         fprintf(stderr, "unpack api error=%d\n", rb.err);
@@ -762,6 +765,8 @@ static int ep_register_api(lua_State *L){
 			return 1;
 		}
 		std::string path = lua_tostring(L, key_index);   // -2:key
+		// generate the proto first: if the proto is empty, bug will happened
+		ps->pManager->registerProto(path);
 		// register element
 		if( !ep_register_element_array(ps, L, path) ){        // -1:value
 			lua_pushboolean(L, 0);
@@ -1213,8 +1218,10 @@ static int ep_encode_api(lua_State *L){
 		return 1;
 	}else{
 		fprintf(stderr, "eproto encode error = %d\n", pwb->getError());
+        lua_pushnil(L);
+        lua_pushnumber(L, (lua_Number)pwb->getError());
 	}
-    return 0;
+    return 2;
 }
 
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec);
@@ -1515,7 +1522,8 @@ static int ep_decode_api(lua_State *L){
         lua_pushnumber(L, rb.offset);
         return 2;
     } else{
-        lua_pushnil(L);
+//        lua_pushnil(L);
+        lua_pushnumber(L, rb.err);
         lua_pushnil(L);
         lua_replace(L,-3);
         fprintf(stderr, "decode api error=%d\n", rb.err);
