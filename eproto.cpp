@@ -1098,6 +1098,10 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 			break;
 		}
 		}
+		if(pwb->getError()){
+			fprintf(stderr, "encode proto element failed\n");
+			return;
+		}
         lua_pop(L,1); // remove value and keep key for next iteration
     }
 }
