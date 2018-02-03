@@ -295,6 +295,7 @@ inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
     for(i=0;i<maplen;i++){
         ep_unpack_anytype(prb, L); // key
         ep_unpack_anytype(prb, L); // value
+        if(prb->getError()) break;
         lua_rawset(L,-3);
     }
 }
@@ -1367,6 +1368,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
 	lua_createtable(L, arylen, 0);
     for(size_t i=0;i<arylen;++i){
     	ep_decode_proto(ps, prb, L, protoVec);	// array element
+    	if(prb->getError()) break;
         lua_rawseti(L, -2, i+1);
     }
 }
@@ -1426,6 +1428,7 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
     for(size_t i=0;i<maplen;i++){
         ep_decode_proto_normal(prb, L, key);
         ep_decode_proto(ps, prb, L, protoVec);	// value
+        if(prb->getError()) break;
         lua_rawset(L, -3);
     }
 }
