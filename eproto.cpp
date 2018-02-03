@@ -1467,6 +1467,10 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 				return;
 			}
 		}
+		if(prb->getError()){
+			fprintf(stderr, "decode proto element failed\n");
+			return;
+		}
 		lua_rawset(L,-3);
 	}
 }
