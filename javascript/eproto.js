@@ -34,7 +34,7 @@
         },
         copyArr: function(name, tab){
             var info = this.infos[name];
-            if (info === undefined){
+            if (typeof info === "undefined"){
                 throw new Error("can not find proto "+name);
             }
             var arr = new Array(info.length);
@@ -125,7 +125,7 @@
         },
         copyTable: function(name, arr){
             var info = this.infos[name];
-            if (info === undefined){
+            if (typeof info === "undefined"){
                 throw new Error("can not find proto "+name);
             }
             var tab = {};

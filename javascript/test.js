@@ -2,6 +2,14 @@
 alert(temp.publicVar)
 temp.publicFun("Hello World!");
 
+//var value = "abc";
+var t = typeof value;
+console.log(t+" "+(t === "undefined"));
+var arr = [1,2,3,4,5];
+var v = arr[8];
+console.log((typeof v)+" v === null "+(v === null));
+
+
 var d = {
 	game_id : 100,
 	game_info : "Hello World!",
