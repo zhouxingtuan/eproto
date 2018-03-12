@@ -295,6 +295,7 @@ inline void ep_unpack_map(ReadBuffer* prb, lua_State *L, int maplen) {
     for(i=0;i<maplen;i++){
         ep_unpack_anytype(prb, L); // key
         ep_unpack_anytype(prb, L); // value
+        if(prb->getError()) break;
         lua_rawset(L,-3);
     }
 }
@@ -1098,6 +1099,10 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 			break;
 		}
 		}
+		if(pwb->getError()){
+			fprintf(stderr, "encode proto element failed\n");
+			return;
+		}
         lua_pop(L,1); // remove value and keep key for next iteration
     }
 }
@@ -1363,6 +1368,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
 	lua_createtable(L, arylen, 0);
     for(size_t i=0;i<arylen;++i){
     	ep_decode_proto(ps, prb, L, protoVec);	// array element
+    	if(prb->getError()) break;
         lua_rawseti(L, -2, i+1);
     }
 }
@@ -1422,6 +1428,7 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
     for(size_t i=0;i<maplen;i++){
         ep_decode_proto_normal(prb, L, key);
         ep_decode_proto(ps, prb, L, protoVec);	// value
+        if(prb->getError()) break;
         lua_rawset(L, -3);
     }
 }
@@ -1466,6 +1473,10 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 				fprintf(stderr, "error type in proto manager\n");
 				return;
 			}
+		}
+		if(prb->getError()){
+			fprintf(stderr, "decode proto element failed\n");
+			return;
 		}
 		lua_rawset(L,-3);
 	}
