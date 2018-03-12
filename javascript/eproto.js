@@ -39,7 +39,7 @@
             }
             var arr = new Array(info.length);
             // 获取info中的所以数据，保存到数组中
-            for(var i=0; i<info.length; ++i){
+            for(var i=0,il=info.length; i<il; ++i){
                 var key = info[i];  // 0type,1index,2name,3type/proto name,4map value
                 var value = tab[key[2]];
                 var t = typeof value;
@@ -80,7 +80,7 @@
                         if(t === "object"){
                             if(typeof key[3] === "string"){   // proto
                                 var a = new Array(value.length);
-                                for(var j=0; j<value.length; ++j){
+                                for(var j=0,vl=value.length; j<vl; ++j){
                                     a[j] = this.copyArr(key[3], value[j]);
                                 }
                                 arr[key[1]] = a;
@@ -129,7 +129,7 @@
                 throw new Error("can not find proto "+name);
             }
             var tab = {};
-            for(var i=0; i<info.length; ++i){
+            for(var i=0,il=info.length; i<il; ++i){
                 var key = info[i];  // 0type,1index,2name,3type/proto name,4map value
                 var value = arr[key[1]];
                 var t = typeof value;
@@ -170,7 +170,7 @@
                             var key3 = key[3];
                             if(typeof key3 === "string"){   // proto
                                 var a = new Array(value.length);
-                                for(var j=0; j<value.length; ++j){
+                                for(var j=0,vl=value.length; j<vl; ++j){
                                     a[j] = this.copyTable(key3, value[j]);
                                 }
                                 tab[key[2]] = a;
