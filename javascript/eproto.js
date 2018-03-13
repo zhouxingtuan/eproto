@@ -9,7 +9,16 @@
     }
 }(function () {
     // 私有变量或者函数定义
-
+    var msgpack;
+    if("object"==typeof exports&&"undefined"!=typeof module){
+        msgpack = require("msgpack");
+    }else{
+        if("undefined"!=typeof window){
+            msgpack = window.msgpack;
+        }else{
+            msgpack = global.msgpack;
+        }
+    }
     return {
         infos: {},
         register: function(name, info){
