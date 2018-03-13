@@ -240,31 +240,29 @@ public:
         return id;
     }
     inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int id, ProtoElementVector* pVec){
-        if(index == 0){
-            return NULL;
-        }
+//        if(index == 0){
+//            return NULL;
+//        }
         ProtoElement* pe;
-        if(index > (unsigned int)pVec->size()){
-            pVec->resize(index);
+        if(index >= (unsigned int)pVec->size()){
+            pVec->resize(index+1);
         }
         // 外部index从0开始
         pe = &((*pVec)[index]);
-        // Lua 使用的index从1开始
-        pe->set(type, index+1, name, id);
+        pe->set(type, index, name, id);
         return pe;
     }
     inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value, ProtoElementVector* pVec){
-        if(index == 0){
-            return NULL;
-        }
+//        if(index == 0){
+//            return NULL;
+//        }
         ProtoElement* pe;
-        if(index > (unsigned int)pVec->size()){
-            pVec->resize(index);
+        if(index >= (unsigned int)pVec->size()){
+            pVec->resize(index+1);
         }
         // 外部index从0开始
         pe = &((*pVec)[index]);
-        // Lua 使用的index从1开始
-        pe->set(type, index+1, name, key, value);
+        pe->set(type, index, name, key, value);
         return pe;
     }
     // 数据类型是 message
