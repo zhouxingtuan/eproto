@@ -112,16 +112,16 @@ local ep_type_map = 7
 local ep_type_message = 8
 local reg_info = {
 	HelloWorld = {
-		{ep_type_int, 1, "id", 0};
-		{ep_type_string, 2, "str", 0};
-		{ep_type_int, 3, "opt", 0};
-		{ep_type_int, 4, "time", 0};
-		{ep_type_array, 5, "addrs", "Address"};
+		{ep_type_int, 0, "id", 0};
+		{ep_type_string, 1, "str", 0};
+		{ep_type_int, 2, "opt", 0};
+		{ep_type_int, 3, "time", 0};
+		{ep_type_array, 4, "addrs", "Address"};
 	};
 	Address = {
-		{ep_type_string, 1, "addr", 0};
-		{ep_type_int, 2, "num", 0};
-		{ep_type_string, 3, "phone", 0};
+		{ep_type_string, 0, "addr", 0};
+		{ep_type_int, 1, "num", 0};
+		{ep_type_string, 2, "phone", 0};
 	};
 }
 
