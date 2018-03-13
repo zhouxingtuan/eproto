@@ -247,8 +247,10 @@ public:
         if(index > (unsigned int)pVec->size()){
             pVec->resize(index);
         }
-        pe = &((*pVec)[index-1]);
-        pe->set(type, index, name, id);
+        // 外部index从0开始
+        pe = &((*pVec)[index]);
+        // Lua 使用的index从1开始
+        pe->set(type, index+1, name, id);
         return pe;
     }
     inline ProtoElement* setElement(unsigned int type, unsigned int index, const std::string& name, unsigned int key, unsigned int value, ProtoElementVector* pVec){
@@ -259,8 +261,10 @@ public:
         if(index > (unsigned int)pVec->size()){
             pVec->resize(index);
         }
-        pe = &((*pVec)[index-1]);
-        pe->set(type, index, name, key, value);
+        // 外部index从0开始
+        pe = &((*pVec)[index]);
+        // Lua 使用的index从1开始
+        pe->set(type, index+1, name, key, value);
         return pe;
     }
     // 数据类型是 message

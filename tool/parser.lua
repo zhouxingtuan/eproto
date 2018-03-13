@@ -315,6 +315,8 @@ function parser:pushEnum(key, value)
     table.insert(info.elements, param)
 end
 function parser:pushElement(data_type, index, name, key, value)
+    -- todo index 为了适配，需要全部从0开始
+    index = index - 1
     local info = self:topMessage()
     -- check data
     if info.name_hash[name] ~= nil then
