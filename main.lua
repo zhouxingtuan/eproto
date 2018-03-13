@@ -145,7 +145,5 @@ end
 print("decode length", len)
 print("count", count, "decode cost", os.clock() - t1)
 
-
-
-
---dump(dt)
+dump(data)
+dump(dt)
