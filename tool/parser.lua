@@ -94,6 +94,16 @@ function parser:parseFile(file, save_file, print_flag)
 !function(t){
     t();
 }(function () {
+    var eproto;
+    if("object"==typeof exports&&"undefined"!=typeof module){
+        eproto = require("eproto");
+    }else{
+        if("undefined"!=typeof window){
+            eproto = window.eproto;
+        }else{
+            eproto = global.eproto;
+        }
+    }
     var %s=%s;
     for(var name in %s){
         eproto.register(name, %s[name]);
