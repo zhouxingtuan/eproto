@@ -27,6 +27,7 @@ typedef enum DataType
     ep_type_float,
     ep_type_int,
     ep_type_string,
+    ep_type_bytes,
     ep_type_array,
     ep_type_map,
     ep_type_message,

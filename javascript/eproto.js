@@ -96,7 +96,15 @@ function copyArray(name, tab){
                 }
                 break;
             }
-            case 6:{    // ep_type_array
+            case 6:{
+                if(_isUint8Array(value)){
+                    arr[key[1]] = value;
+                }else{
+                    throw new Error("type error string in proto "+name+" "+key[2]+" get "+t);
+                }
+                break;
+            }
+            case 7:{    // ep_type_array
                 if(t === "object"){
                     if(typeof key[3] === "string"){   // proto
                         var a = new Array(value.length);
@@ -112,7 +120,7 @@ function copyArray(name, tab){
                 }
                 break;
             }
-            case 7:{    // ep_type_map
+            case 8:{    // ep_type_map
                 if(t === "object"){
                     if(typeof key[4] === "string"){   // proto
                         var a = {};
@@ -128,7 +136,7 @@ function copyArray(name, tab){
                 }
                 break;
             }
-            case 8:{    // ep_type_message
+            case 9:{    // ep_type_message
                 if(t === "object"){
 				    arr[key[1]] = copyArray(key[3], value);
 				}else{
@@ -186,7 +194,15 @@ function copyTable(name, arr){
                 }
                 break;
             }
-            case 6:{    // ep_type_array
+            case 6:{
+                if(_isUint8Array(value)){
+                    tab[key[2]] = value;
+                }else{
+                    throw new Error("type error string in proto "+name+" "+key[2]+" get "+t);
+                }
+                break;
+            }
+            case 7:{    // ep_type_array
                 if(t === "object"){
                     var key3 = key[3];
                     if(typeof key3 === "string"){   // proto
@@ -203,7 +219,7 @@ function copyTable(name, arr){
                  }
                 break;
             }
-            case 7:{    // ep_type_map
+            case 8:{    // ep_type_map
                 if(t === "object"){
                     var key4 = key[4];
                     if(typeof key4 === "string"){   // proto
@@ -220,7 +236,7 @@ function copyTable(name, arr){
                  }
                 break;
             }
-            case 8:{    // ep_type_message
+            case 9:{    // ep_type_message
                 if(t === "object"){
                      tab[key[2]] = copyTable(key[3], value);
                  }else{

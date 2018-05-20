@@ -11,9 +11,10 @@ local ep_type_bool = 2
 local ep_type_float = 3
 local ep_type_int = 4
 local ep_type_string = 5
-local ep_type_array = 6
-local ep_type_map = 7
-local ep_type_message = 8
+local ep_type_bytes = 6
+local ep_type_array = 7
+local ep_type_map = 8
+local ep_type_message = 9
 
 local protobuf_to_eproto = {
     double = ep_type_float;
@@ -30,7 +31,7 @@ local protobuf_to_eproto = {
     sfixed64 = ep_type_int;
     bool = ep_type_bool;
     string = ep_type_string;
-    bytes = ep_type_string;
+    bytes = ep_type_bytes;
 }
 
 local print = print
@@ -48,8 +49,9 @@ local json = require("json")
 
 local parser = class("parser")
 
-function parser:ctor(path)
+function parser:ctor(path, route)
     self.m_path = path
+    self.m_route = route
     self.m_package = nil
     self.m_error_code = nil
     self.m_message_stack = {}
@@ -94,16 +96,7 @@ function parser:parseFile(file, save_file, print_flag)
 !function(t){
     t();
 }(function () {
-    var eproto;
-    if("object"==typeof exports&&"undefined"!=typeof module){
-        eproto = require("eproto");
-    }else{
-        if("undefined"!=typeof window){
-            eproto = window.eproto;
-        }else{
-            eproto = global.eproto;
-        }
-    }
+    var eproto = importModule("eproto");
     var %s=%s;
     for(var name in %s){
         eproto.register(name, %s[name]);
@@ -501,7 +494,12 @@ function parser:findPackage(linesArr)
     print("can not find package name")
 end
 function parser:setFileData(file, buf)
-    local file_path = self.m_path.."/"..file
+    local file_path
+    if self.m_route then
+        file_path = self.m_path.."/"..self.m_route.."/"..file
+    else
+        file_path = self.m_path.."/"..file
+    end
     print("set file data", file_path)
     local f = io.open(file_path, "wb")
     f:write(buf)
