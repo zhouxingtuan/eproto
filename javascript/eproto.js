@@ -275,7 +275,12 @@ function eprotounpack(data) { // @param BinaryString/ByteArray:
                                //       undefined is error return
     //  [1][String to mix]    eproto.unpack("...") -> {}
     //  [2][ByteArray to mix] eproto.unpack([...]) -> {}
-    _buf = typeof data === "string" ? toByteArray(data) : toUint8Array(data);
+    if(typeof data === "string"){
+        _buf = toByteArray(data);
+        _buf = byteArrayToUint8Array(_buf);
+    }else{
+        _buf = toUint8Array(data);
+    }
     _idx = -1;
     return decode(); // mix or undefined
 }
