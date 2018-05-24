@@ -63,7 +63,7 @@ function copyArray(name, tab){
         var key = info[i];  // 0type,1index,2name,3type/proto name,4map value
         var value = tab[key[2]];
         var t = typeof value;
-        if(t === "undefined"){
+        if(t === "undefined" || value === null){
             arr[key[1]] = null;
             continue;
         }
@@ -96,7 +96,7 @@ function copyArray(name, tab){
                 }
                 break;
             }
-            case 6:{
+            case 6:{    // ep_type_bytes
                 if(_isUint8Array(value)){
                     arr[key[1]] = value;
                 }else{
@@ -154,7 +154,7 @@ function copyArray(name, tab){
 
 function copyTable(name, arr){
     var info = _proto[name];
-    if (typeof info === "undefined"){
+    if (typeof info === "undefined" || info === null){
         throw new Error("can not find proto "+name);
     }
     var tab = {};
@@ -194,7 +194,7 @@ function copyTable(name, arr){
                 }
                 break;
             }
-            case 6:{
+            case 6:{    // ep_type_bytes
                 if(_isUint8Array(value)){
                     tab[key[2]] = value;
                 }else{
