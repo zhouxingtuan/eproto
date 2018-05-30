@@ -34,6 +34,8 @@ local protobuf_to_csharp = {
     bytes = "byte[]";
 }
 
+local prettyStep = "    "
+
 local print = print
 local io = io
 local table = table
@@ -90,7 +92,7 @@ namespace %s
 ]]
     end
     local classCode = ""
-    local prettyShow = "    "
+    local prettyShow = prettyStep
     for className,classInfo in pairs(childMap) do
         classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow)
     end
@@ -118,7 +120,7 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow)
 %s
 %s}
 ]]
-    local nextPrettyShow = prettyShow.."    "
+    local nextPrettyShow = prettyShow..prettyStep
     local subClasses = ""
     for name,info in pairs(childMap) do
         subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow)
