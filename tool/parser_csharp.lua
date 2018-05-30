@@ -38,6 +38,7 @@ function parser_csharp:genCode()
     local namespaceMap,defaultNSMap = self:splitNamespace()
     dump(namespaceMap)
     dump(defaultNSMap)
+    return ""
 end
 function parser_csharp:splitNamespace()
     local m_packageName = self.m_packageName
