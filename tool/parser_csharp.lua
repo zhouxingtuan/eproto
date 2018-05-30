@@ -90,33 +90,73 @@ namespace %s
 ]]
     end
     local classCode = ""
+    local prettyShow = "    "
     for className,classInfo in pairs(childMap) do
-        classCode = classCode .. self:genClass(className, classInfo.childMap)
+        classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow)
     end
     local code = string.format(template, namespace, classCode)
     return code
 end
-function parser_csharp:genClass(className, childMap)
+function parser_csharp:genClass(className, elementArray, childMap, prettyShow)
+    --[[
+    -- subClasses
+    -- params
+    -- MaxLength
+    -- Encode
+    -- Decode
+    -- ToString
+    -- ]]
+    local template = [[
+
+%sclass %s
+%s{
+%s
+%s
+%s
+%s
+%s
+%s
+%s}
+]]
+    local nextPrettyShow = prettyShow.."    "
+    local subClasses = ""
+    for name,info in pairs(childMap) do
+        subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow)
+    end
+    local params = self:genParams(elementArray, nextPrettyShow)
+    local MaxLength = self:genMaxLength(elementArray, nextPrettyShow)
+    local Encode = self:genEncode(elementArray, nextPrettyShow)
+    local Decode = self:genDecode(elementArray, nextPrettyShow)
+    local ToString = self:genToString(elementArray, nextPrettyShow)
+    local classCode = string.format(template,
+        prettyShow, className,
+        prettyShow,
+        subClasses,
+        params,
+        MaxLength,
+        Encode,
+        Decode,
+        ToString,
+        prettyShow)
+    return classCode
+end
+function parser_csharp:genParams(elementArray, prettyShow)
 
     return ""
 end
-function parser_csharp:genParams()
+function parser_csharp:genMaxLength(elementArray, prettyShow)
 
     return ""
 end
-function parser_csharp:genMaxLength()
+function parser_csharp:genEncode(elementArray, prettyShow)
 
     return ""
 end
-function parser_csharp:genEncode()
+function parser_csharp:genDecode(elementArray, prettyShow)
 
     return ""
 end
-function parser_csharp:genDecode()
-
-    return ""
-end
-function parser_csharp:genToString()
+function parser_csharp:genToString(elementArray, prettyShow)
 
     return ""
 end

@@ -6,4 +6,34 @@ using Erpc;
 namespace test
 {
 
+    class request
+    {
+
+        class inner
+        {
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+    }
+
+    class response
+    {
+
+
+
+
+
+
+    }
+
 }
