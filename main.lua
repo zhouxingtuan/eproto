@@ -107,9 +107,10 @@ local ep_type_bool = 2
 local ep_type_float = 3
 local ep_type_int = 4
 local ep_type_string = 5
-local ep_type_array = 6
-local ep_type_map = 7
-local ep_type_message = 8
+local ep_type_bytes = 6
+local ep_type_array = 7
+local ep_type_map = 8
+local ep_type_message = 9
 local reg_info = {
 	HelloWorld = {
 		{ep_type_int, 0, "id", 0};
