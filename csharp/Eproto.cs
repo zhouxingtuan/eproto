@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace erpc
+namespace Erpc
 {
     class WriteBuffer
     {

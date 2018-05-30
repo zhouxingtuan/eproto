@@ -47,9 +47,8 @@ local dump = require("dump")
 
 local parser_csharp = class("parser_csharp")
 
-function parser_csharp:ctor(packageName, protos, full_path_info)
+function parser_csharp:ctor(packageName, full_path_info)
     self.m_packageName = packageName
-    self.m_protos = protos
     self.m_full_path_info = full_path_info
 end
 
@@ -57,34 +56,101 @@ function parser_csharp:genCode()
     local namespaceMap,defaultNSMap = self:splitNamespace()
     dump(namespaceMap)
     dump(defaultNSMap)
+    local code = [[
+using System;
+using System.Text;
+using System.Collections.Generic;
+using Erpc;
+
+]]
+    if next(defaultNSMap.childMap) then
+        code = code .. self:genNamespace(nil, defaultNSMap.childMap)
+    else
+        for namespace,info in pairs(namespaceMap) do
+            code = code .. self:genNamespace(namespace, info.childMap)
+        end
+    end
+    return code
+end
+
+function parser_csharp:genNamespace(namespace, childMap)
+    local template
+    if namespace == nil then
+        template = [[
+%s
+%s
+]]
+        namespace = "\n"
+    else
+        template = [[
+namespace %s
+{
+%s
+}
+]]
+    end
+    local classCode = ""
+    for className,classInfo in pairs(childMap) do
+        classCode = classCode .. self:genClass(className, classInfo.childMap)
+    end
+    local code = string.format(template, namespace, classCode)
+    return code
+end
+function parser_csharp:genClass(className, childMap)
+
     return ""
 end
+function parser_csharp:genParams()
+
+    return ""
+end
+function parser_csharp:genMaxLength()
+
+    return ""
+end
+function parser_csharp:genEncode()
+
+    return ""
+end
+function parser_csharp:genDecode()
+
+    return ""
+end
+function parser_csharp:genToString()
+
+    return ""
+end
+
 function parser_csharp:splitNamespace()
     local m_packageName = self.m_packageName
     local m_full_path_info = self.m_full_path_info
-    local protos = self.m_protos
     local namespaceMap = {}
-    local defaultNSMap = {}
-    for full_path,elementArr in pairs(protos) do
+    local defaultNSMap = {
+        childMap = {};
+    }
+    for full_path,info in pairs(m_full_path_info) do
         local arr = util.split(full_path, "%.")
         local packageName = arr[1]
         if #arr > 1 and packageName == m_packageName then
             -- 有外层namespace
             local nsMap = namespaceMap[packageName]
             if nsMap == nil then
-                nsMap = {}
+                nsMap = {
+                    childMap = {};
+                }
                 namespaceMap[packageName] = nsMap
             end
             for k=2,#arr do
                 local protoName = arr[k]
-                local pMap = nsMap[protoName]
+                local pMap = nsMap.childMap[protoName]
                 if pMap == nil then
-                    pMap = {}
-                    nsMap[protoName] = pMap
+                    pMap = {
+                        childMap = {};
+                    }
+                    nsMap.childMap[protoName] = pMap
                 end
                 if k == #arr then
-                    pMap._elementArr = elementArr
-                    pMap._rawElements = m_full_path_info[full_path].raw_elements
+                    pMap.elementArray = info.raw_elements
                 end
                 nsMap = pMap
             end
@@ -93,14 +159,15 @@ function parser_csharp:splitNamespace()
             local nsMap = defaultNSMap
             for k=1,#arr do
                 local protoName = arr[k]
-                local pMap = nsMap[protoName]
+                local pMap = nsMap.childMap[protoName]
                 if pMap == nil then
-                    pMap = {}
-                    nsMap[protoName] = pMap
+                    pMap = {
+                        childMap = {};
+                    }
+                    nsMap.childMap[protoName] = pMap
                 end
                 if k == #arr then
-                    pMap._elementArr = elementArr
-                    pMap._rawElements = m_full_path_info[full_path].raw_elements
+                    pMap.elementArray = info.raw_elements
                 end
                 nsMap = pMap
             end

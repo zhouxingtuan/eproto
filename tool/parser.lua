@@ -109,8 +109,9 @@ function parser:parseFile(file, save_file, print_flag)
 	local js_buf = string.format(js_temp, name, json_buf, name, name)
 	self:setFileData(js_file, js_buf)
 
-	local parser_obj = parser_csharp.new(self.m_package, protos, self.m_full_path_info)
+	local parser_obj = parser_csharp.new(self.m_package, self.m_full_path_info)
 	local cs_buf = parser_obj:genCode()
+	print("csharp code:\n"..cs_buf)
 	local cs_file = name..".cs"
 	self:setFileData(cs_file, cs_buf)
 
@@ -338,7 +339,7 @@ function parser:pushElement(data_type, index, name, key, value, raw_type, raw_ke
 	info.name_hash[name] = param
 	info.index_hash[index] = param
 	table.insert(info.elements, param)
-	table.insert(info.raw_elements, {raw_type, raw_key, raw_value})
+	table.insert(info.raw_elements, {name, raw_type, raw_key, raw_value})
 end
 function parser:pushMessage(name, type)
 	local info = {
