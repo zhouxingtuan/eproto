@@ -16,10 +16,22 @@ local ep_type_array = 7
 local ep_type_map = 8
 local ep_type_message = 9
 
-local eproto_to_scharp = {
-    ep_type_bool = "bool";
-    ep_type_float = "double";
-    ep_type_int = "int";
+local protobuf_to_csharp = {
+    double = "double";
+    float = "float";
+    int32 = "int";
+    int64 = "long";
+    uint32 = "uint";
+    uint64 = "ulong";
+    sint32 = "int";
+    sint64 = "long";
+    fixed32 = "uint";
+    fixed64 = "ulong";
+    sfixed32 = "int";
+    sfixed64 = "long";
+    bool = "bool";
+    string = "string";
+    bytes = "byte[]";
 }
 
 local print = print
