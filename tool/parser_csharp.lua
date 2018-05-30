@@ -16,6 +16,12 @@ local ep_type_array = 7
 local ep_type_map = 8
 local ep_type_message = 9
 
+local eproto_to_scharp = {
+    ep_type_bool = "bool";
+    ep_type_float = "double";
+    ep_type_int = "int";
+}
+
 local print = print
 local io = io
 local table = table
@@ -29,9 +35,10 @@ local dump = require("dump")
 
 local parser_csharp = class("parser_csharp")
 
-function parser_csharp:ctor(packageName, protos)
+function parser_csharp:ctor(packageName, protos, full_path_info)
     self.m_packageName = packageName
     self.m_protos = protos
+    self.m_full_path_info = full_path_info
 end
 
 function parser_csharp:genCode()
@@ -42,11 +49,12 @@ function parser_csharp:genCode()
 end
 function parser_csharp:splitNamespace()
     local m_packageName = self.m_packageName
+    local m_full_path_info = self.m_full_path_info
     local protos = self.m_protos
     local namespaceMap = {}
     local defaultNSMap = {}
-    for root_name,protoArr in pairs(protos) do
-        local arr = util.split(root_name, "%.")
+    for full_path,elementArr in pairs(protos) do
+        local arr = util.split(full_path, "%.")
         local packageName = arr[1]
         if #arr > 1 and packageName == m_packageName then
             -- 有外层namespace
@@ -63,7 +71,8 @@ function parser_csharp:splitNamespace()
                     nsMap[protoName] = pMap
                 end
                 if k == #arr then
-                    pMap.protoArr = protoArr
+                    pMap._elementArr = elementArr
+                    pMap._rawElements = m_full_path_info[full_path].raw_elements
                 end
                 nsMap = pMap
             end
@@ -78,7 +87,8 @@ function parser_csharp:splitNamespace()
                     nsMap[protoName] = pMap
                 end
                 if k == #arr then
-                    pMap.protoArr = protoArr
+                    pMap._elementArr = elementArr
+                    pMap._rawElements = m_full_path_info[full_path].raw_elements
                 end
                 nsMap = pMap
             end

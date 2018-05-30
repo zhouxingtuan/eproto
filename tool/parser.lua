@@ -58,6 +58,7 @@ function parser:ctor(path, route)
 	self.m_message_stack = {}
 	self.m_full_message = {}
 	self.m_current_message = {}
+	self.m_full_path_info = {}
 end
 
 function parser:parseFile(file, save_file, print_flag)
@@ -108,7 +109,7 @@ function parser:parseFile(file, save_file, print_flag)
 	local js_buf = string.format(js_temp, name, json_buf, name, name)
 	self:setFileData(js_file, js_buf)
 
-	local parser_obj = parser_csharp.new(self.m_package, protos)
+	local parser_obj = parser_csharp.new(self.m_package, protos, self.m_full_path_info)
 	local cs_buf = parser_obj:genCode()
 	local cs_file = name..".cs"
 	self:setFileData(cs_file, cs_buf)
@@ -226,7 +227,7 @@ function parser:checkElementSingle(arr)
 		-- the last param for normal type data
 		type_fullname = 0
 	end
-	self:pushElement(data_type, index, name, type_fullname)
+	self:pushElement(data_type, index, name, type_fullname, nil, type_name, nil)
 end
 function parser:checkElementArray(arr)
 	local info = self:topMessage()
@@ -253,7 +254,7 @@ function parser:checkElementArray(arr)
 			type_fullname = type_name
 		end
 	end
-	self:pushElement(data_type, index, name, type_fullname)
+	self:pushElement(data_type, index, name, type_fullname, nil, "array", type_name, nil)
 end
 function parser:checkElementMap(arr)
 	local info = self:topMessage()
@@ -287,7 +288,7 @@ function parser:checkElementMap(arr)
 			value = value_type
 		end
 	end
-	self:pushElement(data_type, index, name, key, value)
+	self:pushElement(data_type, index, name, key, value, "map", key_type, value_type)
 end
 function parser:pushEnum(key, value)
 	local info = self:topMessage()
@@ -313,7 +314,7 @@ function parser:pushEnum(key, value)
 	local param = {key, value}
 	table.insert(info.elements, param)
 end
-function parser:pushElement(data_type, index, name, key, value)
+function parser:pushElement(data_type, index, name, key, value, raw_type, raw_key, raw_value)
     -- todo index 为了适配，需要全部从0开始
     index = index - 1
 	local info = self:topMessage()
@@ -337,12 +338,14 @@ function parser:pushElement(data_type, index, name, key, value)
 	info.name_hash[name] = param
 	info.index_hash[index] = param
 	table.insert(info.elements, param)
+	table.insert(info.raw_elements, {raw_type, raw_key, raw_value})
 end
 function parser:pushMessage(name, type)
 	local info = {
 		type = type;
 		name = name;
 		elements = {};
+		raw_elements = {};
 		name_hash = {};
 		index_hash = {};
 		full_name = nil;
@@ -373,6 +376,7 @@ function parser:setCurrentMessage(name, info)
 		self.m_full_message[full_name] = info.elements
 	end
 	self.m_current_message[path_name] = info
+	self.m_full_path_info[full_name] = info
 end
 function parser:getCurrentMessage()
 	local full_name,path_name = self:getFullName(nil, false)
