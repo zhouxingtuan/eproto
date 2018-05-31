@@ -108,16 +108,9 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow)
     -- Decode
     -- ToString
     -- ]]
-    local template = [[
-
-%sclass %s
+    local template = [[%sclass %s
 %s{
-%s
-%s
-%s
-%s
-%s
-%s
+%s%s%s%s%s%s
 %s}
 ]]
     local nextPrettyShow = prettyShow..prettyStep
@@ -133,12 +126,7 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow)
     local classCode = string.format(template,
         prettyShow, className,
         prettyShow,
-        subClasses,
-        params,
-        MaxLength,
-        Encode,
-        Decode,
-        ToString,
+        subClasses, params, MaxLength, Encode, Decode, ToString,
         prettyShow)
     return classCode
 end

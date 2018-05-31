@@ -5,22 +5,14 @@ using Erpc;
 
 namespace test
 {
-
     class request
     {
-
         class inner
         {
-
             public int t1;
             public string t2;
 
-
-
-
-
         }
-
         public int a;
         public long b;
         public float c;
@@ -32,21 +24,11 @@ namespace test
         public int[] i;
         public inner[] j;
 
-
-
-
-
     }
-
     class response
     {
-
         public int error;
         public byte[] buffer;
-
-
-
-
 
     }
 
