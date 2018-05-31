@@ -229,6 +229,11 @@ namespace Erpc
         }
         static public void PackString(WriteBuffer wb, string str)
         {
+            if(str == null)
+            {
+                PackNil(wb);
+                return;
+            }
             long slen = str.Length;
             byte topbyte = 0;
             if (slen < 32)
