@@ -228,7 +228,7 @@ function parser:checkElementSingle(arr)
 		-- the last param for normal type data
 		type_fullname = 0
 	end
-	self:pushElement(data_type, index, name, type_fullname, nil, type_name, nil)
+	self:pushElement(data_type, index, name, type_fullname, nil, type_name, nil, nil)
 end
 function parser:checkElementArray(arr)
 	local info = self:topMessage()

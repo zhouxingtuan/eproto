@@ -143,8 +143,40 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow)
     return classCode
 end
 function parser_csharp:genParams(elementArray, prettyShow)
-
-    return ""
+    local paramCode = ""
+    for k,elementInfo in ipairs(elementArray) do
+        local name = elementInfo[1]
+        local raw_type = elementInfo[2]
+        local csharp_type = protobuf_to_csharp[raw_type]
+        if csharp_type == nil then
+            if raw_type == "array" then
+                local raw_key = elementInfo[3]
+                local key_type = protobuf_to_csharp[raw_key]
+                if key_type == nil then
+                    key_type = raw_key
+                end
+                csharp_type = key_type.."[]"
+            elseif raw_type == "map" then
+                local raw_key = elementInfo[3]
+                local raw_value = elementInfo[4]
+                local key_type = protobuf_to_csharp[raw_key]
+                if key_type == nil then
+                    key_type = raw_key
+                end
+                local value_type = protobuf_to_csharp[raw_value]
+                if value_type == nil then
+                    value_type = raw_value
+                end
+                csharp_type = "Dictionary<"..key_type..", "..value_type..">"
+            else
+                print("unsupport protobuf type to csharp type", raw_type)
+                csharp_type = raw_type
+            end
+        end
+        local lineCode = prettyShow .. "public " .. csharp_type .. " " .. name .. ";\n"
+        paramCode = paramCode .. lineCode
+    end
+    return paramCode
 end
 function parser_csharp:genMaxLength(elementArray, prettyShow)
 
