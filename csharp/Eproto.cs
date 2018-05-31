@@ -781,7 +781,7 @@ namespace Erpc
                         if (rb.Left() < 2)
                         {
                             Console.WriteLine("UnpackMap array16 length failed");
-                            return 0;
+                            return -3;
                         }
                         ReadNumber(rb.Data(), rb.Offset(), ref slen);
                         rb.MoveOffset(2);
@@ -793,7 +793,7 @@ namespace Erpc
                         if (rb.Left() < 4)
                         {
                             Console.WriteLine("UnpackMap array32 length failed");
-                            return 0;
+                            return -4;
                         }
                         ReadNumber(rb.Data(), rb.Offset(), ref slen);
                         rb.MoveOffset(4);
