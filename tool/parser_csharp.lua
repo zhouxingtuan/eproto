@@ -56,8 +56,8 @@ end
 
 function parser_csharp:genCode()
     local namespaceMap,defaultNSMap = self:splitNamespace()
-    dump(namespaceMap)
-    dump(defaultNSMap)
+--    dump(namespaceMap)
+--    dump(defaultNSMap)
     local code = [[
 using System;
 using System.Text;
@@ -157,7 +157,7 @@ function parser_csharp:genParams(elementArray, prettyShow)
                 end
                 csharp_type = "Dictionary<"..key_type..", "..value_type..">"
             else
-                print("unsupport protobuf type to csharp type", raw_type)
+--                print("unsupport protobuf type to csharp type", raw_type)
                 csharp_type = raw_type
             end
         end

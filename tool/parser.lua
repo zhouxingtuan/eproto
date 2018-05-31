@@ -111,7 +111,7 @@ function parser:parseFile(file, save_file, print_flag)
 
 	local parser_obj = parser_csharp.new(self.m_package, self.m_full_path_info)
 	local cs_buf = parser_obj:genCode()
-	print("csharp code:\n"..cs_buf)
+--	print("csharp code:\n"..cs_buf)
 	local cs_file = name..".cs"
 	self:setFileData(cs_file, cs_buf)
 
