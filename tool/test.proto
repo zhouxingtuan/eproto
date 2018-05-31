@@ -18,6 +18,8 @@ message request
     map<int32, string> h = 8;
     repeated int32 i = 9;
     repeated inner j = 10;
+    map<string, inner> k = 11;
+    map<string, bytes> l = 12;
 }
 
 message response
@@ -25,3 +27,9 @@ message response
     optional int32 error = 1;
     optional bytes buffer = 2;
 }
+
+message empty
+{
+
+}
+

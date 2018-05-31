@@ -7,6 +7,12 @@
 .DS_Store
 .idea/
 .vscode/
+.vs/
+
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 
 #
 *.so

@@ -29,10 +29,7 @@ namespace bee
             length += sizeof(int) + 1;
             length += sizeof(double) + 1;
             length += sizeof(float) + 1;
-            if (g != null)
-            {
-                length += g.Length + 5;
-            }
+            if (g != null) { length += g.Length + 5; }
             return length;
         }
         public void Encode(WriteBuffer wb)

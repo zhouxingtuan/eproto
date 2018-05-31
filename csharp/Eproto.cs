@@ -25,10 +25,6 @@ namespace Erpc
             Array.Copy(buffer, b, offset);
             return b;
         }
-        public void CheckMaxLength(int length)
-        {
-            AllocBuffer(offset + length);
-        }
         public byte[] Data()
         {
             return buffer;
@@ -39,18 +35,18 @@ namespace Erpc
         }
         public void Add(byte b)
         {
-            //AllocBuffer(offset + 1);
+            AllocBuffer(offset + 1);
             buffer[offset++] = b;
         }
         public void Add(byte b, byte v)
         {
-            //AllocBuffer(offset + 2);
+            AllocBuffer(offset + 2);
             buffer[offset++] = b;
             buffer[offset++] = v;
         }
         public void Add(byte b, byte[] v){
             int length = (int)v.Length;
-            //AllocBuffer(offset + 1 + length);
+            AllocBuffer(offset + 1 + length);
             buffer[offset++] = b;
             v.CopyTo(buffer, offset);
             offset += length;
@@ -59,7 +55,7 @@ namespace Erpc
         {
             int llength = (int)l.Length;
             int length = (int)v.Length;
-            //AllocBuffer(offset + llength + length);
+            AllocBuffer(offset + llength + length);
             buffer[offset++] = b;
             l.CopyTo(buffer, offset);
             offset += llength;
@@ -106,6 +102,14 @@ namespace Erpc
         public void MoveOffset(int len)
         {
             offset += len;
+        }
+        public bool NextIsNil()
+        {
+            return buffer[offset] == 0xc0;
+        }
+        public byte Next()
+        {
+            return buffer[offset];
         }
         public byte MoveNext()
         {
@@ -558,6 +562,7 @@ namespace Erpc
             byte t = rb.MoveNext();
             if (t == 0xc0)
             {
+                value = null;
                 return true;
             }
             if (t > 0x9f && t < 0xc0)
@@ -642,6 +647,7 @@ namespace Erpc
             byte t = rb.MoveNext();
             if (t == 0xc0)
             {
+                value = null;
                 return true;
             }
             switch (t)
@@ -714,7 +720,7 @@ namespace Erpc
             byte t = rb.MoveNext();
             if (t == 0xc0)
             {
-                return 0;
+                return -1;
             }
             if (t > 0x8f && t < 0xa0)
             {
@@ -729,7 +735,7 @@ namespace Erpc
                         if (rb.Left() < 2)
                         {
                             Console.WriteLine("UnpackArray array16 length failed");
-                            return 0;
+                            return -3;
                         }
                         ReadNumber(rb.Data(), rb.Offset(), ref slen);
                         rb.MoveOffset(2);
@@ -741,7 +747,7 @@ namespace Erpc
                         if (rb.Left() < 4)
                         {
                             Console.WriteLine("UnpackArray array32 length failed");
-                            return 0;
+                            return -4;
                         }
                         ReadNumber(rb.Data(), rb.Offset(), ref slen);
                         rb.MoveOffset(4);
@@ -753,14 +759,14 @@ namespace Erpc
                         break;
                     }
             }
-            return 0;
+            return -2;
         }
         static public long UnpackMap(ReadBuffer rb)
         {
             byte t = rb.MoveNext();
             if (t == 0xc0)
             {
-                return 0;
+                return -1;
             }
             if (t > 0x7f && t < 0x90)
             {
@@ -799,7 +805,7 @@ namespace Erpc
                         break;
                     }
             }
-            return 0;
+            return -2;
         }
         static public void UnpackDiscard(ReadBuffer rb, long count)
         {
