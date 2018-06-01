@@ -211,6 +211,7 @@ function parser:checkElementSingle(arr)
 	local data_type = protobuf_to_eproto[type_name]
 	if data_type == nil then
 		-- find current proto
+--		print("checkElementSingle")
 		local msg_info = self:findMessage(type_name)
 		if msg_info ~= nil then
 			if msg_info.type == "enum" then
@@ -221,6 +222,7 @@ function parser:checkElementSingle(arr)
 				data_type = ep_type_message
 			end
 		else
+--			print("current can not find full path", type_name)
 			type_fullname = type_name
 			data_type = ep_type_message
 		end
@@ -244,6 +246,7 @@ function parser:checkElementArray(arr)
 	local type_fullname = protobuf_to_eproto[type_name]
 	if type_fullname == nil then
 		-- find current proto
+--		print("checkElementArray")
 		local msg_info = self:findMessage(type_name)
 		if msg_info ~= nil then
 			if msg_info.type == "enum" then
@@ -278,6 +281,7 @@ function parser:checkElementMap(arr)
 	local value = protobuf_to_eproto[value_type]
 	if value == nil then
 		-- find current proto
+--		print("checkElementMap")
 		local msg_info = self:findMessage(value_type)
 		if msg_info ~= nil then
 			if msg_info.type == "enum" then
@@ -370,7 +374,7 @@ function parser:topMessage()
 	return m_message_stack[#m_message_stack]
 end
 function parser:setCurrentMessage(name, info)
-	local full_name,path_name = self:getFullName(name, false)
+	local full_name,path_name = self:getFullName(name, nil)
 	info.full_name = full_name
 	info.path_name = path_name
 	if info.type == "message" then
@@ -380,30 +384,42 @@ function parser:setCurrentMessage(name, info)
 	self.m_full_path_info[full_name] = info
 end
 function parser:getCurrentMessage()
-	local full_name,path_name = self:getFullName(nil, false)
+	local full_name,path_name = self:getFullName(nil, nil)
 	return self.m_current_message[path_name]
 end
 function parser:getFullMessage()
-	local full_name,path_name = self:getFullName(nil, false)
+	local full_name,path_name = self:getFullName(nil, nil)
 	return self.m_full_message[full_name]
 end
 function parser:findMessage(name)
-	local full_name,path_name = self:getFullName(name, true)
-	return self.m_current_message[path_name]
+	local m_current_message = self.m_current_message
+	local m_message_stack = self.m_message_stack
+	for k=1,#m_message_stack + 1 do
+		local full_name,path_name = self:getFullName(name, k - 1)
+		local info = m_current_message[path_name]
+		if info then
+--			print("find info for", name)
+			return info
+		else
+--			print("info not found", name, k, #m_message_stack)
+		end
+	end
 end
 function parser:getFullName(name, skipTop)
 	local arr = {}
 	local m_message_stack = self.m_message_stack
 	local stop_index = #m_message_stack
 	if skipTop then
-		stop_index = stop_index - 1
+		stop_index = stop_index - skipTop
 	end
+--	print("#m_message_stack", #m_message_stack, "stop_index", stop_index, "skipTop", skipTop)
 	for k=1,stop_index do
 		table.insert(arr, m_message_stack[k].name)
 	end
 	if name and name ~= "" then
 		table.insert(arr, name)
 	end
+--	print("#arr", #arr)
 	local path_name
 	if #arr > 1 then
 		path_name = table.concat(arr, ".")
@@ -416,6 +432,7 @@ function parser:getFullName(name, skipTop)
 	else
 		full_name = path_name
 	end
+--	print("name", name, "full_name", full_name, "path_name", path_name)
 	return full_name,path_name
 end
 function parser:splitEmptyMark(lines)
