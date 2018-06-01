@@ -215,17 +215,13 @@ namespace Erpc
                 }
             }
         }
+        static public void PackDouble(WriteBuffer wb, float value)
+        {
+            wb.Add(0xca, ReverseBytes(value));
+        }
         static public void PackDouble(WriteBuffer wb, double value)
         {
-            float f = (float)value;
-            if ((double)f == value)
-            {
-                wb.Add(0xca, ReverseBytes(f));
-            }
-            else
-            {
-                wb.Add(0xcb, ReverseBytes(value));
-            }
+            wb.Add(0xcb, ReverseBytes(value));
         }
         static public void PackString(WriteBuffer wb, string str)
         {

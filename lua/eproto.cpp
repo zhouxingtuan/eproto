@@ -90,12 +90,15 @@ inline void ep_pack_int(WriteBuffer* pwb, long long lv){
 	}
 }
 inline void ep_pack_float(WriteBuffer* pwb, lua_Number n){
-	float f = (float)n;
-	if((double)f == n){
-		pwb->radd(0xca, (unsigned char*)&f, 4);
-	}else{
-		pwb->radd(0xcb, (unsigned char*)&n, 8);
-	}
+//	float f = (float)n;
+//	if(n - (double)f > 0.0000001){
+//		// double
+//		pwb->radd(0xcb, (unsigned char*)&n, 8);
+//	}else{
+//		// float
+//		pwb->radd(0xca, (unsigned char*)&f, 4);
+//	}
+	pwb->radd(0xcb, (unsigned char*)&n, 8);
 }
 inline void ep_pack_string(WriteBuffer* pwb, const unsigned char *sval, size_t slen){
     unsigned char topbyte = 0;

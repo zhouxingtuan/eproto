@@ -34,7 +34,8 @@ namespace bee
                 req.j[i].t1 = 77;
                 req.j[i].t2 = "w";
             }
-
+            wb.Clear();
+            req.Encode(wb);
             DateTime time1 = DateTime.Now;
             Console.WriteLine("start " + time1.ToString("yyyy-MM-dd HH:mm:ss.fff"));
             for (int i = 0; i < count; ++i)
