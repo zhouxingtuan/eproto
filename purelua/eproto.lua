@@ -587,17 +587,10 @@ local function cursor_string (str)
         s = str,
         i = 1,
         j = #str,
-        underflow = function ()
-            error "missing bytes"
-        end,
     }
 end
 local function unpack_cursor (c)
     local s, i, j = c.s, c.i, c.j
-    if i > j then
-        c:underflow(i)
-        s, i, j = c.s, c.i, c.j
-    end
     local val = s:sub(i, i):byte()
     c.i = i+1
     return unpackers[val](c, val)
@@ -605,11 +598,6 @@ end
 local function unpack_str (c, n)
     local s, i, j = c.s, c.i, c.j
     local e = i+n-1
-    if e > j or n < 0 then
-        c:underflow(e)
-        s, i, j = c.s, c.i, c.j
-        e = i+n-1
-    end
     c.i = i+n
     return s:sub(i, e)
 end
@@ -636,10 +624,6 @@ local function unpack_map (c, n)
 end
 local function unpack_float (c)
     local s, i, j = c.s, c.i, c.j
-    if i+3 > j then
-        c:underflow(i+3)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4 = s:sub(i, i+3):byte(1, 4)
     local sign = b1 > 0x7F
     local expo = (b1 % 0x80) * 0x2 + floor(b2 / 0x80)
@@ -666,10 +650,6 @@ local function unpack_float (c)
 end
 local function unpack_double (c)
     local s, i, j = c.s, c.i, c.j
-    if i+7 > j then
-        c:underflow(i+7)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4, b5, b6, b7, b8 = s:sub(i, i+7):byte(1, 8)
 
 --    local s = string.char(b8,b7,b6,b5,b4,b3,b2,b1)
@@ -702,50 +682,30 @@ local function unpack_double (c)
 end
 local function unpack_uint8 (c)
     local s, i, j = c.s, c.i, c.j
-    if i > j then
-        c:underflow(i)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1 = s:sub(i, i):byte()
     c.i = i+1
     return b1
 end
 local function unpack_uint16 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+1 > j then
-        c:underflow(i+1)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2 = s:sub(i, i+1):byte(1, 2)
     c.i = i+2
     return b1 * 0x100 + b2
 end
 local function unpack_uint32 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+3 > j then
-        c:underflow(i+3)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4 = s:sub(i, i+3):byte(1, 4)
     c.i = i+4
     return ((b1 * 0x100 + b2) * 0x100 + b3) * 0x100 + b4
 end
 local function unpack_uint64 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+7 > j then
-        c:underflow(i+7)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4, b5, b6, b7, b8 = s:sub(i, i+7):byte(1, 8)
     c.i = i+8
     return ((((((b1 * 0x100 + b2) * 0x100 + b3) * 0x100 + b4) * 0x100 + b5) * 0x100 + b6) * 0x100 + b7) * 0x100 + b8
 end
 local function unpack_int8 (c)
     local s, i, j = c.s, c.i, c.j
-    if i > j then
-        c:underflow(i)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1 = s:sub(i, i):byte()
     c.i = i+1
     if b1 < 0x80 then
@@ -756,10 +716,6 @@ local function unpack_int8 (c)
 end
 local function unpack_int16 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+1 > j then
-        c:underflow(i+1)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2 = s:sub(i, i+1):byte(1, 2)
     c.i = i+2
     if b1 < 0x80 then
@@ -770,10 +726,6 @@ local function unpack_int16 (c)
 end
 local function unpack_int32 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+3 > j then
-        c:underflow(i+3)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4 = s:sub(i, i+3):byte(1, 4)
     c.i = i+4
     if b1 < 0x80 then
@@ -784,10 +736,6 @@ local function unpack_int32 (c)
 end
 local function unpack_int64 (c)
     local s, i, j = c.s, c.i, c.j
-    if i+7 > j then
-        c:underflow(i+7)
-        s, i, j = c.s, c.i, c.j
-    end
     local b1, b2, b3, b4, b5, b6, b7, b8 = s:sub(i, i+7):byte(1, 8)
     c.i = i+8
     if b1 < 0x80 then
@@ -799,13 +747,7 @@ end
 local function unpack_ext (c, n, tag)
     local s, i, j = c.s, c.i, c.j
     local e = i+n-1
-    if e > j or n < 0 then
-        c:underflow(e)
-        s, i, j = c.s, c.i, c.j
-        e = i+n-1
-    end
     c.i = i+n
-    return m.build_ext(tag, s:sub(i, e))
 end
 unpackers = setmetatable({
     [0xC0] = function () return nil end,
@@ -867,6 +809,10 @@ local ep_encode_proto_normal
 local ep_encode_proto_normal_array
 local ep_count_map
 local ep_copy_table
+local ep_decode_head
+local ep_decode_array_head
+local ep_decode_map_head
+local ep_decode_proto
 
 ep_encode_proto_normal = function(buffer, ep_type, value)
     if ep_type == ep_type_bool then
@@ -921,10 +867,10 @@ ep_encode_proto = function(buffer, root, data)
         return
     end
     local infoData = protos[root]
-    local infoMap = infoData.map
-    local max_index = infoData.max
-    pack_array_head(buffer, max_index)
-    for k=1,max_index do
+    local infoMap = infoData.infoMap
+    local maxIndex = infoData.maxIndex
+    pack_array_head(buffer, maxIndex)
+    for k=1,maxIndex do
         local info = infoMap[k]
         if info == nil then
             pack_nil(buffer)
@@ -975,7 +921,7 @@ end
 ep_copy_table = function(root, dataArr)
     local tab = {}
     local infoData = protos[root]
-    local infoMap = infoData.map
+    local infoMap = infoData.infoMap
     for _,info in pairs(infoMap) do
         local ep_type = info[1]
         local index = info[2] + 1   -- index 从0开始的
@@ -1016,6 +962,116 @@ ep_copy_table = function(root, dataArr)
     end
     return tab
 end
+ep_decode_head = function(c)
+    local s, i, j = c.s, c.i, c.j
+    local val = s:sub(i, i):byte()
+    c.i = i+1
+    return val
+end
+ep_decode_array_head = function(c)
+    local val = ep_decode_head(c)
+    if val == 0xC0 then
+        return nil
+    end
+    if val > 0x8f and val < 0xa0 then
+        return val % 0x10
+    end
+    if val == 0xDC then
+        return unpack_uint16(c)
+    elseif val == 0xDD then
+        return unpack_uint32(c)
+    else
+        error("ep_decode_array_head current is not array " .. val)
+    end
+end
+ep_decode_map_head = function(c)
+    local val = ep_decode_head(c)
+    if val == 0xC0 then
+        return nil
+    end
+    if val > 0x7f and val < 0x90 then
+        return val % 0x10
+    end
+    if val == 0xDE then
+        return unpack_uint16(c)
+    elseif val == 0xDF then
+        return unpack_uint32(c)
+    else
+        error("ep_decode_array_head current is not array " .. val)
+    end
+end
+
+ep_decode_proto = function(c, root)
+    local len = ep_decode_array_head(c)
+    if len == nil then
+        return
+    end
+    local tab = {}
+    local infoData = protos[root]
+    local infoMap = infoData.infoMap
+    for index=1,len do
+        local info = infoMap[index]
+        if info == nil then
+            tab[index] = unpack_cursor(c)
+        else
+            local ep_type = info[1]
+--            local index = info[2] + 1   -- index 从0开始的
+            local name = info[3]
+            if ep_type == ep_type_array then
+                local arr_type = info[4]
+                local arr_len = ep_decode_array_head(c)
+                if arr_len == nil then
+                    -- current array is nil
+                else
+                    local arr = {}
+                    if type(arr_type) == "string" then
+                        -- proto
+                        for i=1,arr_len do
+                            local v = ep_decode_proto(c, arr_type)
+                            table.insert(arr, v)
+                        end
+                    else
+                        for i=1,arr_len do
+                            local v = unpack_cursor(c)
+                            table.insert(arr, v)
+                        end
+                    end
+                    tab[name] = arr
+                end
+            elseif ep_type == ep_type_map then
+--                local key_type = info[4]
+                local value_type = info[5]
+                local map_len = ep_decode_map_head(c)
+                if map_len == nil then
+                    -- current map is nil
+                else
+                    local map = {}
+                    if type(value_type) == "string" then
+                        -- proto
+                        for i=1,map_len do
+                            local k = unpack_cursor(c)
+                            local v = ep_decode_proto(c, value_type)
+                            map[k] = v
+                        end
+                    else
+                        for i=1,map_len do
+                            local k = unpack_cursor(c)
+                            local v = unpack_cursor(c)
+                            map[k] = v
+                        end
+                    end
+                    tab[name] = map
+                end
+            elseif ep_type == ep_type_message then
+                local proto_type = info[4]
+                tab[name] = ep_decode_proto(c, proto_type)
+            else
+                tab[name] = unpack_cursor(c)
+            end
+        end
+    end
+    return tab
+end
 
 local function pack(data)
     local buffer = {}
@@ -1030,20 +1086,20 @@ end
 local function register(buffer)
     local protoMap = unpack(buffer)
     for root,infoArr in pairs(protoMap) do
-        local map = {}
+        local infoMap = {}
         local infoData = {
-            map = map;
-            max = 0;
+            infoMap = infoMap;
+            maxIndex = 0;
         }
-        local max_index = 0
+        local maxIndex = 0
         for _,info in ipairs(infoArr) do
             local index = info[2] + 1   -- index 从0开始的
-            if index > max_index then
-                max_index = index
+            if index > maxIndex then
+                maxIndex = index
             end
-            map[index] = info
+            infoMap[index] = info
         end
-        infoData.max = max_index
+        infoData.maxIndex = maxIndex
         protos[root] = infoData
     end
 end
@@ -1059,8 +1115,10 @@ local function encode(root, data)
     return tconcat(buffer)
 end
 local function decode(root, buffer)
-    local dataArr = unpack(buffer)
-    return ep_copy_table(root, dataArr)
+    local cursor = cursor_string(buffer)
+--    local dataArr = unpack(buffer)
+--    return ep_copy_table(root, dataArr)
+    return ep_decode_proto(cursor, root)
 end
 
 eproto.encode = encode

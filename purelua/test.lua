@@ -84,7 +84,6 @@ local function testEproto()
     end
     log_debug("testEproto buffer length", #buf, "byte", str)
     local data = eproto.unpack(buf)
-    dump(data)
 
     local time1 = os.clock()
     for k=1,10000 do
@@ -98,7 +97,7 @@ local function testEproto()
     end
     local time3 = os.clock()
     log_debug("decode cost", time3 - time2)
-
+    dump(r)
 --    local arr = {   156, 100, 206, 7, 91, 205, 21, 202, 64, 73,
 --        14, 86, 203, 64, 254, 36, 12, 159, 190, 118,
 --        201, 165, 72, 101, 108, 108, 111, 196, 2, 0,
