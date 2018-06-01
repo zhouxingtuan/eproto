@@ -672,32 +672,33 @@ local function unpack_double (c)
     end
     local b1, b2, b3, b4, b5, b6, b7, b8 = s:sub(i, i+7):byte(1, 8)
 
-    local s = string.char(b8,b7,b6,b5,b4,b3,b2,b1)
-    local n = bytestodouble( s )
-    c.i = i+8
-    return n
-    --    local sign = b1 > 0x7F
---    local expo = (b1 % 0x80) * 0x10 + floor(b2 / 0x10)
---    local mant = ((((((b2 % 0x10) * 0x100 + b3) * 0x100 + b4) * 0x100 + b5) * 0x100 + b6) * 0x100 + b7) * 0x100 + b8
---    if sign then
---        sign = -1
---    else
---        sign = 1
---    end
---    local n
---    if mant == 0 and expo == 0 then
---        n = sign * 0.0
---    elseif expo == 0x7FF then
---        if mant == 0 then
---            n = sign * huge
---        else
---            n = 0.0/0.0
---        end
---    else
---        n = sign * ldexp(1.0 + mant / 4503599627370496.0, expo - 0x3FF)
---    end
+--    local s = string.char(b8,b7,b6,b5,b4,b3,b2,b1)
+--    local n = bytestodouble( s )
 --    c.i = i+8
 --    return n
+
+    local sign = b1 > 0x7F
+    local expo = (b1 % 0x80) * 0x10 + floor(b2 / 0x10)
+    local mant = ((((((b2 % 0x10) * 0x100 + b3) * 0x100 + b4) * 0x100 + b5) * 0x100 + b6) * 0x100 + b7) * 0x100 + b8
+    if sign then
+        sign = -1
+    else
+        sign = 1
+    end
+    local n
+    if mant == 0 and expo == 0 then
+        n = sign * 0.0
+    elseif expo == 0x7FF then
+        if mant == 0 then
+            n = sign * huge
+        else
+            n = 0.0/0.0
+        end
+    else
+        n = sign * ldexp(1.0 + mant / 4503599627370496.0, expo - 0x3FF)
+    end
+    c.i = i+8
+    return n
 end
 local function unpack_uint8 (c)
     local s, i, j = c.s, c.i, c.j
@@ -1059,7 +1060,6 @@ local function encode(root, data)
 end
 local function decode(root, buffer)
     local dataArr = unpack(buffer)
---    return dataArr
     return ep_copy_table(root, dataArr)
 end
 

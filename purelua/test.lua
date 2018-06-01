@@ -62,7 +62,7 @@ local function testEproto()
     local req = {}
     req.a = 100;
     req.b = 123456789;
---    req.c = 3.1415;
+    req.c = 3.1415;
     req.d = 123456.789;
     req.e = "Hello";
     req.f = string.char(0, 0);
