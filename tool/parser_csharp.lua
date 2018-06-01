@@ -56,8 +56,8 @@ end
 
 function parser_csharp:genCode()
     local namespaceMap,defaultNSMap = self:splitNamespace()
---    dump(namespaceMap)
---    dump(defaultNSMap)
+    --    dump(namespaceMap)
+    --    dump(defaultNSMap)
     local code = [[
 using System;
 using System.Text;
@@ -157,7 +157,7 @@ function parser_csharp:genParams(elementArray, prettyShow)
                 end
                 csharp_type = "Dictionary<"..key_type..", "..value_type..">"
             else
---                print("unsupport protobuf type to csharp type", raw_type)
+                --                print("unsupport protobuf type to csharp type", raw_type)
                 csharp_type = raw_type
             end
         end
@@ -174,6 +174,7 @@ function parser_csharp:genEncode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        local this_name = "this."..name
         local csharp_type = protobuf_to_csharp[raw_type]
         if csharp_type == nil then
             local nextNextPrettyShow = nextPrettyShow .. prettyStep
@@ -182,12 +183,9 @@ function parser_csharp:genEncode(elementArray, prettyShow)
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
                 local index_name = "i"
-                if index_name == name then
-                    index_name = "_i"
-                end
-                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { Eproto.PackNil(wb); } else {\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("Eproto.PackMap(wb, %s.Count);\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("foreach (var %s in %s)\n", index_name, name)
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { Eproto.PackNil(wb); } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("Eproto.PackMap(wb, %s.Count);\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("foreach (var %s in %s)\n", index_name, this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
                 local raw_key_csharp_type = protobuf_to_csharp[raw_key]
                 local raw_value_csharp_type = protobuf_to_csharp[raw_value]
@@ -212,18 +210,12 @@ function parser_csharp:genEncode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
-                local index_name = "_i_"
-                if index_name == name then
-                    index_name = "__i_"
-                end
-                local value_name = "_v_"
-                if value_name == name then
-                    value_name = "__v_"
-                end
-                local value_at_index = name.."["..index_name.."]"
-                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { Eproto.PackNil(wb); } else {\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("Eproto.PackArray(wb, %s.Length);\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.Length; ++%s)\n", index_name, index_name, name, index_name)
+                local index_name = "i"
+                local value_name = "v"
+                local value_at_index = this_name.."["..index_name.."]"
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { Eproto.PackNil(wb); } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("Eproto.PackArray(wb, %s.Length);\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.Length; ++%s)\n", index_name, index_name, this_name, index_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
                 local raw_key_csharp_type = protobuf_to_csharp[raw_key]
                 if raw_key_csharp_type == nil then
@@ -239,11 +231,11 @@ function parser_csharp:genEncode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             else
                 -- 自定义对象
-                bodyCode = bodyCode .. nextPrettyShow .. self:getPackByDefine(name)
+                bodyCode = bodyCode .. nextPrettyShow .. self:getPackByDefine(this_name)
             end
         else
             -- C#内置数据类型
-            bodyCode = bodyCode .. nextPrettyShow .. self:getPackByType(name, csharp_type)
+            bodyCode = bodyCode .. nextPrettyShow .. self:getPackByType(this_name, csharp_type)
         end
     end
     bodyCode = bodyCode .. prettyShow .. "}\n"
@@ -269,13 +261,14 @@ function parser_csharp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
     local bodyCode = prettyShow .. "public void Decode(ReadBuffer rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
-    local count_name = "_c_"
+    local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("long %s = Eproto.UnpackArray(rb);\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s <= 0) { return; }\n", count_name)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        local this_name = "this."..name
         local csharp_type = protobuf_to_csharp[raw_type]
         if csharp_type == nil then
             local nextNextPrettyShow = nextPrettyShow .. prettyStep
@@ -284,10 +277,7 @@ function parser_csharp:genDecode(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
-                local index_name = "_i_"
-                if index_name == name then
-                    index_name = "__i_"
-                end
+                local index_name = "i"
                 local raw_key_csharp_type = protobuf_to_csharp[raw_key]
                 local raw_value_csharp_type = protobuf_to_csharp[raw_value]
                 local decl_key,decl_value,decl_key_default,decl_value_default
@@ -305,46 +295,39 @@ function parser_csharp:genDecode(elementArray, prettyShow)
                 decl_value_default = self:getDefaultDeclValue(raw_value_csharp_type)
                 csharp_type = "Dictionary<"..decl_key..", "..decl_value..">"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long _n_ = Eproto.UnpackMap(rb);\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (_n_ < 0) { %s=null; } else {\n", name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", name, csharp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<_n_; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long n = Eproto.UnpackMap(rb);\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n < 0) { %s=null; } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, csharp_type)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s _k_=%s; %s _v_=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
+                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
                 if raw_key_csharp_type == nil then
                     -- 自定义对象
                     print("it's not support for self define key for Dictionary")
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("_k_", raw_key)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("k", raw_key)
                 else
                     -- C#内置数据类型
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("_k_", raw_key_csharp_type)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("k", raw_key_csharp_type)
                 end
                 if raw_value_csharp_type == nil then
                     -- 自定义对象
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("_v_", raw_value)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("v", raw_value)
                 else
                     -- C#内置数据类型
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("_v_", raw_value_csharp_type)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_value_csharp_type)
                 end
                 if raw_key_csharp_type == "string" then
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (_k_ != null) { %s[_k_] = _v_; }\n", name)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (k != null) { %s[k] = v; }\n", this_name)
                 else
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[_k_] = _v_;\n", name)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
                 end
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
-                local index_name = "_i_"
-                if index_name == name then
-                    index_name = "__i_"
-                end
-                local value_name = "_v_"
-                if value_name == name then
-                    value_name = "__v_"
-                end
-                local value_at_index = name.."["..index_name.."]"
+                local index_name = "i"
+                local value_name = "v"
                 local raw_key_csharp_type = protobuf_to_csharp[raw_key]
                 local decl_key,decl_key_default
                 if raw_key_csharp_type == nil then
@@ -352,34 +335,33 @@ function parser_csharp:genDecode(elementArray, prettyShow)
                 else
                     decl_key = raw_key_csharp_type
                 end
-                csharp_type = decl_key.."[_n_]"
+                csharp_type = decl_key.."[n]"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long _n_ = Eproto.UnpackArray(rb);\n", name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (_n_ < 0) { %s=null; } else {\n", name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", name, csharp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<_n_; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long n = Eproto.UnpackArray(rb);\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n < 0) { %s=null; } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, csharp_type)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 decl_key_default = self:getDefaultDeclValue(raw_key_csharp_type)
-                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s _v_=%s;\n", decl_key, decl_key_default)
+                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v=%s;\n", decl_key, decl_key_default)
                 if raw_key_csharp_type == nil then
                     -- 自定义对象
-
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("_v_", raw_key)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("v", raw_key)
                 else
                     -- C#内置数据类型
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("_v_", raw_key_csharp_type)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_key_csharp_type)
                 end
-                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[%s] = _v_;\n", name, index_name)
+                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[%s] = v;\n", this_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             else
                 -- 自定义对象
-                bodyCode = bodyCode .. nextPrettyShow .. self:getUnpackByDefine(name, raw_type)
+                bodyCode = bodyCode .. nextPrettyShow .. self:getUnpackByDefine(this_name, raw_type)
             end
         else
             -- C#内置数据类型
-            bodyCode = bodyCode .. nextPrettyShow .. self:getUnpackByType(name, csharp_type)
+            bodyCode = bodyCode .. nextPrettyShow .. self:getUnpackByType(this_name, csharp_type)
         end
         bodyCode = bodyCode .. count_skip
     end
