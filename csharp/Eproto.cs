@@ -148,19 +148,19 @@ namespace Erpc
         }
     }
 
-    class Eproto
+    static class Eproto
     {
         public static WriteBuffer WriteBuffer = new WriteBuffer();
-        static public WriteBuffer GetWriteBuffer()
+        public static WriteBuffer GetWriteBuffer()
         {
             return WriteBuffer;
         }
 
-        static public void PackNil(WriteBuffer wb)
+        public static void PackNil(WriteBuffer wb)
         {
             wb.Add(0xc0);
         }
-        static public void PackBool(WriteBuffer wb, bool value)
+        public static void PackBool(WriteBuffer wb, bool value)
         {
             if (value)
             {
@@ -171,7 +171,7 @@ namespace Erpc
                 wb.Add(0xc2);
             }
         }
-        static public void PackInteger(WriteBuffer wb, long value)
+        public static void PackInteger(WriteBuffer wb, long value)
         {
             if (value >= 0)
             {
@@ -215,15 +215,15 @@ namespace Erpc
                 }
             }
         }
-        static public void PackDouble(WriteBuffer wb, float value)
+        public static void PackDouble(WriteBuffer wb, float value)
         {
             wb.Add(0xca, ReverseBytes(value));
         }
-        static public void PackDouble(WriteBuffer wb, double value)
+        public static void PackDouble(WriteBuffer wb, double value)
         {
             wb.Add(0xcb, ReverseBytes(value));
         }
-        static public void PackString(WriteBuffer wb, string str)
+        public static void PackString(WriteBuffer wb, string str)
         {
             if(str == null)
             {
@@ -255,7 +255,7 @@ namespace Erpc
                 Console.WriteLine("PackString length is out of uint " + slen);
             }
         }
-        static public void PackBytes(WriteBuffer wb, byte[] buf)
+        public static void PackBytes(WriteBuffer wb, byte[] buf)
         {
             if(buf == null)
             {
@@ -282,7 +282,7 @@ namespace Erpc
                 Console.WriteLine("PackBytes length is out of uint " + slen);
             }
         }
-        static public void PackArray(WriteBuffer wb, long length)
+        public static void PackArray(WriteBuffer wb, long length)
         {
             byte topbyte;
             // array!(ignore map part.) 0x90|n , 0xdc+2byte, 0xdd+4byte
@@ -301,7 +301,7 @@ namespace Erpc
                 wb.Add(topbyte, ReverseBytes((uint)length));
             }
         }
-        static public void PackMap(WriteBuffer wb, long length)
+        public static void PackMap(WriteBuffer wb, long length)
         {
             byte topbyte;
             // map fixmap, 16,32 : 0x80|num, 0xde+2byte, 0xdf+4byte
@@ -321,7 +321,7 @@ namespace Erpc
             }
         }
 
-        static public bool UnpackBool(ReadBuffer rb, ref bool value)
+        public static bool UnpackBool(ReadBuffer rb, ref bool value)
         {
             byte t = rb.MoveNext();
             switch (t)
@@ -333,7 +333,7 @@ namespace Erpc
             }
             return true;
         }
-        static public void UnpackInteger(ReadBuffer rb, ref byte value)
+        public static void UnpackInteger(ReadBuffer rb, ref byte value)
         {
             long v = 0;
             if( UnpackInteger(rb, ref v) )
@@ -341,7 +341,7 @@ namespace Erpc
                 value = (byte)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref ushort value)
+        public static void UnpackInteger(ReadBuffer rb, ref ushort value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -349,7 +349,7 @@ namespace Erpc
                 value = (ushort)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref uint value)
+        public static void UnpackInteger(ReadBuffer rb, ref uint value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -357,7 +357,7 @@ namespace Erpc
                 value = (uint)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref ulong value)
+        public static void UnpackInteger(ReadBuffer rb, ref ulong value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -365,7 +365,7 @@ namespace Erpc
                 value = (ulong)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref char value)
+        public static void UnpackInteger(ReadBuffer rb, ref char value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -373,7 +373,7 @@ namespace Erpc
                 value = (char)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref short value)
+        public static void UnpackInteger(ReadBuffer rb, ref short value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -381,7 +381,7 @@ namespace Erpc
                 value = (short)v;
             }
         }
-        static public void UnpackInteger(ReadBuffer rb, ref int value)
+        public static void UnpackInteger(ReadBuffer rb, ref int value)
         {
             long v = 0;
             if (UnpackInteger(rb, ref v))
@@ -389,7 +389,7 @@ namespace Erpc
                 value = (int)v;
             }
         }
-        static public bool UnpackInteger(ReadBuffer rb, ref long value)
+        public static bool UnpackInteger(ReadBuffer rb, ref long value)
         {
             byte t = rb.MoveNext();
             if(t == 0xc0)
@@ -512,7 +512,7 @@ namespace Erpc
             }
             return true;
         }
-        static public void UnpackDouble(ReadBuffer rb, ref float value)
+        public static void UnpackDouble(ReadBuffer rb, ref float value)
         {
             double v = 0;
             if( UnpackDouble(rb, ref v) )
@@ -520,7 +520,7 @@ namespace Erpc
                 value = (float)v;
             }
         }
-        static public bool UnpackDouble(ReadBuffer rb, ref double value)
+        public static bool UnpackDouble(ReadBuffer rb, ref double value)
         {
             byte t = rb.MoveNext();
             switch (t)
@@ -558,7 +558,7 @@ namespace Erpc
             }
             return true;
         }
-        static public bool UnpackString(ReadBuffer rb, ref string value)
+        public static bool UnpackString(ReadBuffer rb, ref string value)
         {
             byte t = rb.MoveNext();
             if (t == 0xc0)
@@ -643,7 +643,7 @@ namespace Erpc
             }
             return true;
         }
-        static public bool UnpackBytes(ReadBuffer rb, ref byte[] value)
+        public static bool UnpackBytes(ReadBuffer rb, ref byte[] value)
         {
             byte t = rb.MoveNext();
             if (t == 0xc0)
@@ -716,7 +716,7 @@ namespace Erpc
             }
             return true;
         }
-        static public long UnpackArray(ReadBuffer rb)
+        public static long UnpackArray(ReadBuffer rb)
         {
             byte t = rb.MoveNext();
             if (t == 0xc0)
@@ -762,7 +762,7 @@ namespace Erpc
             }
             return -2;
         }
-        static public long UnpackMap(ReadBuffer rb)
+        public static long UnpackMap(ReadBuffer rb)
         {
             byte t = rb.MoveNext();
             if (t == 0xc0)
@@ -808,7 +808,7 @@ namespace Erpc
             }
             return -2;
         }
-        static public void UnpackDiscard(ReadBuffer rb, long count)
+        public static void UnpackDiscard(ReadBuffer rb, long count)
         {
             if(count <= 0)
             {
@@ -819,7 +819,7 @@ namespace Erpc
                 Discard(rb);
             }
         }
-        static public void Discard(ReadBuffer rb)
+        public static void Discard(ReadBuffer rb)
         {
             if(rb.Left() < 1)
             {
@@ -1131,7 +1131,7 @@ namespace Erpc
         }
 
 
-        static public void ReadNumber(byte[] b, int offset, ref ushort value)
+        public static void ReadNumber(byte[] b, int offset, ref ushort value)
         {
             byte[] v = new byte[2];
             for (int i = 1, j = 0; j < 2; --i, ++j)
@@ -1140,7 +1140,7 @@ namespace Erpc
             }
             value = BitConverter.ToUInt16(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref uint value)
+        public static void ReadNumber(byte[] b, int offset, ref uint value)
         {
             byte[] v = new byte[4];
             for (int i = 3, j = 0; j < 4; --i, ++j)
@@ -1149,7 +1149,7 @@ namespace Erpc
             }
             value = BitConverter.ToUInt32(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref ulong value)
+        public static void ReadNumber(byte[] b, int offset, ref ulong value)
         {
             byte[] v = new byte[8];
             for (int i = 7, j = 0; j < 8; --i, ++j)
@@ -1158,7 +1158,7 @@ namespace Erpc
             }
             value = BitConverter.ToUInt64(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref short value)
+        public static void ReadNumber(byte[] b, int offset, ref short value)
         {
             byte[] v = new byte[2];
             for (int i = 1, j = 0; j < 2; --i, ++j)
@@ -1167,7 +1167,7 @@ namespace Erpc
             }
             value = BitConverter.ToInt16(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref int value)
+        public static void ReadNumber(byte[] b, int offset, ref int value)
         {
             byte[] v = new byte[4];
             for (int i = 3, j = 0; j < 4; --i, ++j)
@@ -1176,7 +1176,7 @@ namespace Erpc
             }
             value = BitConverter.ToInt32(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref long value)
+        public static void ReadNumber(byte[] b, int offset, ref long value)
         {
             byte[] v = new byte[8];
             for (int i = 7, j = 0; j < 8; --i, ++j)
@@ -1185,7 +1185,7 @@ namespace Erpc
             }
             value = BitConverter.ToInt64(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref float value)
+        public static void ReadNumber(byte[] b, int offset, ref float value)
         {
             byte[] v = new byte[4];
             for (int i = 3, j = 0; j < 4; --i, ++j)
@@ -1194,7 +1194,7 @@ namespace Erpc
             }
             value = BitConverter.ToSingle(v, 0);
         }
-        static public void ReadNumber(byte[] b, int offset, ref double value)
+        public static void ReadNumber(byte[] b, int offset, ref double value)
         {
             byte[] v = new byte[8];
             for (int i = 7, j = 0; j < 8; --i, ++j)
@@ -1203,63 +1203,63 @@ namespace Erpc
             }
             value = BitConverter.ToDouble(v, 0);
         }
-        
-        static public byte[] ReverseBytes(byte value)
+
+        public static byte[] ReverseBytes(byte value)
         {
             byte[] b = new byte[1];
             b[0] = value;
             return b;
         }
-        static public byte[] ReverseBytes(ushort value)
+        public static byte[] ReverseBytes(ushort value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(uint value)
+        public static byte[] ReverseBytes(uint value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(ulong value)
+        public static byte[] ReverseBytes(ulong value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(short value)
+        public static byte[] ReverseBytes(short value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(int value)
+        public static byte[] ReverseBytes(int value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(long value)
+        public static byte[] ReverseBytes(long value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(float value)
+        public static byte[] ReverseBytes(float value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
-        static public byte[] ReverseBytes(double value)
+        public static byte[] ReverseBytes(double value)
         {
             byte[] b = BitConverter.GetBytes(value);
             Array.Reverse(b);
             return b;
         }
 
-        static public string BytesToString(byte[] b)
+        public static string BytesToString(byte[] b)
         {
             string s = "";
             for(int i=0; i<b.Length; ++i)
@@ -1268,7 +1268,7 @@ namespace Erpc
             }
             return s;
         }
-        static public string BytesToHex(byte[] buffer)
+        public static string BytesToHex(byte[] buffer)
         {
             StringBuilder ret = new StringBuilder();
             foreach (byte b in buffer)
