@@ -21,9 +21,9 @@ int main(int argc, const char * argv[]) {
 	// insert code here...
 	std::cout << "Hello, World!\n";
 
-	fprintf(stderr, "start loading main.lua t=%lld\n", get_time_us());
+	fprintf(stderr, "start  t=%lld\n", get_time_us());
 
-	fprintf(stderr, "end loading main.lua t=%lld\n", get_time_us());
+	fprintf(stderr, "end    t=%lld\n", get_time_us());
 
     return 0;
 }
