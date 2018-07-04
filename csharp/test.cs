@@ -5,27 +5,27 @@ using Erpc;
 
 namespace test
 {
-    class request
+    class request : Proto
     {
-        public class inner
+        public class inner : Proto
         {
             public int t1;
             public string t2;
-            public void Encode(WriteBuffer wb)
+            override public void Encode(WriteBuffer wb)
             {
                 Eproto.PackArray(wb, 2);
-                Eproto.PackInteger(wb, t1);
-                Eproto.PackString(wb, t2);
+                Eproto.PackInteger(wb, this.t1);
+                Eproto.PackString(wb, this.t2);
             }
-            public void Decode(ReadBuffer rb)
+            override public void Decode(ReadBuffer rb)
             {
-                long _c_ = Eproto.UnpackArray(rb);
-                if (_c_ <= 0) { return; }
-                Eproto.UnpackInteger(rb, ref t1);
-                if (--_c_ <= 0) { return; }
-                Eproto.UnpackString(rb, ref t2);
-                if (--_c_ <= 0) { return; }
-                Eproto.UnpackDiscard(rb, _c_);
+                long c = Eproto.UnpackArray(rb);
+                if (c <= 0) { return; }
+                Eproto.UnpackInteger(rb, ref this.t1);
+                if (--c <= 0) { return; }
+                Eproto.UnpackString(rb, ref this.t2);
+                if (--c <= 0) { return; }
+                Eproto.UnpackDiscard(rb, c);
             }
 
         }
@@ -41,180 +41,180 @@ namespace test
         public inner[] j;
         public Dictionary<string, inner> k;
         public Dictionary<string, byte[]> l;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 12);
-            Eproto.PackInteger(wb, a);
-            Eproto.PackInteger(wb, b);
-            Eproto.PackDouble(wb, c);
-            Eproto.PackDouble(wb, d);
-            Eproto.PackString(wb, e);
-            Eproto.PackBytes(wb, f);
-            if (g == null) { Eproto.PackNil(wb); } else { g.Encode(wb); }
-            if (h == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackMap(wb, h.Count);
-                foreach (var i in h)
+            Eproto.PackInteger(wb, this.a);
+            Eproto.PackInteger(wb, this.b);
+            Eproto.PackDouble(wb, this.c);
+            Eproto.PackDouble(wb, this.d);
+            Eproto.PackString(wb, this.e);
+            Eproto.PackBytes(wb, this.f);
+            if (this.g == null) { Eproto.PackNil(wb); } else { this.g.Encode(wb); }
+            if (this.h == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackMap(wb, this.h.Count);
+                foreach (var i in this.h)
                 {
                     Eproto.PackInteger(wb, i.Key);
                     Eproto.PackString(wb, i.Value);
                 }
             }
-            if (i == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackArray(wb, i.Length);
-                for(int _i_=0; _i_<i.Length; ++_i_)
+            if (this.i == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackArray(wb, this.i.Length);
+                for(int i=0; i<this.i.Length; ++i)
                 {
-                    int _v_ = i[_i_];
-                Eproto.PackInteger(wb, _v_);
+                    int v = this.i[i];
+                Eproto.PackInteger(wb, v);
                 }
             }
-            if (j == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackArray(wb, j.Length);
-                for(int _i_=0; _i_<j.Length; ++_i_)
+            if (this.j == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackArray(wb, this.j.Length);
+                for(int i=0; i<this.j.Length; ++i)
                 {
-                    inner _v_ = j[_i_];
-                    if (_v_ == null) { Eproto.PackNil(wb); } else { _v_.Encode(wb); }
+                    inner v = this.j[i];
+                    if (v == null) { Eproto.PackNil(wb); } else { v.Encode(wb); }
                 }
             }
-            if (k == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackMap(wb, k.Count);
-                foreach (var i in k)
+            if (this.k == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackMap(wb, this.k.Count);
+                foreach (var i in this.k)
                 {
                     Eproto.PackString(wb, i.Key);
                     if (i.Value == null) { Eproto.PackNil(wb); } else { i.Value.Encode(wb); }
                 }
             }
-            if (l == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackMap(wb, l.Count);
-                foreach (var i in l)
+            if (this.l == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackMap(wb, this.l.Count);
+                foreach (var i in this.l)
                 {
                     Eproto.PackString(wb, i.Key);
                     Eproto.PackBytes(wb, i.Value);
                 }
             }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
-            long _c_ = Eproto.UnpackArray(rb);
-            if (_c_ <= 0) { return; }
-            Eproto.UnpackInteger(rb, ref a);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackInteger(rb, ref b);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackDouble(rb, ref c);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackDouble(rb, ref d);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackString(rb, ref e);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackBytes(rb, ref f);
-            if (--_c_ <= 0) { return; }
-            if (rb.NextIsNil()) { rb.MoveNext(); } else { g = new inner(); g.Decode(rb); }
-            if (--_c_ <= 0) { return; }
+            long c = Eproto.UnpackArray(rb);
+            if (c <= 0) { return; }
+            Eproto.UnpackInteger(rb, ref this.a);
+            if (--c <= 0) { return; }
+            Eproto.UnpackInteger(rb, ref this.b);
+            if (--c <= 0) { return; }
+            Eproto.UnpackDouble(rb, ref this.c);
+            if (--c <= 0) { return; }
+            Eproto.UnpackDouble(rb, ref this.d);
+            if (--c <= 0) { return; }
+            Eproto.UnpackString(rb, ref this.e);
+            if (--c <= 0) { return; }
+            Eproto.UnpackBytes(rb, ref this.f);
+            if (--c <= 0) { return; }
+            if (rb.NextIsNil()) { rb.MoveNext(); } else { this.g = new inner(); this.g.Decode(rb); }
+            if (--c <= 0) { return; }
             {
-                long _n_ = Eproto.UnpackMap(rb);
-                if (_n_ < 0) { h=null; } else {
-                    h = new Dictionary<int, string>();
-                    for(int _i_=0; _i_<_n_; ++_i_)
+                long n = Eproto.UnpackMap(rb);
+                if (n < 0) { this.h=null; } else {
+                    this.h = new Dictionary<int, string>();
+                    for(int i=0; i<n; ++i)
                     {
-                        int _k_=0; string _v_=null;
-                        Eproto.UnpackInteger(rb, ref _k_);
-                        Eproto.UnpackString(rb, ref _v_);
-                        h[_k_] = _v_;
+                        int k=0; string v=null;
+                        Eproto.UnpackInteger(rb, ref k);
+                        Eproto.UnpackString(rb, ref v);
+                        this.h[k] = v;
                     }
                 }
             }
-            if (--_c_ <= 0) { return; }
+            if (--c <= 0) { return; }
             {
-                long _n_ = Eproto.UnpackArray(rb);
-                if (_n_ < 0) { i=null; } else {
-                    i = new int[_n_];
-                    for(int _i_=0; _i_<_n_; ++_i_)
+                long n = Eproto.UnpackArray(rb);
+                if (n < 0) { this.i=null; } else {
+                    this.i = new int[n];
+                    for(int i=0; i<n; ++i)
                     {
-                        int _v_=0;
-                        Eproto.UnpackInteger(rb, ref _v_);
-                        i[_i_] = _v_;
+                        int v=0;
+                        Eproto.UnpackInteger(rb, ref v);
+                        this.i[i] = v;
                     }
                 }
             }
-            if (--_c_ <= 0) { return; }
+            if (--c <= 0) { return; }
             {
-                long _n_ = Eproto.UnpackArray(rb);
-                if (_n_ < 0) { j=null; } else {
-                    j = new inner[_n_];
-                    for(int _i_=0; _i_<_n_; ++_i_)
+                long n = Eproto.UnpackArray(rb);
+                if (n < 0) { this.j=null; } else {
+                    this.j = new inner[n];
+                    for(int i=0; i<n; ++i)
                     {
-                        inner _v_=null;
-                        if (rb.NextIsNil()) { rb.MoveNext(); } else { _v_ = new inner(); _v_.Decode(rb); }
-                        j[_i_] = _v_;
+                        inner v=null;
+                        if (rb.NextIsNil()) { rb.MoveNext(); } else { v = new inner(); v.Decode(rb); }
+                        this.j[i] = v;
                     }
                 }
             }
-            if (--_c_ <= 0) { return; }
+            if (--c <= 0) { return; }
             {
-                long _n_ = Eproto.UnpackMap(rb);
-                if (_n_ < 0) { k=null; } else {
-                    k = new Dictionary<string, inner>();
-                    for(int _i_=0; _i_<_n_; ++_i_)
+                long n = Eproto.UnpackMap(rb);
+                if (n < 0) { this.k=null; } else {
+                    this.k = new Dictionary<string, inner>();
+                    for(int i=0; i<n; ++i)
                     {
-                        string _k_=null; inner _v_=null;
-                        Eproto.UnpackString(rb, ref _k_);
-                        if (rb.NextIsNil()) { rb.MoveNext(); } else { _v_ = new inner(); _v_.Decode(rb); }
-                        if (_k_ != null) { k[_k_] = _v_; }
+                        string k=null; inner v=null;
+                        Eproto.UnpackString(rb, ref k);
+                        if (rb.NextIsNil()) { rb.MoveNext(); } else { v = new inner(); v.Decode(rb); }
+                        if (k != null) { this.k[k] = v; }
                     }
                 }
             }
-            if (--_c_ <= 0) { return; }
+            if (--c <= 0) { return; }
             {
-                long _n_ = Eproto.UnpackMap(rb);
-                if (_n_ < 0) { l=null; } else {
-                    l = new Dictionary<string, byte[]>();
-                    for(int _i_=0; _i_<_n_; ++_i_)
+                long n = Eproto.UnpackMap(rb);
+                if (n < 0) { this.l=null; } else {
+                    this.l = new Dictionary<string, byte[]>();
+                    for(int i=0; i<n; ++i)
                     {
-                        string _k_=null; byte[] _v_=null;
-                        Eproto.UnpackString(rb, ref _k_);
-                        Eproto.UnpackBytes(rb, ref _v_);
-                        if (_k_ != null) { l[_k_] = _v_; }
+                        string k=null; byte[] v=null;
+                        Eproto.UnpackString(rb, ref k);
+                        Eproto.UnpackBytes(rb, ref v);
+                        if (k != null) { this.l[k] = v; }
                     }
                 }
             }
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackDiscard(rb, _c_);
+            if (--c <= 0) { return; }
+            Eproto.UnpackDiscard(rb, c);
         }
 
     }
-    class empty
+    class empty : Proto
     {
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 0);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
-            long _c_ = Eproto.UnpackArray(rb);
-            if (_c_ <= 0) { return; }
-            Eproto.UnpackDiscard(rb, _c_);
+            long c = Eproto.UnpackArray(rb);
+            if (c <= 0) { return; }
+            Eproto.UnpackDiscard(rb, c);
         }
 
     }
-    class response
+    class response : Proto
     {
         public int error;
         public byte[] buffer;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
-            Eproto.PackInteger(wb, error);
-            Eproto.PackBytes(wb, buffer);
+            Eproto.PackInteger(wb, this.error);
+            Eproto.PackBytes(wb, this.buffer);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
-            long _c_ = Eproto.UnpackArray(rb);
-            if (_c_ <= 0) { return; }
-            Eproto.UnpackInteger(rb, ref error);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackBytes(rb, ref buffer);
-            if (--_c_ <= 0) { return; }
-            Eproto.UnpackDiscard(rb, _c_);
+            long c = Eproto.UnpackArray(rb);
+            if (c <= 0) { return; }
+            Eproto.UnpackInteger(rb, ref this.error);
+            if (--c <= 0) { return; }
+            Eproto.UnpackBytes(rb, ref this.buffer);
+            if (--c <= 0) { return; }
+            Eproto.UnpackDiscard(rb, c);
         }
 
     }
