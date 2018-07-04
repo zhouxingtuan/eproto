@@ -3,6 +3,12 @@ using System.Text;
 
 namespace Erpc
 {
+    class Proto
+    {
+        virtual public void Encode(WriteBuffer wb) { }
+        virtual public void Decode(ReadBuffer rb) { }
+    }
+
     class WriteBuffer
     {
         public const int WRITE_BUFFER_SIZE = 4096;
@@ -95,6 +101,12 @@ namespace Erpc
             length = b.Length;
             offset = 0;
         }
+        public ReadBuffer(byte[] b, int offset, int length)
+        {
+            buffer = b;
+            this.length = length;
+            this.offset = offset;
+        }
         public byte[] Data()
         {
             return buffer;
@@ -150,11 +162,6 @@ namespace Erpc
 
     static class Eproto
     {
-        public static WriteBuffer WriteBuffer = new WriteBuffer();
-        public static WriteBuffer GetWriteBuffer()
-        {
-            return WriteBuffer;
-        }
 
         public static void PackNil(WriteBuffer wb)
         {
@@ -1129,7 +1136,6 @@ namespace Erpc
                     }
             }
         }
-
 
         public static void ReadNumber(byte[] b, int offset, ref ushort value)
         {

@@ -5,19 +5,19 @@ using Erpc;
 
 namespace test
 {
-    class request
+    class request : Proto
     {
-        public class inner
+        public class inner : Proto
         {
             public int t1;
             public string t2;
-            public void Encode(WriteBuffer wb)
+            override public void Encode(WriteBuffer wb)
             {
                 Eproto.PackArray(wb, 2);
                 Eproto.PackInteger(wb, this.t1);
                 Eproto.PackString(wb, this.t2);
             }
-            public void Decode(ReadBuffer rb)
+            override public void Decode(ReadBuffer rb)
             {
                 long c = Eproto.UnpackArray(rb);
                 if (c <= 0) { return; }
@@ -41,7 +41,7 @@ namespace test
         public inner[] j;
         public Dictionary<string, inner> k;
         public Dictionary<string, byte[]> l;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 12);
             Eproto.PackInteger(wb, this.a);
@@ -92,7 +92,7 @@ namespace test
                 }
             }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -182,13 +182,13 @@ namespace test
         }
 
     }
-    class empty
+    class empty : Proto
     {
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 0);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -196,17 +196,17 @@ namespace test
         }
 
     }
-    class response
+    class response : Proto
     {
         public int error;
         public byte[] buffer;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.error);
             Eproto.PackBytes(wb, this.buffer);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }

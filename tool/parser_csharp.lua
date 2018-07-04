@@ -106,7 +106,7 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow, i
     -- Encode
     -- Decode
     -- ]]
-    local template = [[%sclass %s
+    local template = [[%sclass %s : Proto
 %s{
 %s%s%s%s
 %s}
@@ -168,7 +168,7 @@ function parser_csharp:genParams(elementArray, prettyShow)
 end
 function parser_csharp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "public void Encode(WriteBuffer wb)\n"
+    local bodyCode = prettyShow .. "override public void Encode(WriteBuffer wb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     bodyCode = bodyCode .. nextPrettyShow .. string.format("Eproto.PackArray(wb, %s);\n", #elementArray)
     for k,elementInfo in ipairs(elementArray) do
@@ -259,7 +259,7 @@ function parser_csharp:getPackByType(name, csharp_type)
 end
 function parser_csharp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "public void Decode(ReadBuffer rb)\n"
+    local bodyCode = prettyShow .. "override public void Decode(ReadBuffer rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
