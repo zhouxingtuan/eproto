@@ -108,7 +108,7 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow, i
     -- ]]
     local template = [[%sclass %s : Proto
 %s{
-%s%s%s%s
+%s%s%s%s%s
 %s}
 ]]
     local nextPrettyShow = prettyShow..prettyStep
@@ -123,10 +123,11 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow, i
     local params = self:genParams(elementArray, nextPrettyShow)
     local Encode = self:genEncode(elementArray, nextPrettyShow)
     local Decode = self:genDecode(elementArray, nextPrettyShow)
+    local Create = self:genCreate(className, nextPrettyShow)
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Encode, Decode,
+        subClasses, params, Encode, Decode, Create,
         prettyShow)
     return classCode
 end
@@ -368,6 +369,10 @@ function parser_csharp:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("Eproto.UnpackDiscard(rb, %s);\n", count_name)
     bodyCode = bodyCode .. prettyShow .. "}\n"
     return bodyCode
+end
+function parser_csharp:genCreate(className, prettyShow)
+    local str = string.format("%soverride public Proto Create() { return new %s(); }", prettyShow, className)
+    return str
 end
 function parser_csharp:getDefaultDeclValue(csharp_type)
     if csharp_type == nil then

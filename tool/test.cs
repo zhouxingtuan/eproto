@@ -27,7 +27,7 @@ namespace test
                 if (--c <= 0) { return; }
                 Eproto.UnpackDiscard(rb, c);
             }
-
+            override public Proto Create() { return new inner(); }
         }
         public int a;
         public long b;
@@ -180,7 +180,7 @@ namespace test
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request(); }
     }
     class empty : Proto
     {
@@ -194,7 +194,7 @@ namespace test
             if (c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new empty(); }
     }
     class response : Proto
     {
@@ -216,7 +216,7 @@ namespace test
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response(); }
     }
 
 }
