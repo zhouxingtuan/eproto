@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #ifndef LOG_ERROR
+#include <sys/time.h>
 #define LOG_ERROR(fmt, ...)\
 	fprintf(stderr, "[ERROR %s][%s:%s():%d] " fmt "\n", __getTimeStringUS().c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);
 
