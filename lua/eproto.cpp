@@ -5,7 +5,23 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#ifndef LOG_ERROR
+#define LOG_ERROR(fmt, ...)\
+	fprintf(stderr, "[ERROR %s][%s:%s():%d] " fmt "\n", __getTimeStringUS().c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);
+
+#endif
+
 namespace eproto{
+
+std::string __getTimeStringUS(void){
+    char temp[32] = {0};
+	timeval t;
+	gettimeofday( &t, NULL );
+	struct tm* ptm = localtime(&t.tv_sec);
+	snprintf(temp, 32, "%4d-%02d-%02d %02d:%02d:%02d %06d",
+		ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)t.tv_usec);
+	return std::string(temp);
+}
 
 #if LUA_VERSION_NUM >= 503
 # define lua53_getfield lua_getfield
@@ -119,6 +135,7 @@ inline void ep_pack_string(WriteBuffer* pwb, const unsigned char *sval, size_t s
         pwb->add(topbyte, l, sval, slen);
     } else {
         pwb->setError(ERRORBIT_STRINGLEN);
+        LOG_ERROR("ep_pack_string length too long %lld", slen);
     }
 }
 inline void ep_pack_bytes(WriteBuffer* pwb, const unsigned char *sval, size_t slen){
@@ -137,6 +154,7 @@ inline void ep_pack_bytes(WriteBuffer* pwb, const unsigned char *sval, size_t sl
         pwb->add(topbyte, l, sval, slen);
     } else {
         pwb->setError(ERRORBIT_STRINGLEN);
+        LOG_ERROR("ep_pack_bytes length too long %lld", slen);
     }
 }
 inline void ep_pack_number(WriteBuffer* pwb, lua_Number n){
@@ -303,6 +321,7 @@ inline void ep_unpack_fixstr(ReadBuffer* prb, lua_State *L, unsigned char t){
     size_t slen = t & 0x1f;
     if( prb->left() < slen ){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_fixstr prb->left()=%d < slen=%lld", prb->left(), slen);
         return;
     }
     lua_pushlstring(L,(const char*)prb->offsetPtr(),slen);
@@ -325,11 +344,13 @@ inline void ep_unpack_true(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_bin8(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin8 prb->left()=%d < 1", prb->left());
         return;
     }
     size_t slen = prb->moveNext();
     if(prb->left() < slen){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin8 prb->left()=%d < slen=%lld", prb->left(), slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -338,12 +359,14 @@ inline void ep_unpack_bin8(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_bin16(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 2){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin16 prb->left()=%d < 2", prb->left());
         return;
     }
     size_t slen = ntohs(*((unsigned short*)(prb->offsetPtr())));
     prb->moveOffset(2);
     if(prb->left() < slen){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin16 prb->left()=%d < slen=%lld", prb->left(), slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -352,12 +375,14 @@ inline void ep_unpack_bin16(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_bin32(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin32 prb->left()=%d < 4", prb->left());
         return;
     }
     size_t slen = ntohl(*((unsigned int*)(prb->offsetPtr())));
     prb->moveOffset(4);
     if(prb->left() < slen){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_bin32 prb->left()=%d < slen=%lld", prb->left(), slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -366,6 +391,7 @@ inline void ep_unpack_bin32(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_float(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_float prb->left()=%d < 4", prb->left());
         return;
     }
     float f;
@@ -376,6 +402,7 @@ inline void ep_unpack_float(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_double(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 8){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_double prb->left()=%d < 8", prb->left());
         return;
     }
     double v;
@@ -386,6 +413,7 @@ inline void ep_unpack_double(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_uint8(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_uint8 prb->left()=%d < 1", prb->left());
         return;
     }
     unsigned char v = prb->moveNext();
@@ -394,6 +422,7 @@ inline void ep_unpack_uint8(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_uint16(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 2){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_uint16 prb->left()=%d < 2", prb->left());
         return;
     }
     unsigned short v = ntohs( *(short*)(prb->offsetPtr()) );
@@ -403,6 +432,7 @@ inline void ep_unpack_uint16(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_uint32(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_uint32 prb->left()=%d < 4", prb->left());
         return;
     }
     unsigned long v = ntohl( *(long*)(prb->offsetPtr()) );
@@ -412,6 +442,7 @@ inline void ep_unpack_uint32(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_uint64(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 8){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_uint64 prb->left()=%d < 8", prb->left());
         return;
     }
     long long v = *(long long*)(prb->offsetPtr());
@@ -422,6 +453,7 @@ inline void ep_unpack_uint64(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_int8(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_int8 prb->left()=%d < 1", prb->left());
         return;
     }
     char v = (char)prb->moveNext();
@@ -430,6 +462,7 @@ inline void ep_unpack_int8(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_int16(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 2){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_int16 prb->left()=%d < 2", prb->left());
         return;
     }
     short v = ntohs( *(short*)(prb->offsetPtr()) );
@@ -439,6 +472,7 @@ inline void ep_unpack_int16(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_int32(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_int32 prb->left()=%d < 4", prb->left());
         return;
     }
     long v = ntohl( *(long*)(prb->offsetPtr()) );
@@ -448,6 +482,7 @@ inline void ep_unpack_int32(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_int64(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 8){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_int64 prb->left()=%d < 8", prb->left());
         return;
     }
     long long v = *(long long*)(prb->offsetPtr());
@@ -467,6 +502,7 @@ inline void ep_unpack_str32(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_array16(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 2){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_array16 prb->left()=%d < 2", prb->left());
         return;
     }
     unsigned short arylen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
@@ -476,6 +512,7 @@ inline void ep_unpack_array16(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_array32(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_array32 prb->left()=%d < 4", prb->left());
         return;
     }
     unsigned int arylen = ntohl( *((unsigned int*)(prb->offsetPtr())));
@@ -485,6 +522,7 @@ inline void ep_unpack_array32(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_map16(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 2){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_map16 prb->left()=%d < 2", prb->left());
         return;
     }
     unsigned short maplen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
@@ -494,6 +532,7 @@ inline void ep_unpack_map16(ReadBuffer* prb, lua_State *L, unsigned char t){
 inline void ep_unpack_map32(ReadBuffer* prb, lua_State *L, unsigned char t){
     if(prb->left() < 4){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_map32 prb->left()=%d < 4", prb->left());
         return;
     }
     unsigned int maplen = ntohl( *((unsigned int*)(prb->offsetPtr())));
@@ -504,6 +543,7 @@ inline void ep_unpack_map32(ReadBuffer* prb, lua_State *L, unsigned char t){
 static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_unpack_anytype prb->left()=%d < 1", prb->left());
         return;
     }
     unsigned char t = prb->moveNext();
@@ -561,11 +601,14 @@ static void ep_unpack_anytype(ReadBuffer* prb, lua_State *L){
         case 0xc4: ep_unpack_bin8(prb, L, t); return;
         case 0xc5: ep_unpack_bin16(prb, L, t); return;
         case 0xc6: ep_unpack_bin32(prb, L, t); return;
-        default: prb->setError(1); break;
+        default: prb->setError(1);
+            LOG_ERROR("ep_unpack_anytype unknown type=0x%x", t);
+        break;
         }
         return;
 //    }
     prb->setError(1);
+    LOG_ERROR("ep_unpack_anytype unknown type=0x%x", t);
 }
 
 static void ep_state_init(ProtoState *ps){
@@ -886,6 +929,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 			}
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_array t != LUA_TNUMBER t=%d", t);
 				return;
 			}
 			long long lv = lua_tonumber(L, value_index);
@@ -905,6 +949,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 			}
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_array t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -925,6 +970,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 			}
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_array t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -945,6 +991,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
     			}
     			if(t != LUA_TBOOLEAN){
     				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    				LOG_ERROR("ep_encode_proto_array t != LUA_TBOOLEAN t=%d", t);
     				return;
     			}
     			int iv = lua_toboolean(L, value_index);
@@ -964,6 +1011,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
     			}
     			if(t != LUA_TNUMBER){
     				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+    				LOG_ERROR("ep_encode_proto_array t != LUA_TNUMBER t=%d", t);
     				return;
     			}
     			lua_Number n = lua_tonumber(L, value_index);
@@ -975,6 +1023,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 	default:{
 		if(id < ep_type_max){
 			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			LOG_ERROR("ep_encode_proto_array id=%d < ep_type_max=%d", id, ep_type_max);
 			return;
 		}
 		ProtoElementVector* otherProtoVec = ps->pManager->findProto(id);
@@ -988,6 +1037,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
     		}
     		if(t != LUA_TTABLE){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto_array t != LUA_TTABLE t=%d", t);
                 return;
             }
 			ep_encode_proto(ps, L, value_index, otherProtoVec);
@@ -1018,6 +1068,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map key t != LUA_TNUMBER t=%d", t);
 				return;
 			}
 			long long lv = lua_tonumber(L, key_index);
@@ -1027,6 +1078,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_string:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map key t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -1037,6 +1089,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map key t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -1047,6 +1100,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
         case ep_type_bool:{
 			if(t != LUA_TBOOLEAN){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map key t != LUA_TBOOLEAN t=%d", t);
 				return;
 			}
 			int iv = lua_toboolean(L, key_index);
@@ -1056,6 +1110,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
         case ep_type_float:{
             if(t != LUA_TNUMBER){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto_map key t != LUA_TNUMBER t=%d", t);
                 return;
             }
             lua_Number n = lua_tonumber(L, key_index);
@@ -1064,6 +1119,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
         }
 		default:{
 			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			LOG_ERROR("ep_encode_proto_map key unsupport type t=%d", t);
 			return;
 		}
         }
@@ -1072,6 +1128,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value t != LUA_TNUMBER t=%d", t);
 				return;
 			}
 			long long lv = lua_tonumber(L, value_index);
@@ -1081,6 +1138,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_string:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -1091,6 +1149,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value t != LUA_TSTRING t=%d", t);
 				return;
 			}
 	        size_t slen;
@@ -1101,6 +1160,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_bool:{
 			if(t != LUA_TBOOLEAN){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value t != LUA_TBOOLEAN t=%d", t);
 				return;
 			}
 			int iv = lua_toboolean(L, value_index);
@@ -1110,6 +1170,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		case ep_type_float:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value t != LUA_TNUMBER t=%d", t);
 				return;
 			}
 			lua_Number n = lua_tonumber(L, value_index);
@@ -1119,10 +1180,12 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		default:{
 			if(value < ep_type_max){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto_map value value=%d < ep_type_max=%d", value, ep_type_max);
 				return;
 			}
             if(t != LUA_TTABLE){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto_map value t != LUA_TTABLE t=%d", t);
                 return;
             }
 			ep_encode_proto(ps, L, value_index, otherProtoVec);
@@ -1130,7 +1193,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 		}
 		}
 		if(pwb->getError()){
-			fprintf(stderr, "encode proto element failed\n");
+			LOG_ERROR("encode proto element failed t=%d", t);
 			return;
 		}
         lua_pop(L,1); // remove value and keep key for next iteration
@@ -1145,10 +1208,12 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 	}
 	if( t != LUA_TTABLE ){
 		pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+		LOG_ERROR("ep_encode_proto t != LUA_TTABLE t=%d", t);
 		return;
 	}
 	if(NULL == protoVec){
 		pwb->setError(ERRORBIT_TYPE_NO_PROTO);
+		LOG_ERROR("ep_encode_proto NULL == protoVec t=%d", t);
     	return;
 	}
 	int value_index = index + 1;
@@ -1173,6 +1238,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_int:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto t != LUA_TNUMBER t=%d name=%s", t, element.name.c_str());
 				return;
 			}
 			long long lv = lua_tonumber(L, value_index);
@@ -1182,6 +1248,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_string:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto t != LUA_TSTRING t=%d name=%s", t, element.name.c_str());
 				return;
 			}
             size_t slen;
@@ -1192,6 +1259,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_bytes:{
 			if(t != LUA_TSTRING){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto t != LUA_TSTRING t=%d name=%s", t, element.name.c_str());
 				return;
 			}
             size_t slen;
@@ -1202,6 +1270,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_message:{
 			if(t != LUA_TTABLE){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto t != LUA_TTABLE t=%d name=%s", t, element.name.c_str());
                 return;
             }
 			ProtoElementVector* otherProtoVec = ps->pManager->findProto(element.id);
@@ -1211,6 +1280,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_bool:{
 			if(t != LUA_TBOOLEAN){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto t != LUA_TBOOLEAN t=%d name=%s", t, element.name.c_str());
 				return;
 			}
 			int iv = lua_toboolean(L, value_index);
@@ -1220,6 +1290,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_float:{
 			if(t != LUA_TNUMBER){
 				pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+				LOG_ERROR("ep_encode_proto t != LUA_TNUMBER t=%d name=%s", t, element.name.c_str());
 				return;
 			}
 			lua_Number n = lua_tonumber(L, value_index);
@@ -1229,6 +1300,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_array:{
 			if(t != LUA_TTABLE){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto t != LUA_TTABLE t=%d name=%s", t, element.name.c_str());
                 return;
             }
 			ep_encode_proto_array(ps, L, value_index, element.id);
@@ -1237,6 +1309,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		case ep_type_map:{
 			if(t != LUA_TTABLE){
                 pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+                LOG_ERROR("ep_encode_proto t != LUA_TTABLE t=%d name=%s", t, element.name.c_str());
                 return;
             }
 			ep_encode_proto_map(ps, L, value_index, element.key, element.value);
@@ -1244,6 +1317,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 		}
 		default:{
 			pwb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+			LOG_ERROR("ep_encode_proto unknown element.type=%d name=%s", element.type, element.name.c_str());
 			return;
 		}
 		}
@@ -1262,7 +1336,7 @@ static int ep_encode_api(lua_State *L){
 		lua_pushlstring(L, (const char*)(pwb->data()), pwb->size());
 		return 1;
 	}else{
-		fprintf(stderr, "eproto encode error = %d\n", pwb->getError());
+	    LOG_ERROR("eproto encode error = %d", pwb->getError());
         lua_pushnil(L);
         lua_pushnumber(L, (lua_Number)pwb->getError());
 	}
@@ -1273,6 +1347,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
 inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_normal prb->left()=% < 1", prb->left());
         return;
     }
     unsigned char t = prb->moveNext();
@@ -1301,6 +1376,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xd3: ep_unpack_int64(prb, L, t); return;
         default:{
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_normal number unknown type=%d", t);
             return;
         }
         }
@@ -1317,6 +1393,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xdb: ep_unpack_str32(prb, L, t); return;
         default:{
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_normal string unknown type=%d", t);
             return;
         }
 	    }
@@ -1329,6 +1406,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xc6: ep_unpack_bin32(prb, L, t); return;
         default:{
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_normal bin unknown type=%d", t);
             return;
         }
         }
@@ -1339,6 +1417,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xc3: ep_unpack_true(prb, L, t); return;
         default:{
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_normal bool unknown type=%d", t);
             return;
         }
 		}
@@ -1350,6 +1429,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
         case 0xcb: ep_unpack_double(prb, L, t); return;
         default:{
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_normal float unknown type=%d", t);
             return;
         }
 		}
@@ -1357,6 +1437,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
 	}
     default:{
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_normal unknown type=%d", type);
         return;
     }
 	}
@@ -1364,6 +1445,7 @@ inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int t
 inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_array_normal prb->left()=%d < 1", prb->left());
         return;
     }
     unsigned char t = prb->moveNext();
@@ -1380,6 +1462,7 @@ inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
     case 0xdd: ep_unpack_array32(prb, L, t); return;
     default:{
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_array_normal array unknown type=%d", t);
         return;
     }
     }
@@ -1387,6 +1470,7 @@ inline void ep_decode_proto_array_normal(ReadBuffer* prb, lua_State *L){
 inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_array prb->left()=%d < 1", prb->left());
         return;
     }
 	unsigned char t = prb->moveNext();
@@ -1397,6 +1481,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
     }else if(t == 0xdc){
         if(prb->left() < 2){
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_array prb->left()=%d < 2", prb->left());
             return;
         }
         arylen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
@@ -1404,6 +1489,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
     }else if(t == 0xdd){
 	    if(prb->left() < 4){
 	        prb->setError(1);
+	        LOG_ERROR("ep_decode_proto_array prb->left()=%d < 4", prb->left());
 	        return;
 	    }
 	    arylen = ntohl( *((unsigned int*)(prb->offsetPtr())));
@@ -1423,6 +1509,7 @@ inline void ep_decode_proto_array(ProtoState* ps, ReadBuffer* prb, lua_State *L,
 inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_map_normal prb->left()=%d < 1", prb->left());
         return;
     }
     unsigned char t = prb->moveNext();
@@ -1439,6 +1526,7 @@ inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
     case 0xdf: ep_unpack_map32(prb, L, t); return;
     default:{
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_map_normal unknown type=%d", t);
         return;
     }
     }
@@ -1446,6 +1534,7 @@ inline void ep_decode_proto_map_normal(ReadBuffer* prb, lua_State *L){
 inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, unsigned int key, ProtoElementVector* protoVec){
     if( prb->left() < 1){
         prb->setError(1);
+        LOG_ERROR("ep_decode_proto_map prb->left()=%d < 1", prb->left());
         return;
     }
 	unsigned char t = prb->moveNext();
@@ -1456,6 +1545,7 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
     }else if(t == 0xde){
 	    if(prb->left() < 2){
 	        prb->setError(1);
+	        LOG_ERROR("ep_decode_proto_map prb->left()=%d < 2", prb->left());
 	        return;
 	    }
 	    maplen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
@@ -1463,6 +1553,7 @@ inline void ep_decode_proto_map(ProtoState* ps, ReadBuffer* prb, lua_State *L, u
     }else if(t == 0xdf){
 	    if(prb->left() < 4){
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto_map prb->left()=%d < 4", prb->left());
             return;
         }
         maplen = ntohl( *((unsigned int*)(prb->offsetPtr())));
@@ -1518,12 +1609,12 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 				}
 			}else{
 				prb->setError(1);
-				fprintf(stderr, "error type in proto manager\n");
+				LOG_ERROR("ep_decode_proto_element error type in proto manager");
 				return;
 			}
 		}
 		if(prb->getError()){
-			fprintf(stderr, "decode proto element failed\n");
+		    LOG_ERROR("ep_decode_proto_element decode proto element failed");
 			return;
 		}
 		lua_rawset(L,-3);
@@ -1532,6 +1623,7 @@ inline void ep_decode_proto_element(ProtoState* ps, ReadBuffer* prb, lua_State *
 static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, ProtoElementVector* protoVec){
     if( NULL == protoVec ){
         prb->setError(ERRORBIT_TYPE_NO_PROTO);
+        LOG_ERROR("ep_decode_proto decode NULL == protoVec");
         return;
     }
     unsigned char t = prb->moveNext();
@@ -1542,6 +1634,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     }else if(t==0xdc){
         if(prb->left() < 2){
             prb->setError(1);
+            LOG_ERROR("ep_decode_proto prb->left()=%d < 2", prb->left());
             return;
         }
 	    arrLen = ntohs( *((unsigned short*)(prb->offsetPtr()) ) );
@@ -1549,6 +1642,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     }else if(t==0xdd){
 	    if(prb->left() < 4){
 	        prb->setError(1);
+	        LOG_ERROR("ep_decode_proto prb->left()=%d < 4", prb->left());
 	        return;
 	    }
 	    arrLen = ntohl( *((unsigned int*)(prb->offsetPtr())));
@@ -1559,6 +1653,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
 		return;
     }else{
         prb->setError(ERRORBIT_TYPE_WRONG_PROTO);
+        LOG_ERROR("ep_decode_proto unknown type=%d", t);
     }
     ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 }
