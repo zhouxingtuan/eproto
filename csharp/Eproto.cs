@@ -7,6 +7,7 @@ namespace Erpc
     {
         virtual public void Encode(WriteBuffer wb) { }
         virtual public void Decode(ReadBuffer rb) { }
+        virtual public Proto Create() { return null; }
     }
 
     class WriteBuffer
@@ -142,7 +143,7 @@ namespace Erpc
         public string CopyString(int count)
         {
             byte[] b = CopyBytes(count);
-            return Encoding.Default.GetString(b);
+            return Eproto.BytesToString(b);
         }
         public byte[] CopyBytes(int count)
         {
@@ -242,21 +243,21 @@ namespace Erpc
             if (slen < 32)
             {
                 topbyte = (byte)(0xa0 | (byte)slen);
-                wb.Add(topbyte, Encoding.Default.GetBytes(str));
+                wb.Add(topbyte, Eproto.StringToBytes(str));
             }
             else if (slen < 256)
             {
                 topbyte = 0xd9;
-                wb.Add(topbyte, ReverseBytes((byte)slen), Encoding.Default.GetBytes(str));
+                wb.Add(topbyte, ReverseBytes((byte)slen), Eproto.StringToBytes(str));
             }
             else if (slen < 65536)
             {
                 topbyte = 0xda;
-                wb.Add(topbyte, ReverseBytes((ushort)slen), Encoding.Default.GetBytes(str));
+                wb.Add(topbyte, ReverseBytes((ushort)slen), Eproto.StringToBytes(str));
             }
             else if (slen < 4294967296 - 1){ // TODO: -1 for avoiding (condition is always true warning)
                 topbyte = 0xdb;
-                wb.Add(topbyte, ReverseBytes((uint)slen), Encoding.Default.GetBytes(str));
+                wb.Add(topbyte, ReverseBytes((uint)slen), Eproto.StringToBytes(str));
             } else {
                 PackNil(wb);
                 Console.WriteLine("PackString length is out of uint " + slen);
@@ -1209,7 +1210,7 @@ namespace Erpc
             }
             value = BitConverter.ToDouble(v, 0);
         }
-
+        
         public static byte[] ReverseBytes(byte value)
         {
             byte[] b = new byte[1];
@@ -1265,7 +1266,7 @@ namespace Erpc
             return b;
         }
 
-        public static string BytesToString(byte[] b)
+        public static string BytesPrint(byte[] b)
         {
             string s = "";
             for(int i=0; i<b.Length; ++i)
@@ -1274,7 +1275,7 @@ namespace Erpc
             }
             return s;
         }
-        public static string BytesToHex(byte[] buffer)
+        public static string BytesPrintHex(byte[] buffer)
         {
             StringBuilder ret = new StringBuilder();
             foreach (byte b in buffer)
@@ -1286,6 +1287,14 @@ namespace Erpc
             }
             var hex = ret.ToString();
             return hex;
+        }
+        static public byte[] StringToBytes(string str)
+        {
+            return Encoding.UTF8.GetBytes(str);
+        }
+        static public string BytesToString(byte[] b)
+        {
+            return Encoding.UTF8.GetString(b);
         }
     }
 }
