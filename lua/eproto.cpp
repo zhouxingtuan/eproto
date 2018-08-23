@@ -135,7 +135,7 @@ inline void ep_pack_string(WriteBuffer* pwb, const unsigned char *sval, size_t s
         pwb->add(topbyte, l, sval, slen);
     } else {
         pwb->setError(ERRORBIT_STRINGLEN);
-        LOG_ERROR("ep_pack_string length too long %lld", slen);
+        LOG_ERROR("ep_pack_string length too long %lld", (long long int)slen);
     }
 }
 inline void ep_pack_bytes(WriteBuffer* pwb, const unsigned char *sval, size_t slen){
@@ -154,7 +154,7 @@ inline void ep_pack_bytes(WriteBuffer* pwb, const unsigned char *sval, size_t sl
         pwb->add(topbyte, l, sval, slen);
     } else {
         pwb->setError(ERRORBIT_STRINGLEN);
-        LOG_ERROR("ep_pack_bytes length too long %lld", slen);
+        LOG_ERROR("ep_pack_bytes length too long %lld", (long long int)slen);
     }
 }
 inline void ep_pack_number(WriteBuffer* pwb, lua_Number n){
@@ -321,7 +321,7 @@ inline void ep_unpack_fixstr(ReadBuffer* prb, lua_State *L, unsigned char t){
     size_t slen = t & 0x1f;
     if( prb->left() < slen ){
         prb->setError(1);
-        LOG_ERROR("ep_unpack_fixstr prb->left()=%d < slen=%lld", prb->left(), slen);
+        LOG_ERROR("ep_unpack_fixstr prb->left()=%d < slen=%lld", prb->left(), (long long int)slen);
         return;
     }
     lua_pushlstring(L,(const char*)prb->offsetPtr(),slen);
@@ -350,7 +350,7 @@ inline void ep_unpack_bin8(ReadBuffer* prb, lua_State *L, unsigned char t){
     size_t slen = prb->moveNext();
     if(prb->left() < slen){
         prb->setError(1);
-        LOG_ERROR("ep_unpack_bin8 prb->left()=%d < slen=%lld", prb->left(), slen);
+        LOG_ERROR("ep_unpack_bin8 prb->left()=%d < slen=%lld", prb->left(), (long long int)slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -366,7 +366,7 @@ inline void ep_unpack_bin16(ReadBuffer* prb, lua_State *L, unsigned char t){
     prb->moveOffset(2);
     if(prb->left() < slen){
         prb->setError(1);
-        LOG_ERROR("ep_unpack_bin16 prb->left()=%d < slen=%lld", prb->left(), slen);
+        LOG_ERROR("ep_unpack_bin16 prb->left()=%d < slen=%lld", prb->left(), (long long int)slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -382,7 +382,7 @@ inline void ep_unpack_bin32(ReadBuffer* prb, lua_State *L, unsigned char t){
     prb->moveOffset(4);
     if(prb->left() < slen){
         prb->setError(1);
-        LOG_ERROR("ep_unpack_bin32 prb->left()=%d < slen=%lld", prb->left(), slen);
+        LOG_ERROR("ep_unpack_bin32 prb->left()=%d < slen=%lld", prb->left(), (long long int)slen);
         return;
     }
     lua_pushlstring(L, (const char*)prb->offsetPtr(), slen);
@@ -1347,7 +1347,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
 inline void ep_decode_proto_normal(ReadBuffer* prb, lua_State *L, unsigned int type){
     if( prb->left() < 1){
         prb->setError(1);
-        LOG_ERROR("ep_decode_proto_normal prb->left()=% < 1", prb->left());
+        LOG_ERROR("ep_decode_proto_normal prb->left()=%d < 1", prb->left());
         return;
     }
     unsigned char t = prb->moveNext();
