@@ -445,7 +445,7 @@ class Reader{
                     return false;
                 }
                 float v = 0;
-                rcopy((unsigned char*)(&f), 4);
+                rcopy((unsigned char*)(&v), 4);
                 value = v;
                 moveOffset(4);
                 break;
@@ -470,7 +470,7 @@ class Reader{
         }
         return true;
     }
-    inline void unpack_string(std::string &value){
+    inline bool unpack_string(std::string &value){
         value.clear();
         unsigned char t = moveNext();
         if (t == 0xc0)
@@ -480,7 +480,7 @@ class Reader{
         if (t > 0x9f && t < 0xc0)
         {
             int slen = t & 0x1f;
-            if(left() < slen)
+            if (left() < (unsigned int)slen)
             {
                 fprintf(stderr, "unpack_string fixed str failed\n");
                 return false;
@@ -744,7 +744,7 @@ class Reader{
         if (t > 0x9f && t < 0xc0)
         {
             int slen = t & 0x1f;
-            if (left() < slen)
+            if (left() < (unsigned int)slen)
             {
                 fprintf(stderr, "discard fixed str failed\n");
                 return;
