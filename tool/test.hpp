@@ -18,7 +18,7 @@ namespace test
             }
             virtual void Decode(Reader& rb)
             {
-                long c = rb.unpack_array();
+                long long int c = rb.unpack_array();
                 if (c <= 0) { return; }
                 rb.unpack_int(ref this->t1);
                 if (--c <= 0) { return; }
@@ -27,18 +27,19 @@ namespace test
                 rb.unpack_discard(c);
             }
             virtual Proto* Create() { return new inner(); }
-        }
+            static inner* New() { return new inner(); }
+        };
         int a;
         long long int b;
         float c;
         double d;
         std::string e;
         std::vector<char> f;
-        inner g;
+        inner* g;
         std::unordered_map<int, std::string> h;
         std::vector<int> i;
-        std::vector<inner> j;
-        std::unordered_map<std::string, inner> k;
+        std::vector<inner*> j;
+        std::unordered_map<std::string, inner*> k;
         std::unordered_map<std::string, std::vector<char>> l;
         virtual void Encode(Writer& wb)
         {
@@ -50,7 +51,7 @@ namespace test
             wb.pack_int(this->e);
             wb.pack_bytes(this->f);
             if (this->g == null) { wb.pack_nil(); } else { this->g.Encode(wb); }
-            if (this->h == null) { wb.pack_nil(); } else {
+            {
                 wb.pack_map(this->h.size());
                 for(auto &i : this->h)
                 {
@@ -58,7 +59,7 @@ namespace test
                     wb.pack_int(i.second);
                 }
             }
-            if (this->i == null) { wb.pack_nil(); } else {
+            {
                 wb.pack_array(this->i.size());
                 for(int i=0; i<this->i.size(); ++i)
                 {
@@ -66,7 +67,7 @@ namespace test
                     wb.pack_int(v);
                 }
             }
-            if (this->j == null) { wb.pack_nil(); } else {
+            {
                 wb.pack_array(this->j.size());
                 for(int i=0; i<this->j.size(); ++i)
                 {
@@ -74,7 +75,7 @@ namespace test
                     if (v == null) { wb.pack_nil(); } else { v.Encode(wb); }
                 }
             }
-            if (this->k == null) { wb.pack_nil(); } else {
+            {
                 wb.pack_map(this->k.size());
                 for(auto &i : this->k)
                 {
@@ -82,7 +83,7 @@ namespace test
                     if (i.second == null) { wb.pack_nil(); } else { i.second.Encode(wb); }
                 }
             }
-            if (this->l == null) { wb.pack_nil(); } else {
+            {
                 wb.pack_map(this->l.size());
                 for(auto &i : this->l)
                 {
@@ -93,7 +94,7 @@ namespace test
         }
         virtual void Decode(Reader& rb)
         {
-            long c = rb.unpack_array();
+            long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(ref this->a);
             if (--c <= 0) { return; }
@@ -110,10 +111,10 @@ namespace test
             if (rb.NextIsNil()) { rb.MoveNext(); } else { this->g = new inner(); this->g.Decode(rb); }
             if (--c <= 0) { return; }
             {
-                long n = rb.unpack_map();
-                if (n < 0) { this->h=null; } else {
+                long long int n = rb.unpack_map();
+                if (n > 0) {
                     this->h = new Dictionary<int, std::string>();
-                    for(int i=0; i<n; ++i)
+                    for(long long int i=0; i<n; ++i)
                     {
                         int k=0; std::string v=0;
                         rb.unpack_int(ref k);
@@ -124,10 +125,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long n = rb.unpack_array();
-                if (n < 0) { this->i=null; } else {
+                long long int n = rb.unpack_array();
+                if (n > 0) {
                     this->i = new int[n];
-                    for(int i=0; i<n; ++i)
+                    for(long long int i=0; i<n; ++i)
                     {
                         int v=0;
                         rb.unpack_int(ref v);
@@ -137,10 +138,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long n = rb.unpack_array();
-                if (n < 0) { this->j=null; } else {
+                long long int n = rb.unpack_array();
+                if (n > 0) {
                     this->j = new inner[n];
-                    for(int i=0; i<n; ++i)
+                    for(long long int i=0; i<n; ++i)
                     {
                         inner v=null;
                         if (rb.NextIsNil()) { rb.MoveNext(); } else { v = new inner(); v.Decode(rb); }
@@ -150,10 +151,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long n = rb.unpack_map();
-                if (n < 0) { this->k=null; } else {
+                long long int n = rb.unpack_map();
+                if (n > 0) {
                     this->k = new Dictionary<std::string, inner>();
-                    for(int i=0; i<n; ++i)
+                    for(long long int i=0; i<n; ++i)
                     {
                         std::string k=0; inner v=null;
                         rb.unpack_int(ref k);
@@ -164,10 +165,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long n = rb.unpack_map();
-                if (n < 0) { this->l=null; } else {
+                long long int n = rb.unpack_map();
+                if (n > 0) {
                     this->l = new Dictionary<std::string, std::vector<char>>();
-                    for(int i=0; i<n; ++i)
+                    for(long long int i=0; i<n; ++i)
                     {
                         std::string k=0; std::vector<char> v=std::vector<char>();
                         rb.unpack_int(ref k);
@@ -180,7 +181,8 @@ namespace test
             rb.unpack_discard(c);
         }
         virtual Proto* Create() { return new request(); }
-    }
+        static request* New() { return new request(); }
+    };
     class empty : public Proto
     {
     public:
@@ -190,12 +192,13 @@ namespace test
         }
         virtual void Decode(Reader& rb)
         {
-            long c = rb.unpack_array();
+            long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
         virtual Proto* Create() { return new empty(); }
-    }
+        static empty* New() { return new empty(); }
+    };
     class response : public Proto
     {
     public:
@@ -209,7 +212,7 @@ namespace test
         }
         virtual void Decode(Reader& rb)
         {
-            long c = rb.unpack_array();
+            long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(ref this->error);
             if (--c <= 0) { return; }
@@ -218,6 +221,7 @@ namespace test
             rb.unpack_discard(c);
         }
         virtual Proto* Create() { return new response(); }
-    }
+        static response* New() { return new response(); }
+    };
 
 }

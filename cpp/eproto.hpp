@@ -60,7 +60,7 @@ public:
 	        add(0xc2);
 	    }
 	}
-	inline void pack_int(long long lv){
+	inline void pack_int(long long int lv){
         if(lv>=0){
             if(lv<128){
                 add((unsigned char)lv);
@@ -74,7 +74,7 @@ public:
                 long v = htonl((long)lv);
                 add(0xce, (unsigned char*)&v, 4);
             } else {
-                long long v = htonll((long long)lv);
+                long long int v = htonll((long long int)lv);
                 add(0xcf, (unsigned char*)&v, 8);
             }
         } else {
@@ -91,7 +91,7 @@ public:
                 int v = htonl(lv&0xffffffff);
                 add(0xd2, (unsigned char*)&v, 4);
             } else{
-                long long v = htonll(lv);
+                long long int v = htonll(lv);
                 add(0xd3, (unsigned char*)&v, 8);
             }
         }
@@ -289,48 +289,48 @@ public:
         }
     }
     inline void unpack_int(unsigned char &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (unsigned char)v;
         }
     }
     inline void unpack_int(unsigned short &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (unsigned short)v;
         }
     }
     inline void unpack_int(unsigned int &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (unsigned int)v;
         }
     }
-    inline void unpack_int(unsigned long long &value){
-        long long v = 0;
+    inline void unpack_int(unsigned long long int &value){
+        long long int v = 0;
         if(unpack_int(v)){
-            value = (unsigned long long)v;
+            value = (unsigned long long int)v;
         }
     }
     inline void unpack_int(char &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (char)v;
         }
     }
     inline void unpack_int(short &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (short)v;
         }
     }
     inline void unpack_int(int &value){
-        long long v = 0;
+        long long int v = 0;
         if(unpack_int(v)){
             value = (int)v;
         }
     }
-    inline bool unpack_int(long long &value){
+    inline bool unpack_int(long long int &value){
         unsigned char t = moveNext();
         if(t == 0xc0)
         {
@@ -387,7 +387,7 @@ public:
                     fprintf(stderr, "unpack_int uint64 failed\n");
                     return false;
                 }
-                value = ntohll(*(long long*)(offsetPtr()));
+                value = ntohll(*(long long int*)(offsetPtr()));
                 moveOffset(8);
                 break;
             }
@@ -430,7 +430,7 @@ public:
                     fprintf(stderr, "unpack_int int64 failed\n");
                     return false;
                 }
-                value = ntohll(*(long long*)(offsetPtr()));
+                value = ntohll(*(long long int*)(offsetPtr()));
                 moveOffset(8);
                 break;
             }
@@ -646,7 +646,7 @@ public:
         }
         return true;
     }
-    inline long long unpack_array(void){
+    inline long long int unpack_array(void){
         unsigned char t = moveNext();
         if (t == 0xc0)
         {
@@ -691,7 +691,7 @@ public:
         }
         return -2;
     }
-    inline long long unpack_map(void){
+    inline long long int unpack_map(void){
         unsigned char t = moveNext();
         if (t == 0xc0)
         {

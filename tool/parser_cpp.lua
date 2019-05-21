@@ -105,8 +105,8 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- ]]
     local template = [[%sclass %s : public Proto
 %s{
-%s%s%s%s%s
-%s}
+%s%s%s%s%s%s
+%s};
 ]]
     local nextPrettyShow = prettyShow..prettyStep
     local beforeClass = prettyShow
@@ -123,10 +123,11 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local Encode = self:genEncode(elementArray, nextPrettyShow)
     local Decode = self:genDecode(elementArray, nextPrettyShow)
     local Create = self:genCreate(className, nextPrettyShow)
+    local New    = self:genNew(className, nextPrettyShow)
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Encode, Decode, Create,
+        subClasses, params, Encode, Decode, Create, New,
         prettyShow)
     return classCode
 end
@@ -141,7 +142,8 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 local raw_key = elementInfo[3]
                 local key_type = protobuf_to_cpp[raw_key]
                 if key_type == nil then
-                    key_type = raw_key
+                    -- 自定义对象
+                    key_type = raw_key.."*"
                 end
                 cpp_type = "std::vector<"..key_type..">"
             elseif raw_type == "map" then
@@ -153,12 +155,14 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 end
                 local value_type = protobuf_to_cpp[raw_value]
                 if value_type == nil then
-                    value_type = raw_value
+                    -- 自定义对象
+                    value_type = raw_value.."*"
                 end
                 cpp_type = "std::unordered_map<"..key_type..", "..value_type..">"
             else
                 --                print("unsupport protobuf type to cpp type", raw_type)
-                cpp_type = raw_type
+                -- 自定义对象
+                cpp_type = raw_type.."*"
             end
         end
         local lineCode = prettyShow .. cpp_type .. " " .. name .. ";\n"
@@ -183,7 +187,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
                 local index_name = "i"
-                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { wb.pack_nil(); } else {\n", this_name)
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_map(%s.size());\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(auto &%s : %s)\n", index_name, this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
@@ -213,7 +217,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local index_name = "i"
                 local value_name = "v"
                 local value_at_index = this_name.."["..index_name.."]"
-                bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { wb.pack_nil(); } else {\n", this_name)
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_array(%s.size());\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.size(); ++%s)\n", index_name, index_name, this_name, index_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
@@ -263,7 +267,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. prettyShow .. "{\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
-    bodyCode = bodyCode .. nextPrettyShow .. string.format("long %s = rb.unpack_array();\n", count_name)
+    bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s <= 0) { return; }\n", count_name)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
@@ -295,10 +299,10 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 decl_value_default = self:getDefaultDeclValue(raw_value_cpp_type)
                 cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long n = rb.unpack_map();\n")
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n < 0) { %s=null; } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
                 if raw_key_cpp_type == nil then
@@ -337,10 +341,10 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 end
                 cpp_type = decl_key.."[n]"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long n = rb.unpack_array();\n")
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n < 0) { %s=null; } else {\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_array();\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
                 bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v=%s;\n", decl_key, decl_key_default)
@@ -370,7 +374,11 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     return bodyCode
 end
 function parser_cpp:genCreate(className, prettyShow)
-    local str = string.format("%svirtual Proto* Create() { return new %s(); }", prettyShow, className)
+    local str = string.format("%svirtual Proto* Create() { return new %s(); }\n", prettyShow, className)
+    return str
+end
+function parser_cpp:genNew(className, prettyShow)
+    local str = string.format("%sstatic %s* New() { return new %s(); }", prettyShow, className, className)
     return str
 end
 function parser_cpp:getDefaultDeclValue(cpp_type)
