@@ -25,12 +25,14 @@ class Reader;
 
 class Proto
 {
+public:
     virtual public void Encode(Writer& wb) { }
     virtual public void Decode(Reader& rb) { }
     virtual public Proto* Create() { return null; }
 }
 
 class Writer{
+public:
 	unsigned char* buffer;
 	unsigned int bufferSize;
 	unsigned int offset;
@@ -248,6 +250,7 @@ class Writer{
 };
 
 class Reader{
+public:
     unsigned char *buffer;
     unsigned int length;
     unsigned int offset;

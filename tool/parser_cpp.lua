@@ -111,9 +111,11 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local nextPrettyShow = prettyShow..prettyStep
     local beforeClass = prettyShow
     if isPublic then
-        beforeClass = beforeClass .. "public "
+--        beforeClass = beforeClass .. "public "
     end
     local subClasses = ""
+    local publicLine = prettyShow.."public:\n"
+    subClasses = subClasses .. publicLine
     for name,info in pairs(childMap) do
         subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow, true)
     end
@@ -159,20 +161,20 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 cpp_type = raw_type
             end
         end
-        local lineCode = prettyShow .. "public " .. cpp_type .. " " .. name .. ";\n"
+        local lineCode = prettyShow .. cpp_type .. " " .. name .. ";\n"
         paramCode = paramCode .. lineCode
     end
     return paramCode
 end
 function parser_cpp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "virtual public void Encode(Writer& wb)\n"
+    local bodyCode = prettyShow .. "virtual void Encode(Writer& wb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     bodyCode = bodyCode .. nextPrettyShow .. string.format("wb.pack_array(wb, %s);\n", #elementArray)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
-        local this_name = "this."..name
+        local this_name = "this->"..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
             local nextNextPrettyShow = nextPrettyShow .. prettyStep
@@ -182,8 +184,8 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local raw_value = elementInfo[4]
                 local index_name = "i"
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { wb.pack_nil(); } else {\n", this_name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_map(%s.Count);\n", this_name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(auto %s : %s)\n", index_name, this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_map(%s.size());\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(auto &%s : %s)\n", index_name, this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 local raw_value_cpp_type = protobuf_to_cpp[raw_value]
@@ -212,8 +214,8 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local value_name = "v"
                 local value_at_index = this_name.."["..index_name.."]"
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s == null) { wb.pack_nil(); } else {\n", this_name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_array(%s.Length);\n", this_name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.Length; ++%s)\n", index_name, index_name, this_name, index_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_array(%s.size());\n", this_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.size(); ++%s)\n", index_name, index_name, this_name, index_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 if raw_key_cpp_type == nil then
@@ -257,7 +259,7 @@ function parser_cpp:getPackByType(name, cpp_type)
 end
 function parser_cpp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "virtual public void Decode(Reader& rb)\n"
+    local bodyCode = prettyShow .. "virtual void Decode(Reader& rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
@@ -266,7 +268,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
-        local this_name = "this."..name
+        local this_name = "this->"..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
             local nextNextPrettyShow = nextPrettyShow .. prettyStep
@@ -368,7 +370,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     return bodyCode
 end
 function parser_cpp:genCreate(className, prettyShow)
-    local str = string.format("%svirtual public Proto* Create() { return new %s(); }", prettyShow, className)
+    local str = string.format("%svirtual Proto* Create() { return new %s(); }", prettyShow, className)
     return str
 end
 function parser_cpp:getDefaultDeclValue(cpp_type)
