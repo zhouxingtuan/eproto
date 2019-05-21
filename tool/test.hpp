@@ -61,7 +61,7 @@ namespace test
             }
             {
                 wb.pack_array(this->i.size());
-                for(int i=0; i<this->i.size(); ++i)
+                for(size_t i=0; i<this->i.size(); ++i)
                 {
                     int v = this->i[i];
                     wb.pack_int(v);
@@ -69,7 +69,7 @@ namespace test
             }
             {
                 wb.pack_array(this->j.size());
-                for(int i=0; i<this->j.size(); ++i)
+                for(size_t i=0; i<this->j.size(); ++i)
                 {
                     inner v = this->j[i];
                     if (v == null) { wb.pack_nil(); } else { v.Encode(wb); }

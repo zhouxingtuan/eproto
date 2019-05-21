@@ -219,7 +219,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local value_at_index = this_name.."["..index_name.."]"
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_array(%s.size());\n", this_name)
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(int %s=0; %s<%s.size(); ++%s)\n", index_name, index_name, this_name, index_name)
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(size_t %s=0; %s<%s.size(); ++%s)\n", index_name, index_name, this_name, index_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 if raw_key_cpp_type == nil then
