@@ -115,6 +115,13 @@ function parser:parseFile(file, save_file, print_flag)
 	local cs_file = name..".cs"
 	self:setFileData(cs_file, cs_buf)
 
+	local parser_cpp = require("parser_cpp")
+	local parser_obj = parser_cpp.new(self.m_package, self.m_full_path_info)
+	local cpp_buf = parser_obj:genCode()
+--	print("csharp code:\n"..cs_buf)
+	local cpp_file = name..".hpp"
+	self:setFileData(cpp_file, cpp_buf)
+
 	return protos
 end
 function parser:getFileNameAndData(file)

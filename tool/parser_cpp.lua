@@ -103,7 +103,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- Encode
     -- Decode
     -- ]]
-    local template = [[%sclass %s : Proto
+    local template = [[%sclass %s : public Proto
 %s{
 %s%s%s%s%s
 %s}
@@ -141,7 +141,7 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if key_type == nil then
                     key_type = raw_key
                 end
-                cpp_type = key_type.."[]"
+                cpp_type = "std::vector<"..key_type..">"
             elseif raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
@@ -153,7 +153,7 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if value_type == nil then
                     value_type = raw_value
                 end
-                cpp_type = "Dictionary<"..key_type..", "..value_type..">"
+                cpp_type = "std::unordered_map<"..key_type..", "..value_type..">"
             else
                 --                print("unsupport protobuf type to cpp type", raw_type)
                 cpp_type = raw_type
