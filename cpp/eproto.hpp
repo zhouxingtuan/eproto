@@ -554,7 +554,7 @@ class Reader{
         }
         return true;
     }
-    inline void unpack_bytes(std::vector<char> &value){
+    inline bool unpack_bytes(std::vector<char> &value){
         value.clear();
         unsigned char t = moveNext();
         if (t == 0xc0)
