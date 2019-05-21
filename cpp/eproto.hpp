@@ -142,7 +142,7 @@ class Writer{
         } else if( l<4294967296LL-1){ // TODO: avoid C warn
             topbyte = 0xdd;
             unsigned int elemnum = htonl(l);
-            addadd(topbyte, (unsigned char*)&elemnum, 4);
+            add(topbyte, (unsigned char*)&elemnum, 4);
         }
     }
     inline void pack_map(size_t l){
@@ -432,7 +432,7 @@ class Reader{
             value = (float)v;
         }
     }
-    inline void unpack_double(double &value){
+    inline bool unpack_double(double &value){
         unsigned char t = moveNext();
         switch (t)
         {
