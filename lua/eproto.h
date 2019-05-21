@@ -1,6 +1,8 @@
 #ifndef __eproto_h__
 #define __eproto_h__
 
+#include "log.h"
+
 extern "C" {
 #include "lua.h"
 }

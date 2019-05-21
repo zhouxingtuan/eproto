@@ -6,23 +6,12 @@ extern "C" {
 }
 
 #ifndef LOG_ERROR
-#include <sys/time.h>
 #define LOG_ERROR(fmt, ...)\
-	fprintf(stderr, "[ERROR %s][%s:%s():%d] " fmt "\n", __getTimeStringUS().c_str(), __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);
+	fprintf(stderr, "[ERROR][%s:%s():%d] " fmt "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__);
 
 #endif
 
 namespace eproto{
-
-std::string __getTimeStringUS(void){
-    char temp[32] = {0};
-	timeval t;
-	gettimeofday( &t, NULL );
-	struct tm* ptm = localtime(&t.tv_sec);
-	snprintf(temp, 32, "%4d-%02d-%02d %02d:%02d:%02d %06d",
-		ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)t.tv_usec);
-	return std::string(temp);
-}
 
 #if LUA_VERSION_NUM >= 503
 # define lua53_getfield lua_getfield
@@ -632,8 +621,13 @@ static int delete_ep_state(lua_State *L){
     }
     return 0;
 }
-static ProtoState* default_ep_state(lua_State *L){
+static ProtoState* default_ep_state(lua_State *L, int index){
     ProtoState *ps;
+    int t = lua_type(L, index);
+    if(t == LUA_TUSERDATA){
+        ps = (ProtoState*)lua_touserdata(L, index);
+        return ps;
+    }
     if (lua53_getfield(L, LUA_REGISTRYINDEX, EP_STATE) == LUA_TUSERDATA) {
         ps = (ProtoState*)lua_touserdata(L, -1);
         lua_pop(L, 1);
@@ -649,8 +643,27 @@ static ProtoState* default_ep_state(lua_State *L){
     }
     return ps;
 }
+static int delete_ep_state_new(lua_State *L){
+    ProtoState *ps;
+    ps = (ProtoState*)lua_touserdata(L, -1);
+    if (ps != NULL) {
+        ep_state_free(ps);
+    }
+    return 0;
+}
+static ProtoState* create_new_state(lua_State *L){
+    ProtoState *ps;
+    ps = (ProtoState*)lua_newuserdata(L, sizeof(ProtoState));
+    ep_state_init(ps);
+    lua_createtable(L, 0, 1);
+    lua_pushcfunction(L, delete_ep_state_new);
+    lua_setfield(L, -2, "__gc");
+    lua_setmetatable(L, -2);
+    return ps;
+}
 static int ep_pack_api(lua_State *L){
-	ProtoState* ps = default_ep_state(L);
+	ProtoState* ps = default_ep_state(L, 2);
+	lua_settop(L, 1);
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	pwb->clear();
 	ep_pack_anytype(pwb, L, 1);
@@ -665,6 +678,7 @@ static int ep_pack_api(lua_State *L){
     return 2;
 }
 static int ep_unpack_api(lua_State *L){
+    lua_settop(L, 1);
     size_t len;
     const char * s = lua_tolstring(L, 1, &len);
 //    const char * s = luaL_checklstring(L,1,&len);
@@ -775,8 +789,7 @@ static bool ep_register_element_array(ProtoState* ps, lua_State *L, const std::s
     }
 	return true;
 }
-static int ep_register_api(lua_State *L){
-	ProtoState* ps = default_ep_state(L);
+static int ep_register_api_call(lua_State *L, ProtoState* ps){
 	lua_settop(L, 1);
 	ep_unpack_api(L);
 	lua_pop(L, 1);      // pop unpack len
@@ -812,7 +825,13 @@ static int ep_register_api(lua_State *L){
 	lua_pushboolean(L, 1);
     return 1;
 }
+static int ep_register_api(lua_State *L){
+	ProtoState* ps = default_ep_state(L, 2);
+	lua_settop(L, 1);
+    return ep_register_api_call(L, ps);
+}
 static int ep_register_file_api(lua_State *L){
+    ProtoState* ps = default_ep_state(L, 2);
 	lua_settop(L, 1);
 	const char* filepath = lua_tostring(L, 1);
 	// read file data
@@ -833,10 +852,12 @@ static int ep_register_file_api(lua_State *L){
 	delete [] buf;
 	fclose(pFile);
 	// register buffer now
-	return ep_register_api(L);
+    return ep_register_api_call(L, ps);
+//	return ep_register_api(L);
 }
 static int ep_proto_api(lua_State *L){
-	ProtoState* ps = default_ep_state(L);
+	ProtoState* ps = default_ep_state(L, 1);
+	lua_settop(L, 0);
 	typedef std::unordered_map<unsigned int, std::string> ProtoNameMap;
 	ProtoNameMap nameMap;
 	nameMap.insert(std::make_pair(ep_type_nil, "nil"));
@@ -1326,7 +1347,8 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 	}
 }
 static int ep_encode_api(lua_State *L){
-	ProtoState* ps = default_ep_state(L);
+	ProtoState* ps = default_ep_state(L, 3);
+	lua_settop(L, 2);
 	WriteBuffer* pwb = ps->pWriteBuffer;
 	pwb->clear();
 	std::string path = lua_tostring(L, 1);
@@ -1659,7 +1681,8 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 }
 static int ep_decode_api(lua_State *L){
-	ProtoState* ps = default_ep_state(L);
+	ProtoState* ps = default_ep_state(L, 3);
+	lua_settop(L, 2);
 	std::string path = lua_tostring(L, 1);
     size_t len;
     const char * s = lua_tolstring(L, 2, &len);
@@ -1685,6 +1708,10 @@ static int ep_decode_api(lua_State *L){
         return 2;
     }
 }
+static int ep_create_api(lua_State *L){
+    create_new_state(L);
+    return 1;
+}
 };  // end namespace eproto
 using namespace eproto;
 
@@ -1696,6 +1723,7 @@ static const luaL_Reg eproto_f[] = {
     { "register",       ep_register_api },      // buffer       -> bool
     { "register_file",  ep_register_file_api }, // filepath     -> bool
     { "proto",          ep_proto_api },         // none         -> table
+    { "create",          ep_create_api },         // none         -> userdata
     {NULL,NULL}
 };
 LUALIB_API int luaopen_eproto(lua_State *L){
