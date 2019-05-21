@@ -61,7 +61,7 @@ namespace test
                 for(int i=0; i<this.i.Length; ++i)
                 {
                     int v = this.i[i];
-                wb.pack_int(v);
+                    wb.pack_int(v);
                 }
             }
             if (this.j == null) { wb.pack_nil(); } else {

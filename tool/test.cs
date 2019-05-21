@@ -64,7 +64,7 @@ namespace test
                 for(int i=0; i<this.i.Length; ++i)
                 {
                     int v = this.i[i];
-                Eproto.PackInteger(wb, v);
+                    Eproto.PackInteger(wb, v);
                 }
             }
             if (this.j == null) { Eproto.PackNil(wb); } else {

@@ -223,7 +223,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 else
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s %s = %s;\n", raw_key_cpp_type, value_name, value_at_index)
-                    bodyCode = bodyCode .. nextNextPrettyShow .. self:getPackByType(value_name, raw_key_cpp_type)
+                    bodyCode = bodyCode .. nextNextNextPrettyShow .. self:getPackByType(value_name, raw_key_cpp_type)
                 end
                 bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
