@@ -20,6 +20,7 @@ RM = rm -f
 BIN = .
 TARGET = main
 
+#OBJS = old/epsilonproto.o eproto.o script.o
 OBJS = old/epsilonproto.o eproto.o script.o
 
 $(TARGET): main.o $(OBJS)

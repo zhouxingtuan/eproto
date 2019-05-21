@@ -14,6 +14,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+typedef luaL_Reg luaL_reg;
+
 #define ntohll(x) ( ( (uint64_t)(ntohl( (uint32_t)((x << 32) >> 32) )) << 32) | ntohl( ((uint32_t)(x >> 32)) ) )
 
 #define htonll(x) ntohll(x)
