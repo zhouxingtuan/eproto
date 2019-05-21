@@ -19,6 +19,16 @@ namespace eproto{
 
 #define WRITE_BUFFER_SIZE 4096
 
+class Writer;
+class Reader;
+
+class Proto
+{
+    virtual public void Encode(Writer& wb) { }
+    virtual public void Decode(Reader& rb) { }
+    virtual public Proto* Create() { return null; }
+}
+
 class Writer{
 	unsigned char* buffer;
 	unsigned int bufferSize;
@@ -37,6 +47,9 @@ class Writer{
 	inline unsigned char* data(void){ return (unsigned char*)buffer; }
 	inline unsigned int size(void) const { return offset; }
 
+    inline void pack_nil(void){
+        add(0xc0);
+    }
 	inline void pack_bool(bool b){
 	    if(b){
 	        add(0xc3);
