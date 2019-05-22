@@ -698,7 +698,7 @@ public:
                     unsigned short slen = 0;
                     if (left() < 2)
                     {
-                        fprintf(stderr, "unpack_array array16 length failed\n");
+                        fprintf(stderr, "unpack_map map16 length failed\n");
                         return -3;
                     }
                     slen = ntohs( *(short*)(offsetPtr()) );
@@ -710,7 +710,7 @@ public:
                     uint slen = 0;
                     if (left() < 4)
                     {
-                        fprintf(stderr, "unpack_array array32 length failed\n");
+                        fprintf(stderr, "unpack_map map32 length failed\n");
                         return -4;
                     }
                     slen = ntohl( *(long*)(offsetPtr()) );
@@ -719,7 +719,7 @@ public:
                 }
             default:
                 {
-                    fprintf(stderr, "unpack_array unknown type=0x%x", t);
+                    fprintf(stderr, "unpack_map unknown type=0x%x\n", t);
                     break;
                 }
         }
