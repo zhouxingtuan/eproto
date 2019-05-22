@@ -56,8 +56,8 @@ int main(int argc, const char * argv[]) {
         req->Encode(wb);
     }
     int64 t2 = get_time_us();
-    double gap = (double)(t2-t1)/1000000;
-	fprintf(stderr, "encode end t=%lld gap=%f\n", t2, gap);
+    double gap1 = (double)(t2-t1)/1000000;
+	fprintf(stderr, "encode end t=%lld gap=%f\n", t2, gap1);
 
     int64 t3 = get_time_us();
 	fprintf(stderr, "decode start t=%lld\n", t3);
@@ -67,8 +67,8 @@ int main(int argc, const char * argv[]) {
         req2->Decode(rb);
     }
     int64 t4 = get_time_us();
-    double gap = (double)(t4-t3)/1000000;
-	fprintf(stderr, "decode end t=%lld gap=%f\n", t4, gap);
+    double gap2 = (double)(t4-t3)/1000000;
+	fprintf(stderr, "decode end t=%lld gap=%f\n", t4, gap2);
 
     return 0;
 }
