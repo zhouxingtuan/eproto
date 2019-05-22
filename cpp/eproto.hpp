@@ -736,7 +736,7 @@ public:
         }
         return -2;
     }
-    void unpack_discard(long count){
+    void unpack_discard(long long int count){
         if(count <= 0)
         {
             return;
