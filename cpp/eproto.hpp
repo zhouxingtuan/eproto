@@ -7,7 +7,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _WIN32
+#include <windows.h>
+#pragma comment(lib, "wsock32.lib")
+#else
 #include <arpa/inet.h>
+#endif
 
 #include <vector>
 #include <string>
@@ -707,7 +712,7 @@ public:
                 }
             case 0xdf:// map32
                 {
-                    uint slen = 0;
+                    unsigned int slen = 0;
                     if (left() < 4)
                     {
                         fprintf(stderr, "unpack_map map32 length failed\n");
