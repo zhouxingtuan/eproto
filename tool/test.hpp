@@ -17,7 +17,7 @@ namespace test
             }
             virtual void Encode(eproto::Writer& wb)
             {
-                wb.pack_array(wb, 2);
+                wb.pack_array(2);
                 wb.pack_int(this->t1);
                 wb.pack_int(this->t2);
             }
@@ -71,7 +71,7 @@ namespace test
         }
         virtual void Encode(eproto::Writer& wb)
         {
-            wb.pack_array(wb, 12);
+            wb.pack_array(12);
             wb.pack_int(this->a);
             wb.pack_int(this->b);
             wb.pack_double(this->c);
@@ -226,7 +226,7 @@ namespace test
         }
         virtual void Encode(eproto::Writer& wb)
         {
-            wb.pack_array(wb, 0);
+            wb.pack_array(0);
         }
         virtual void Decode(eproto::Reader& rb)
         {
@@ -251,7 +251,7 @@ namespace test
         }
         virtual void Encode(eproto::Writer& wb)
         {
-            wb.pack_array(wb, 2);
+            wb.pack_array(2);
             wb.pack_int(this->error);
             wb.pack_bytes(this->buffer);
         }
@@ -271,4 +271,4 @@ namespace test
         static void Delete(response* p) { if(NULL != p){ delete p; }; }
     };
 
-}
+};

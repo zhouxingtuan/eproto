@@ -281,7 +281,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
     local bodyCode = prettyShow .. "virtual void Encode(eproto::Writer& wb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
-    bodyCode = bodyCode .. nextPrettyShow .. string.format("wb.pack_array(wb, %s);\n", #elementArray)
+    bodyCode = bodyCode .. nextPrettyShow .. string.format("wb.pack_array(%s);\n", #elementArray)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
