@@ -250,9 +250,10 @@ public:
     unsigned int offset;
     Reader(void) : buffer(NULL), length(0), offset(0){}
     Reader(unsigned char *p, unsigned int len) : buffer(p), length(len), offset(0){}
-    inline void setBuffer(unsigned char *p, unsigned int len){
+    inline void resetBuffer(unsigned char *p, unsigned int len){
         buffer = p;
         length = len;
+        offset = 0;
     }
     inline unsigned char* data(void){ return buffer; }
     inline void moveOffset(unsigned int len){ offset += len; }

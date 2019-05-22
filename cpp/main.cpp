@@ -64,7 +64,7 @@ int main(int argc, const char * argv[]) {
 
     for(int i=0; i<count; ++i)
     {
-        rb.setBuffer(wb.data(), wb.size());
+        rb.resetBuffer(wb.data(), wb.size());
         req2->Decode(rb);
     }
     int64 t4 = get_time_us();
