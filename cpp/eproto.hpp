@@ -28,7 +28,7 @@ class Proto
 public:
     virtual void Encode(Writer& wb) { }
     virtual void Decode(Reader& rb) { }
-    virtual Proto* Create() { return null; }
+    virtual Proto* Create() { return NULL; }
 };
 
 class Writer{
