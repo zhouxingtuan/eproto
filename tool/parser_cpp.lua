@@ -103,7 +103,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- Encode
     -- Decode
     -- ]]
-    local template = [[%sclass %s : public Proto
+    local template = [[%sclass %s : public eproto::Proto
 %s{
 %s%s%s%s%s%s%s%s%s%s
 %s};
@@ -202,7 +202,7 @@ function parser_cpp:genConstructor(elementArray, prettyShow, className)
             end
         end
     end
-    local str = string.format("%s%s() : Proto()%s {}\n", prettyShow, className, paramCode)
+    local str = string.format("%s%s() : eproto::Proto()%s {}\n", prettyShow, className, paramCode)
     return str
 end
 function parser_cpp:genDestructor(elementArray, prettyShow, className)
@@ -513,7 +513,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     return bodyCode
 end
 function parser_cpp:genCreate(className, prettyShow)
-    local str = string.format("%svirtual Proto* Create() { return new %s(); }\n", prettyShow, className)
+    local str = string.format("%svirtual eproto::Proto* Create() { return new %s(); }\n", prettyShow, className)
     return str
 end
 function parser_cpp:genNew(className, prettyShow)
