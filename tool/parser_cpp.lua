@@ -449,11 +449,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_value_cpp_type)
                 end
-                if raw_key_cpp_type == "std::string" then
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (v != NULL) { %s[k] = v; }\n", this_name)
-                else
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
-                end
+                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"

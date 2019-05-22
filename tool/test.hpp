@@ -190,7 +190,7 @@ namespace test
                         rb.unpack_string(k);
                         inner* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { v = inner::New(); v->Decode(rb); }
-                        if (v != NULL) { this->k[k] = v; }
+                        this->k[k] = v;
                     }
                 }
             }
@@ -205,7 +205,7 @@ namespace test
                         rb.unpack_string(k);
                         std::vector<char> v;
                         rb.unpack_bytes(v);
-                        if (v != NULL) { this->l[k] = v; }
+                        this->l[k] = v;
                     }
                 }
             }
