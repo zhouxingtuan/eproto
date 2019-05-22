@@ -19,6 +19,8 @@ inline int64 get_time_ms(void){
 }
 
 int main(int argc, const char * argv[]) {
+    std::cout.width(16); //设置输出宽度
+
 	// insert code here...
 	std::cout << "Hello, World!\n";
 //    int count = 1000000;
@@ -43,10 +45,10 @@ int main(int argc, const char * argv[]) {
     }
     wb.clear();
     req->Encode(wb);
-    std::cout << "encode size" << wb.size() << std::endl;
+    std::cout << "encode size = " << wb.size() << std::endl;
     eproto::Reader rb(wb.data(), wb.size());
     req2->Decode(rb);
-    std::cout << "decode d" << req2->d << std::endl;
+    std::cout << "decode d = " << req2->d << std::endl;
 
 	fprintf(stderr, "start  t=%lld\n", get_time_us());
 
