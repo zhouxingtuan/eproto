@@ -175,11 +175,107 @@ function parser_cpp:genParams(elementArray, prettyShow)
     return paramCode
 end
 function parser_cpp:genConstructor(elementArray, prettyShow, className)
-    return "\n"
+    local paramCode = ""
+    if #elementArray > 0 then
+        for k,elementInfo in ipairs(elementArray) do
+            local name = elementInfo[1]
+            local raw_type = elementInfo[2]
+            local cpp_type = protobuf_to_cpp[raw_type]
+            local value_default
+            if cpp_type == nil then
+                if raw_type == "array" then
+                    -- don't need
+                elseif raw_type == "map" then
+                    -- don't need
+                else
+                    --                print("unsupport protobuf type to cpp type", raw_type)
+                    -- 自定义对象
+                    value_default = "NULL"
+                end
+            else
+                value_default = self:getDefaultDeclValue(cpp_type)
+            end
+            local lineCode
+            if value_default then
+                lineCode = ", " .. name .. "("..value_default..")"
+                paramCode = paramCode .. lineCode
+            end
+        end
+    end
+    local str = string.format("%s%s() : Proto()%s {}\n", prettyShow, className, paramCode)
+    return str
 end
 function parser_cpp:genDestructor(elementArray, prettyShow, className)
     local str = string.format("%svirtual ~%s(){ Clear(); }\n", prettyShow, className)
     return str
+end
+function parser_cpp:genClear(elementArray, prettyShow)
+    local nextPrettyShow = prettyShow..prettyStep
+    local bodyCode = prettyShow .. "void Clear()\n"
+    bodyCode = bodyCode .. prettyShow .. "{\n"
+    for k,elementInfo in ipairs(elementArray) do
+        local name = elementInfo[1]
+        local raw_type = elementInfo[2]
+        local this_name = "this->"..name
+        local cpp_type = protobuf_to_cpp[raw_type]
+        if cpp_type == nil then
+            local nextNextPrettyShow = nextPrettyShow .. prettyStep
+            local nextNextNextPrettyShow = nextNextPrettyShow .. prettyStep
+            if raw_type == "map" then
+                local raw_key = elementInfo[3]
+                local raw_value = elementInfo[4]
+                local raw_key_cpp_type = protobuf_to_cpp[raw_key]
+                local raw_value_cpp_type = protobuf_to_cpp[raw_value]
+                -- 在map里面拥有玩家自定义对象，需要清理指针
+                if raw_key_cpp_type == nil or raw_value_cpp_type == nil then
+                    local index_name = "i"
+                    bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
+                    bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(auto &%s : %s)\n", index_name, this_name)
+                    bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
+                    local raw_key_name = string.format("%s.first", index_name)
+                    if raw_key_cpp_type == nil then
+                        -- 自定义对象
+                        print("it's not support for self define key for Dictionary")
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s.first){ %s::Delete(%s.first); }\n", index_name, raw_key, index_name)
+                    end
+                    local raw_value_name = string.format("%s.second", index_name)
+                    if raw_value_cpp_type == nil then
+                        -- 自定义对象
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s.second){ %s::Delete(%s.second); }\n", index_name, raw_value, index_name)
+                    end
+                    bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
+                    bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
+                    bodyCode = bodyCode .. nextPrettyShow .. "}\n"
+                end
+            elseif raw_type == "array" then
+                local raw_key = elementInfo[3]
+                local raw_key_cpp_type = protobuf_to_cpp[raw_key]
+                -- 当前是玩家自定义数据，需要清理指针
+                if raw_key_cpp_type == nil then
+                    local index_name = "i"
+                    local value_name = "v"
+                    local value_at_index = this_name.."["..index_name.."]"
+                    bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
+                    bodyCode = bodyCode .. nextNextPrettyShow .. string.format("for(size_t %s=0; %s<%s.size(); ++%s)\n", index_name, index_name, this_name, index_name)
+                    bodyCode = bodyCode .. nextNextPrettyShow .. "{\n"
+                    if raw_key_cpp_type == nil then
+                        -- 自定义对象
+
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s* %s = %s;\n", raw_key, value_name, value_at_index)
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s){ %s::Delete(%s); }\n", value_name, raw_key, value_name)
+                    end
+                    bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
+                    bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
+                    bodyCode = bodyCode .. nextPrettyShow .. "}\n"
+                end
+            else
+                -- 自定义对象，需要清理指针
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("if(NULL!=%s){ %s::Delete(%s); %s=NULL; }\n", this_name, raw_type, this_name, this_name)
+            end
+        end
+    end
+    bodyCode = bodyCode .. prettyShow .. "}\n"
+    return bodyCode
 end
 function parser_cpp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
@@ -415,11 +511,6 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("rb.unpack_discard(%s);\n", count_name)
     bodyCode = bodyCode .. prettyShow .. "}\n"
     return bodyCode
-end
-function parser_cpp:genClear(elementArray, prettyShow)
-    local str = "\n"
-
-    return str
 end
 function parser_cpp:genCreate(className, prettyShow)
     local str = string.format("%svirtual Proto* Create() { return new %s(); }\n", prettyShow, className)

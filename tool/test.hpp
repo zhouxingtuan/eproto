@@ -10,9 +10,11 @@ namespace test
         public:
             int t1;
             std::string t2;
-
+            inner() : Proto(), t1(0) {}
             virtual ~inner(){ Clear(); }
-
+            void Clear()
+            {
+            }
             virtual void Encode(Writer& wb)
             {
                 wb.pack_array(wb, 2);
@@ -46,9 +48,27 @@ namespace test
         std::vector<inner*> j;
         std::unordered_map<std::string, inner*> k;
         std::unordered_map<std::string, std::vector<char>> l;
-
+        request() : Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
-
+        void Clear()
+        {
+            if(NULL!=this->g){ inner::Delete(this->g); this->g=NULL; }
+            {
+                for(size_t i=0; i<this->j.size(); ++i)
+                {
+                    inner* v = this->j[i];
+                    if(NULL!=v){ inner::Delete(v); }
+                }
+                this->j.clear();
+            }
+            {
+                for(auto &i : this->k)
+                {
+                    if(NULL!=i.second){ inner::Delete(i.second); }
+                }
+                this->k.clear();
+            }
+        }
         virtual void Encode(Writer& wb)
         {
             wb.pack_array(wb, 12);
@@ -199,9 +219,11 @@ namespace test
     class empty : public Proto
     {
     public:
-
+        empty() : Proto() {}
         virtual ~empty(){ Clear(); }
-
+        void Clear()
+        {
+        }
         virtual void Encode(Writer& wb)
         {
             wb.pack_array(wb, 0);
@@ -222,9 +244,11 @@ namespace test
     public:
         int error;
         std::vector<char> buffer;
-
+        response() : Proto(), error(0) {}
         virtual ~response(){ Clear(); }
-
+        void Clear()
+        {
+        }
         virtual void Encode(Writer& wb)
         {
             wb.pack_array(wb, 2);
