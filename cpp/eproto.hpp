@@ -23,14 +23,6 @@ namespace eproto{
 class Writer;
 class Reader;
 
-class Proto
-{
-public:
-    virtual void Encode(Writer& wb) { }
-    virtual void Decode(Reader& rb) { }
-    virtual Proto* Create() { return NULL; }
-};
-
 class Writer{
 public:
 	unsigned char* buffer;
@@ -1055,6 +1047,14 @@ public:
                 }
         }
     }
+};
+
+class Proto
+{
+public:
+    virtual void Encode(Writer& wb) { }
+    virtual void Decode(Reader& rb) { }
+    virtual Proto* Create() { return NULL; }
 };
 
 };
