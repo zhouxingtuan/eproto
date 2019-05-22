@@ -410,7 +410,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s->clear();\n", this_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
 --                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
@@ -450,7 +450,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_value_cpp_type)
                 end
                 if raw_key_cpp_type == "std::string" then
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (k != NULL) { %s[k] = v; }\n", this_name)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (v != NULL) { %s[k] = v; }\n", this_name)
                 else
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
                 end
@@ -473,7 +473,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_array();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s->resize(n);\n", this_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.resize(n);\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
@@ -557,7 +557,7 @@ function parser_cpp:getDefaultDeclValue(cpp_type)
     end
 end
 function parser_cpp:getUnpackByDefine(name, raw_key)
-    return string.format("if (rb.NextIsNil()) { rb.MoveNext(); } else { %s = %s::New(); %s->Decode(rb); }\n", name, raw_key, name)
+    return string.format("if (rb.nextIsNil()) { rb.moveNext(); } else { %s = %s::New(); %s->Decode(rb); }\n", name, raw_key, name)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
     if cpp_type == "std::string" then

@@ -137,12 +137,12 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_bytes(this->f);
             if (--c <= 0) { return; }
-            if (rb.NextIsNil()) { rb.MoveNext(); } else { this->g = inner::New(); this->g->Decode(rb); }
+            if (rb.nextIsNil()) { rb.moveNext(); } else { this->g = inner::New(); this->g->Decode(rb); }
             if (--c <= 0) { return; }
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->h->clear();
+                    this->h.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         int k=0;
@@ -157,7 +157,7 @@ namespace test
             {
                 long long int n = rb.unpack_array();
                 if (n > 0) {
-                    this->i->resize(n);
+                    this->i.resize(n);
                     for(long long int i=0; i<n; ++i)
                     {
                         int v=0;
@@ -170,11 +170,11 @@ namespace test
             {
                 long long int n = rb.unpack_array();
                 if (n > 0) {
-                    this->j->resize(n);
+                    this->j.resize(n);
                     for(long long int i=0; i<n; ++i)
                     {
                         inner* v=NULL;
-                        if (rb.NextIsNil()) { rb.MoveNext(); } else { v = inner::New(); v->Decode(rb); }
+                        if (rb.nextIsNil()) { rb.moveNext(); } else { v = inner::New(); v->Decode(rb); }
                         this->j[i] = v;
                     }
                 }
@@ -183,14 +183,14 @@ namespace test
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->k->clear();
+                    this->k.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
                         rb.unpack_string(k);
                         inner* v=NULL;
-                        if (rb.NextIsNil()) { rb.MoveNext(); } else { v = inner::New(); v->Decode(rb); }
-                        if (k != NULL) { this->k[k] = v; }
+                        if (rb.nextIsNil()) { rb.moveNext(); } else { v = inner::New(); v->Decode(rb); }
+                        if (v != NULL) { this->k[k] = v; }
                     }
                 }
             }
@@ -198,14 +198,14 @@ namespace test
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->l->clear();
+                    this->l.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
                         rb.unpack_string(k);
                         std::vector<char> v;
                         rb.unpack_bytes(v);
-                        if (k != NULL) { this->l[k] = v; }
+                        if (v != NULL) { this->l[k] = v; }
                     }
                 }
             }
