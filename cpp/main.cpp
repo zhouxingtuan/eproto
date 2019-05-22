@@ -35,15 +35,15 @@ int main(int argc, const char * argv[]) {
     req->h[2] = "b";
     //req->i = new int[10];
     req->j.resize(1);
-    for (int i = 0; i < req->j.size(); ++i)
+    for (size_t i = 0; i < req->j.size(); ++i)
     {
         req->j[i] = test::request::inner::New();
-        req->j[i].t1 = 77;
-        req->j[i].t2 = "w";
+        req->j[i]->t1 = 77;
+        req->j[i]->t2 = "w";
     }
-    wb.Clear();
+    wb.clear();
     req->Encode(wb);
-    std::out << wb.size() << std::endl;
+    std::out << wb.size() << endl;
 	fprintf(stderr, "start  t=%lld\n", get_time_us());
 
 
