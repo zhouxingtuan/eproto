@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "eproto.hpp"
+#include "test.hpp"
 
 typedef long long int int64;
 
