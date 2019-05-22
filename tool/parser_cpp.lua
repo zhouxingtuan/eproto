@@ -401,15 +401,15 @@ function parser_cpp:getUnpackByDefine(name, raw_key)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
     if cpp_type == "string" then
-        return  string.format("rb.unpack_string(ref %s);\n", name)
+        return  string.format("rb.unpack_string(%s);\n", name)
     elseif cpp_type == "std::vector<char>" then
-        return string.format("rb.unpack_bytes(ref %s);\n", name)
+        return string.format("rb.unpack_bytes(%s);\n", name)
     elseif cpp_type == "float" or cpp_type == "double" then
-        return string.format("rb.unpack_double(ref %s);\n", name)
+        return string.format("rb.unpack_double(%s);\n", name)
     elseif cpp_type == "bool" then
-        return string.format("rb.unpack_bool(ref %s);\n", name)
+        return string.format("rb.unpack_bool(%s);\n", name)
     else
-        return string.format("rb.unpack_int(ref %s);\n", name)
+        return string.format("rb.unpack_int(%s);\n", name)
     end
 end
 function parser_cpp:splitNamespace()
