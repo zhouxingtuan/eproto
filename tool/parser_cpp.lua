@@ -374,8 +374,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. prettyShow .. "{\n"
     bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
-    local count_skip = nextPrettyShow .. string.format("--%s;\n", count_name)
-    count_skip = count_skip .. nextPrettyShow .. string.format("if (%s <= 0) { return; }\n", count_name)
+    local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s <= 0) { return; }\n", count_name)
     for k,elementInfo in ipairs(elementArray) do
