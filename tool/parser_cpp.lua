@@ -85,7 +85,7 @@ function parser_cpp:genNamespace(namespace, childMap)
 namespace %s
 {
 %s
-}
+};
 ]]
     end
     local classCode = ""

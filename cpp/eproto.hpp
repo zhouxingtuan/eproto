@@ -20,9 +20,6 @@ namespace eproto{
 
 #define WRITE_BUFFER_SIZE 4096
 
-class Writer;
-class Reader;
-
 class Writer{
 public:
 	unsigned char* buffer;
