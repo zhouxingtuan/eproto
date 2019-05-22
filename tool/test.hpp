@@ -19,7 +19,7 @@ namespace test
             {
                 wb.pack_array(2);
                 wb.pack_int(this->t1);
-                wb.pack_int(this->t2);
+                wb.pack_string(this->t2);
             }
             virtual void Decode(eproto::Reader& rb)
             {
@@ -28,7 +28,7 @@ namespace test
                 if (c <= 0) { return; }
                 rb.unpack_int(this->t1);
                 if (--c <= 0) { return; }
-                rb.unpack_int(this->t2);
+                rb.unpack_string(this->t2);
                 if (--c <= 0) { return; }
                 rb.unpack_discard(c);
             }
@@ -76,7 +76,7 @@ namespace test
             wb.pack_int(this->b);
             wb.pack_double(this->c);
             wb.pack_double(this->d);
-            wb.pack_int(this->e);
+            wb.pack_string(this->e);
             wb.pack_bytes(this->f);
             if (this->g == NULL) { wb.pack_nil(); } else { this->g->Encode(wb); }
             {
@@ -84,7 +84,7 @@ namespace test
                 for(auto &i : this->h)
                 {
                     wb.pack_int(i.first);
-                    wb.pack_int(i.second);
+                    wb.pack_string(i.second);
                 }
             }
             {
@@ -107,7 +107,7 @@ namespace test
                 wb.pack_map(this->k.size());
                 for(auto &i : this->k)
                 {
-                    wb.pack_int(i.first);
+                    wb.pack_string(i.first);
                     if (i.second == NULL) { wb.pack_nil(); } else { i.second->Encode(wb); }
                 }
             }
@@ -115,7 +115,7 @@ namespace test
                 wb.pack_map(this->l.size());
                 for(auto &i : this->l)
                 {
-                    wb.pack_int(i.first);
+                    wb.pack_string(i.first);
                     wb.pack_bytes(i.second);
                 }
             }
@@ -133,7 +133,7 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_double(this->d);
             if (--c <= 0) { return; }
-            rb.unpack_int(this->e);
+            rb.unpack_string(this->e);
             if (--c <= 0) { return; }
             rb.unpack_bytes(this->f);
             if (--c <= 0) { return; }
@@ -148,7 +148,7 @@ namespace test
                         int k=0;
                         rb.unpack_int(k);
                         std::string v;
-                        rb.unpack_int(v);
+                        rb.unpack_string(v);
                         this->h[k] = v;
                     }
                 }
@@ -187,10 +187,10 @@ namespace test
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
-                        rb.unpack_int(k);
+                        rb.unpack_string(k);
                         inner* v=NULL;
                         if (rb.NextIsNil()) { rb.MoveNext(); } else { v = inner::New(); v->Decode(rb); }
-                        this->k[k] = v;
+                        if (k != NULL) { this->k[k] = v; }
                     }
                 }
             }
@@ -202,10 +202,10 @@ namespace test
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
-                        rb.unpack_int(k);
+                        rb.unpack_string(k);
                         std::vector<char> v;
                         rb.unpack_bytes(v);
-                        this->l[k] = v;
+                        if (k != NULL) { this->l[k] = v; }
                     }
                 }
             }

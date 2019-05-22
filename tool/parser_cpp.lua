@@ -356,7 +356,7 @@ function parser_cpp:getPackByDefine(name)
     return string.format("if (%s == NULL) { wb.pack_nil(); } else { %s->Encode(wb); }\n", name, name)
 end
 function parser_cpp:getPackByType(name, cpp_type)
-    if cpp_type == "string" then
+    if cpp_type == "std::string" then
         return string.format("wb.pack_string(%s);\n", name)
     elseif cpp_type == "std::vector<char>" then
         return string.format("wb.pack_bytes(%s);\n", name)
@@ -449,7 +449,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_value_cpp_type)
                 end
-                if raw_key_cpp_type == "string" then
+                if raw_key_cpp_type == "std::string" then
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (k != NULL) { %s[k] = v; }\n", this_name)
                 else
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
@@ -560,7 +560,7 @@ function parser_cpp:getUnpackByDefine(name, raw_key)
     return string.format("if (rb.NextIsNil()) { rb.MoveNext(); } else { %s = %s::New(); %s->Decode(rb); }\n", name, raw_key, name)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
-    if cpp_type == "string" then
+    if cpp_type == "std::string" then
         return  string.format("rb.unpack_string(%s);\n", name)
     elseif cpp_type == "std::vector<char>" then
         return string.format("rb.unpack_bytes(%s);\n", name)
