@@ -105,7 +105,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- ]]
     local template = [[%sclass %s : public Proto
 %s{
-%s%s%s%s%s%s
+%s%s%s%s%s%s%s%s%s%s
 %s};
 ]]
     local nextPrettyShow = prettyShow..prettyStep
@@ -120,14 +120,18 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
         subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow, true)
     end
     local params = self:genParams(elementArray, nextPrettyShow)
+    local Constructor = self:genConstructor(elementArray, nextPrettyShow, className)
+    local Destructor = self:genDestructor(elementArray, nextPrettyShow, className)
+    local Clear = self:genClear(elementArray, nextPrettyShow)
     local Encode = self:genEncode(elementArray, nextPrettyShow)
     local Decode = self:genDecode(elementArray, nextPrettyShow)
     local Create = self:genCreate(className, nextPrettyShow)
     local New    = self:genNew(className, nextPrettyShow)
+    local Delete = self:genDelete(className, nextPrettyShow)
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Encode, Decode, Create, New,
+        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, New, Delete,
         prettyShow)
     return classCode
 end
@@ -169,6 +173,13 @@ function parser_cpp:genParams(elementArray, prettyShow)
         paramCode = paramCode .. lineCode
     end
     return paramCode
+end
+function parser_cpp:genConstructor(elementArray, prettyShow, className)
+    return "\n"
+end
+function parser_cpp:genDestructor(elementArray, prettyShow, className)
+    local str = string.format("%svirtual ~%s(){ Clear(); }\n", prettyShow, className)
+    return str
 end
 function parser_cpp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
@@ -224,7 +235,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 if raw_key_cpp_type == nil then
                     -- 自定义对象
-                    bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s %s = %s;\n", raw_key, value_name, value_at_index)
+                    bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s* %s = %s;\n", raw_key, value_name, value_at_index)
                     bodyCode = bodyCode .. nextNextNextPrettyShow .. self:getPackByDefine(value_name)
                 else
                     -- C++内置数据类型
@@ -246,7 +257,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
     return bodyCode
 end
 function parser_cpp:getPackByDefine(name)
-    return string.format("if (%s == null) { wb.pack_nil(); } else { %s.Encode(wb); }\n", name, name)
+    return string.format("if (%s == NULL) { wb.pack_nil(); } else { %s->Encode(wb); }\n", name, name)
 end
 function parser_cpp:getPackByType(name, cpp_type)
     if cpp_type == "string" then
@@ -265,6 +276,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
     local bodyCode = prettyShow .. "virtual void Decode(Reader& rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
+    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
@@ -297,31 +309,52 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 end
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
                 decl_value_default = self:getDefaultDeclValue(raw_value_cpp_type)
-                cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
+--                cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
+--                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s->clear();\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
+--                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
                 if raw_key_cpp_type == nil then
+                    if decl_key_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* k=%s;\n", decl_key, decl_key_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* k;\n", decl_key)
+                    end
                     -- 自定义对象
                     print("it's not support for self define key for Dictionary")
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("k", raw_key)
                 else
+                    if decl_key_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s;\n", decl_key, decl_key_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k;\n", decl_key)
+                    end
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("k", raw_key_cpp_type)
                 end
                 if raw_value_cpp_type == nil then
+                    if decl_value_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* v=%s;\n", decl_value, decl_value_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* v;\n", decl_value)
+                    end
                     -- 自定义对象
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("v", raw_value)
                 else
+                    if decl_value_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v=%s;\n", decl_value, decl_value_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v;\n", decl_value)
+                    end
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_value_cpp_type)
                 end
                 if raw_key_cpp_type == "string" then
-                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (k != null) { %s[k] = v; }\n", this_name)
+                    bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("if (k != NULL) { %s[k] = v; }\n", this_name)
                 else
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s[k] = v;\n", this_name)
                 end
@@ -339,19 +372,29 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 else
                     decl_key = raw_key_cpp_type
                 end
-                cpp_type = decl_key.."[n]"
+--                cpp_type = decl_key.."[n]"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_array();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
+--                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s->resize(n);\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
-                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v=%s;\n", decl_key, decl_key_default)
                 if raw_key_cpp_type == nil then
+                    if decl_key_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* v=%s;\n", decl_key, decl_key_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* v;\n", decl_key)
+                    end
                     -- 自定义对象
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByDefine("v", raw_key)
                 else
+                    if decl_key_default then
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v=%s;\n", decl_key, decl_key_default)
+                    else
+                        bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s v;\n", decl_key)
+                    end
                     -- C++内置数据类型
                     bodyCode = bodyCode .. nextNextNextNextPrettyShow .. self:getUnpackByType("v", raw_key_cpp_type)
                 end
@@ -373,22 +416,48 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. prettyShow .. "}\n"
     return bodyCode
 end
+function parser_cpp:genClear(elementArray, prettyShow)
+    local str = "\n"
+
+    return str
+end
 function parser_cpp:genCreate(className, prettyShow)
     local str = string.format("%svirtual Proto* Create() { return new %s(); }\n", prettyShow, className)
     return str
 end
 function parser_cpp:genNew(className, prettyShow)
-    local str = string.format("%sstatic %s* New() { return new %s(); }", prettyShow, className, className)
+    local str = string.format("%sstatic %s* New() { return new %s(); }\n", prettyShow, className, className)
     return str
+end
+function parser_cpp:genDelete(className, prettyShow)
+    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ delete p; }; }", prettyShow, className)
+    return str
+end
+function parser_cpp:hasDefaultDeclValue(cpp_type)
+    if cpp_type == nil then
+        return true
+    else
+        if cpp_type == "std::string" then
+            return false
+        elseif cpp_type == "std::vector<char>" then
+            return false
+        elseif cpp_type == "bool" then
+            return true
+        else
+            return true
+        end
+    end
 end
 function parser_cpp:getDefaultDeclValue(cpp_type)
     if cpp_type == nil then
-        return "null"
+        return "NULL"
     else
-        if cpp_type == "string" then
-            return "null"
+        if cpp_type == "std::string" then
+            return nil
+--            return "\"\""
         elseif cpp_type == "std::vector<char>" then
-            return "std::vector<char>()"
+            return nil
+--            return "std::vector<char>()"
         elseif cpp_type == "bool" then
             return "false"
         else
@@ -397,7 +466,7 @@ function parser_cpp:getDefaultDeclValue(cpp_type)
     end
 end
 function parser_cpp:getUnpackByDefine(name, raw_key)
-    return string.format("if (rb.NextIsNil()) { rb.MoveNext(); } else { %s = new %s(); %s.Decode(rb); }\n", name, raw_key, name)
+    return string.format("if (rb.NextIsNil()) { rb.MoveNext(); } else { %s = %s::New(); %s->Decode(rb); }\n", name, raw_key, name)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
     if cpp_type == "string" then
