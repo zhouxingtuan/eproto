@@ -2,15 +2,15 @@
 
 namespace test
 {
-    class request : public Proto
+    class request : public eproto::Proto
     {
     public:
-        class inner : public Proto
+        class inner : public eproto::Proto
         {
         public:
             int t1;
             std::string t2;
-            inner() : Proto(), t1(0) {}
+            inner() : eproto::Proto(), t1(0) {}
             virtual ~inner(){ Clear(); }
             void Clear()
             {
@@ -32,7 +32,7 @@ namespace test
                 if (--c <= 0) { return; }
                 rb.unpack_discard(c);
             }
-            virtual Proto* Create() { return new inner(); }
+            virtual eproto::Proto* Create() { return new inner(); }
             static inner* New() { return new inner(); }
             static void Delete(inner* p) { if(NULL != p){ delete p; }; }
         };
@@ -48,7 +48,7 @@ namespace test
         std::vector<inner*> j;
         std::unordered_map<std::string, inner*> k;
         std::unordered_map<std::string, std::vector<char>> l;
-        request() : Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
+        request() : eproto::Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
         void Clear()
         {
@@ -212,14 +212,14 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual Proto* Create() { return new request(); }
+        virtual eproto::Proto* Create() { return new request(); }
         static request* New() { return new request(); }
         static void Delete(request* p) { if(NULL != p){ delete p; }; }
     };
-    class empty : public Proto
+    class empty : public eproto::Proto
     {
     public:
-        empty() : Proto() {}
+        empty() : eproto::Proto() {}
         virtual ~empty(){ Clear(); }
         void Clear()
         {
@@ -235,16 +235,16 @@ namespace test
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual Proto* Create() { return new empty(); }
+        virtual eproto::Proto* Create() { return new empty(); }
         static empty* New() { return new empty(); }
         static void Delete(empty* p) { if(NULL != p){ delete p; }; }
     };
-    class response : public Proto
+    class response : public eproto::Proto
     {
     public:
         int error;
         std::vector<char> buffer;
-        response() : Proto(), error(0) {}
+        response() : eproto::Proto(), error(0) {}
         virtual ~response(){ Clear(); }
         void Clear()
         {
@@ -266,7 +266,7 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual Proto* Create() { return new response(); }
+        virtual eproto::Proto* Create() { return new response(); }
         static response* New() { return new response(); }
         static void Delete(response* p) { if(NULL != p){ delete p; }; }
     };
