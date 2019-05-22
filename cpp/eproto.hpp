@@ -735,7 +735,7 @@ public:
         {
             return;
         }
-        for(int i=0; i<count; ++i)
+        for(long long int i=0; i<count; ++i)
         {
             discard();
         }

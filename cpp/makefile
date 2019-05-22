@@ -9,7 +9,7 @@ LIBS = -lz -lstdc++ -ldl -lm
 INCLUDES =
 
 # 注意，这里的 -ldl 需要放在flag的最后才能生效
-CFLAGS = -O2 -Wall -Wstrict-overflow=3 -std=c++11 $(INCLUDES) $(LIBPATH) $(LIBS)
+CFLAGS = -O2 -Wall -Wstrict-overflow -std=c++11 $(INCLUDES) $(LIBPATH) $(LIBS)
 
 CC = gcc
 DEBUG= -g -ggdb
