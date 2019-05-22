@@ -279,7 +279,7 @@ function parser_cpp:genClear(elementArray, prettyShow)
 end
 function parser_cpp:genEncode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "virtual void Encode(Writer& wb)\n"
+    local bodyCode = prettyShow .. "virtual void Encode(eproto::Writer& wb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     bodyCode = bodyCode .. nextPrettyShow .. string.format("wb.pack_array(wb, %s);\n", #elementArray)
     for k,elementInfo in ipairs(elementArray) do
@@ -370,7 +370,7 @@ function parser_cpp:getPackByType(name, cpp_type)
 end
 function parser_cpp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "virtual void Decode(Reader& rb)\n"
+    local bodyCode = prettyShow .. "virtual void Decode(eproto::Reader& rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
