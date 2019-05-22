@@ -27,8 +27,10 @@ namespace test
                 long long int c = rb.unpack_array();
                 if (c <= 0) { return; }
                 rb.unpack_int(this->t1);
+                --c;
                 if (c <= 0) { return; }
                 rb.unpack_string(this->t2);
+                --c;
                 if (c <= 0) { return; }
                 rb.unpack_discard(c);
             }
@@ -126,18 +128,25 @@ namespace test
             long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->a);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_int(this->b);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_double(this->c);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_double(this->d);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_string(this->e);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_bytes(this->f);
+            --c;
             if (c <= 0) { return; }
             if (rb.nextIsNil()) { rb.moveNext(); } else { this->g = inner::New(); this->g->Decode(rb); }
+            --c;
             if (c <= 0) { return; }
             {
                 long long int n = rb.unpack_map();
@@ -153,6 +162,7 @@ namespace test
                     }
                 }
             }
+            --c;
             if (c <= 0) { return; }
             {
                 long long int n = rb.unpack_array();
@@ -166,6 +176,7 @@ namespace test
                     }
                 }
             }
+            --c;
             if (c <= 0) { return; }
             {
                 long long int n = rb.unpack_array();
@@ -179,6 +190,7 @@ namespace test
                     }
                 }
             }
+            --c;
             if (c <= 0) { return; }
             {
                 long long int n = rb.unpack_map();
@@ -194,6 +206,7 @@ namespace test
                     }
                 }
             }
+            --c;
             if (c <= 0) { return; }
             {
                 long long int n = rb.unpack_map();
@@ -209,6 +222,7 @@ namespace test
                     }
                 }
             }
+            --c;
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
@@ -261,8 +275,10 @@ namespace test
             long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->error);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_bytes(this->buffer);
+            --c;
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
