@@ -21,7 +21,7 @@ inline int64 get_time_ms(void){
 int main(int argc, const char * argv[]) {
 	// insert code here...
 	std::cout << "Hello, World!\n";
-//    int count = 1000000;
+    int count = 1000000;
     eproto::Writer wb;
     test::request* req = test::request::New();
     test::request* req2 = test::request::New();
@@ -48,11 +48,27 @@ int main(int argc, const char * argv[]) {
     req2->Decode(rb);
     fprintf(stderr, "decode d = %f\n", req2->d);
 
-	fprintf(stderr, "start  t=%lld\n", get_time_us());
+    int64 t1 = get_time_us();
+	fprintf(stderr, "encode start t=%lld\n", t1);
+    for(int i=0; i<count; ++i)
+    {
+        wb.clear();
+        req->Encode(wb);
+    }
+    int64 t2 = get_time_us();
+    double gap = (double)(t2-t1)/1000000;
+	fprintf(stderr, "encode end t=%lld gap=%f\n", t2, gap);
 
-
-
-	fprintf(stderr, "end    t=%lld\n", get_time_us());
+    int64 t3 = get_time_us();
+	fprintf(stderr, "decode start t=%lld\n", t3);
+    for(int i=0; i<count; ++i)
+    {
+        eproto::Reader rb(wb.data(), wb.size());
+        req2->Decode(rb);
+    }
+    int64 t4 = get_time_us();
+    double gap = (double)(t4-t3)/1000000;
+	fprintf(stderr, "decode end t=%lld gap=%f\n", t4, gap);
 
     return 0;
 }
