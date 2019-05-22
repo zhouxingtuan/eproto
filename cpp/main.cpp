@@ -21,8 +21,32 @@ inline int64 get_time_ms(void){
 int main(int argc, const char * argv[]) {
 	// insert code here...
 	std::cout << "Hello, World!\n";
-
+    int count = 1000000;
+    eproto::Writer wb;
+    test::request* req = test::request::New();
+    test::request* req2 = test::request::New();
+    req->a = 100;
+    req->b = 123456789;
+    req->c = 3.1415F;
+    req->d = 123456.789;
+    req->e = "Hello";
+    req->g = test::request::inner::New();
+    req->h[1] = "a";
+    req->h[2] = "b";
+    //req->i = new int[10];
+    req->j.resize(1);
+    for (int i = 0; i < req->j.size(); ++i)
+    {
+        req->j[i] = test::request::inner::New();
+        req->j[i].t1 = 77;
+        req->j[i].t2 = "w";
+    }
+    wb.Clear();
+    req->Encode(wb);
+    std::out << wb.size() << std::endl;
 	fprintf(stderr, "start  t=%lld\n", get_time_us());
+
+
 
 	fprintf(stderr, "end    t=%lld\n", get_time_us());
 
