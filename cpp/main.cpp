@@ -43,7 +43,7 @@ int main(int argc, const char * argv[]) {
     }
     wb.clear();
     req->Encode(wb);
-    std::out << wb.size() << endl;
+    std::cout << wb.size() << std::endl;
 	fprintf(stderr, "start  t=%lld\n", get_time_us());
 
 
