@@ -61,7 +61,7 @@ int main(int argc, const char * argv[]) {
 
     int64 t3 = get_time_us();
 	fprintf(stderr, "decode start t=%lld\n", t3);
-	eproto::Reader rb;
+
     for(int i=0; i<count; ++i)
     {
         rb.setBuffer(wb.data(), wb.size());
