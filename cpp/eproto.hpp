@@ -29,7 +29,7 @@ public:
     virtual void Encode(Writer& wb) { }
     virtual void Decode(Reader& rb) { }
     virtual Proto* Create() { return null; }
-}
+};
 
 class Writer{
 public:
