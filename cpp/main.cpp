@@ -57,18 +57,19 @@ int main(int argc, const char * argv[]) {
     }
     int64 t2 = get_time_us();
     double gap1 = (double)(t2-t1)/1000000;
-	fprintf(stderr, "encode end t=%lld gap=%f\n", t2, gap1);
+	fprintf(stderr, "encode end t=%lld gap=%f count=%d\n", t2, gap1, count);
 
     int64 t3 = get_time_us();
 	fprintf(stderr, "decode start t=%lld\n", t3);
+	eproto::Reader rb;
     for(int i=0; i<count; ++i)
     {
-        eproto::Reader rb(wb.data(), wb.size());
+        rb.setBuffer(wb.data(), wb.size());
         req2->Decode(rb);
     }
     int64 t4 = get_time_us();
     double gap2 = (double)(t4-t3)/1000000;
-	fprintf(stderr, "decode end t=%lld gap=%f\n", t4, gap2);
+	fprintf(stderr, "decode end t=%lld gap=%f count=%d\n", t4, gap2, count);
 
     return 0;
 }
