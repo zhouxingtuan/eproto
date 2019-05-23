@@ -65,9 +65,11 @@ link https://github.com/zhouxingtuan/eproto
 		 req->Decode(rb);
 		 test::request::Delete(req);
     You can find some simple test in main.cpp
-    Note: C++中的message对象采用的是裸指针，需要显示New和Delete，挂载到另一个message里面的message会被连带释放，可以看生成源代码中的Clear函数；
-		 由于C++中对数字、字符串、map、vector等没有nil的概念，所以和Lua中的nil会不一致，C++中会给默认值，分别是数字（0）、字符串（空""）、map（空表）、vector（长度为0空数组）。
-		 只有message对象使用指针，NULL和nil保持了一致。这里采用了完全public的class模式（类似struct），对新手不友好，容易造成内存泄漏，注意使用。
+    Note: C++中的message对象采用的是裸指针，需要显示New和Delete，挂载到另一个message里面的message会被连带释放，
+		 可以看生成源代码中的Clear函数；由于C++中对数字、字符串、map、vector等没有nil的概念，所以和Lua中的nil
+		 会不一致，C++中会给默认值，分别是数字（0）、字符串（空""）、map（空表）、vector（长度为0空数组）。
+		 只有message对象使用指针，NULL和nil保持了一致。这里采用了完全public的class模式（类似struct），对新手
+		 不友好，容易造成内存泄漏，注意使用。
     
     
     
