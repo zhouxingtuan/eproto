@@ -131,8 +131,12 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local subClasses = ""
     local publicLine = prettyShow.."public:\n"
     subClasses = subClasses .. publicLine
-    for name,info in pairs(childMap) do
-        subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow, true)
+    local childArray = self:getChildMapLevel(childMap)
+    for _,info in ipairs(childArray) do
+        local name = info.className
+        local classInfo = info.classInfo
+--    for name,info in pairs(childMap) do
+        subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true)
     end
     local params = self:genParams(elementArray, nextPrettyShow)
     local Constructor = self:genConstructor(elementArray, nextPrettyShow, className)
