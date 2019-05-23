@@ -246,6 +246,8 @@ function parser_cpp:genClear(elementArray, prettyShow)
                     bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                     bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
                     bodyCode = bodyCode .. nextPrettyShow .. "}\n"
+                else
+                    bodyCode = bodyCode .. nextPrettyShow .. string.format("%s.clear();\n", this_name)
                 end
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
@@ -267,10 +269,22 @@ function parser_cpp:genClear(elementArray, prettyShow)
                     bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                     bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
                     bodyCode = bodyCode .. nextPrettyShow .. "}\n"
+                else
+                    bodyCode = bodyCode .. nextPrettyShow .. string.format("%s.clear();\n", this_name)
                 end
             else
                 -- 自定义对象，需要清理指针
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("if(NULL!=%s){ %s::Delete(%s); %s=NULL; }\n", this_name, raw_type, this_name, this_name)
+            end
+        else
+            if cpp_type == "std::vector<char>" then
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("%s.clear();\n", this_name)
+            else
+                local value_default = self:getDefaultDeclValue(cpp_type)
+                if cpp_type == "std::string" then
+                    value_default = "\"\"";
+                end
+                bodyCode = bodyCode .. nextPrettyShow .. string.format("%s = %s;\n", this_name, value_default)
             end
         end
     end

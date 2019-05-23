@@ -14,6 +14,8 @@ namespace test
             virtual ~inner(){ Clear(); }
             void Clear()
             {
+                this->t1 = 0;
+                this->t2 = "";
             }
             virtual void Encode(eproto::Writer& wb)
             {
@@ -51,7 +53,15 @@ namespace test
         virtual ~request(){ Clear(); }
         void Clear()
         {
+            this->a = 0;
+            this->b = 0;
+            this->c = 0;
+            this->d = 0;
+            this->e = "";
+            this->f.clear();
             if(NULL!=this->g){ inner::Delete(this->g); this->g=NULL; }
+            this->h.clear();
+            this->i.clear();
             {
                 for(size_t i=0; i<this->j.size(); ++i)
                 {
@@ -67,6 +77,7 @@ namespace test
                 }
                 this->k.clear();
             }
+            this->l.clear();
         }
         virtual void Encode(eproto::Writer& wb)
         {
@@ -242,6 +253,8 @@ namespace test
         virtual ~response(){ Clear(); }
         void Clear()
         {
+            this->error = 0;
+            this->buffer.clear();
         }
         virtual void Encode(eproto::Writer& wb)
         {
