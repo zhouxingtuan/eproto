@@ -1,3 +1,6 @@
+#ifndef __test_hpp__
+#define __test_hpp__
+
 #include "eproto.hpp"
 
 namespace test
@@ -278,3 +281,6 @@ namespace test
     };
 
 };
+
+
+#endif

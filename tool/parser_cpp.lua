@@ -54,21 +54,32 @@ function parser_cpp:ctor(packageName, full_path_info)
     self.m_full_path_info = full_path_info
 end
 
-function parser_cpp:genCode()
+function parser_cpp:genCode(cpp_file)
     local namespaceMap,defaultNSMap = self:splitNamespace()
     --    dump(namespaceMap)
     --    dump(defaultNSMap)
-    local code = [[
+    local code_template = [[
+#ifndef %s
+#define %s
+
 #include "eproto.hpp"
 
+%s
+
+#endif
 ]]
+    local file_header = string.gsub(cpp_file, "%.", "_")
+    file_header = "__"..file_header.."__"
+    local body
     if next(defaultNSMap.childMap) then
-        code = code .. self:genNamespace(nil, defaultNSMap.childMap)
+        body = self:genNamespace(nil, defaultNSMap.childMap)
     else
+        body = ""
         for namespace,info in pairs(namespaceMap) do
-            code = code .. self:genNamespace(namespace, info.childMap)
+            body = body .. self:genNamespace(namespace, info.childMap)
         end
     end
+    local code = string.format(code_template, file_header, file_header, body)
     return code
 end
 
