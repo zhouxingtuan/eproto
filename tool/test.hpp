@@ -5,6 +5,28 @@
 
 namespace test
 {
+    class empty : public eproto::Proto
+    {
+    public:
+        empty() : eproto::Proto() {}
+        virtual ~empty(){ Clear(); }
+        void Clear()
+        {
+        }
+        virtual void Encode(eproto::Writer& wb)
+        {
+            wb.pack_array(0);
+        }
+        virtual void Decode(eproto::Reader& rb)
+        {
+            long long int c = rb.unpack_array();
+            if (c <= 0) { return; }
+            rb.unpack_discard(c);
+        }
+        virtual eproto::Proto* Create() { return new empty(); }
+        static empty* New() { return new empty(); }
+        static void Delete(empty* p) { if(NULL != p){ delete p; }; }
+    };
     class request : public eproto::Proto
     {
     public:
@@ -224,28 +246,6 @@ namespace test
         virtual eproto::Proto* Create() { return new request(); }
         static request* New() { return new request(); }
         static void Delete(request* p) { if(NULL != p){ delete p; }; }
-    };
-    class empty : public eproto::Proto
-    {
-    public:
-        empty() : eproto::Proto() {}
-        virtual ~empty(){ Clear(); }
-        void Clear()
-        {
-        }
-        virtual void Encode(eproto::Writer& wb)
-        {
-            wb.pack_array(0);
-        }
-        virtual void Decode(eproto::Reader& rb)
-        {
-            long long int c = rb.unpack_array();
-            if (c <= 0) { return; }
-            rb.unpack_discard(c);
-        }
-        virtual eproto::Proto* Create() { return new empty(); }
-        static empty* New() { return new empty(); }
-        static void Delete(empty* p) { if(NULL != p){ delete p; }; }
     };
     class response : public eproto::Proto
     {

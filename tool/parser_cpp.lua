@@ -56,8 +56,8 @@ end
 
 function parser_cpp:genCode(cpp_file)
     local namespaceMap,defaultNSMap = self:splitNamespace()
-    --    dump(namespaceMap)
-    --    dump(defaultNSMap)
+--    dump(namespaceMap)
+--    dump(defaultNSMap)
     local code_template = [[
 #ifndef %s
 #define %s
@@ -101,7 +101,11 @@ namespace %s
     end
     local classCode = ""
     local prettyShow = prettyStep
-    for className,classInfo in pairs(childMap) do
+    local childArray = self:getChildMapLevel(childMap)
+    for _,info in ipairs(childArray) do
+        local className = info.className
+        local classInfo = info.classInfo
+--    for className,classInfo in pairs(childMap) do
         classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
     end
     local code = string.format(template, namespace, classCode)
@@ -592,6 +596,51 @@ function parser_cpp:getUnpackByType(name, cpp_type)
     else
         return string.format("rb.unpack_int(%s);\n", name)
     end
+end
+function parser_cpp:getChildMapLevel(childMap)
+    for className,classInfo in pairs(childMap) do
+        classInfo.protoLevel = 1
+    end
+    local function loopFindLevel()
+        local isFind = false
+        for className,classInfo in pairs(childMap) do
+            for k,elementInfo in ipairs(classInfo.elementArray) do
+                for k=2,#elementInfo do
+                    local raw_type = elementInfo[k]
+                    local thatInfo = childMap[raw_type]
+                    if thatInfo then
+                        local protoLevel = thatInfo.protoLevel
+                        if classInfo.protoLevel <= thatInfo.protoLevel then
+                            classInfo.protoLevel = thatInfo.protoLevel + 1
+                            isFind = true
+                        end
+                    end
+                end
+            end
+        end
+        return isFind
+    end
+    local count = 0
+    local isFind = loopFindLevel()
+    while isFind do
+        count = count + 1
+--        print("loopFindLevel count ", count, "isFind", isFind)
+        isFind = loopFindLevel()
+    end
+    local childArray= {}
+    for className,classInfo in pairs(childMap) do
+        table.insert(childArray, {className=className, classInfo=classInfo})
+    end
+    local function sortFunc(a, b)
+        if a.classInfo.protoLevel == b.classInfo.protoLevel then
+            return a.className < b.className
+        else
+            return a.classInfo.protoLevel < b.classInfo.protoLevel
+        end
+    end
+    table.sort(childArray, sortFunc)
+--    dump(childArray)
+    return childArray
 end
 function parser_cpp:splitNamespace()
     local m_packageName = self.m_packageName
