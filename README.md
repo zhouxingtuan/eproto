@@ -3,18 +3,6 @@ eproto is base on msgpack. support protobuf description file format (.proto). ca
 
 link https://github.com/zhouxingtuan/eproto
 
-# How to use
-embedded the code into your program, now support with Lua5.1/LuaJIT only:
-
-	eproto.cpp
-	eproto.h
-
-the test can be run on Linux
-
-	git clone --recursive https://github.com/zhouxingtuan/eproto
-	cd eproto
-	make
-
 # How to define a proto
     define the proto just the same as protobuf
 
@@ -23,6 +11,9 @@ the test can be run on Linux
         lua gen.lua xxx.proto
 
 # How to use the lua api
+    embedded the code into your program, now support with Lua5.1/LuaJIT only:
+        eproto.cpp
+        eproto.h
     use the api follow to register a file:
         eproto.register_file("xxx.pb")
     user the api follow to register a buffer from pb file:
