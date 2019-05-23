@@ -33,8 +33,8 @@ int main(int argc, const char * argv[]) {
     req->g = test::request::inner::New();
     req->h[1] = "a";
     req->h[2] = "b";
-    //req->i = new int[10];
-    req->j.resize(1);
+
+    req->j.resize(1, NULL);
     for (size_t i = 0; i < req->j.size(); ++i)
     {
         req->j[i] = test::request::inner::New();
@@ -71,5 +71,7 @@ int main(int argc, const char * argv[]) {
     double gap2 = (double)(t4-t3)/1000000;
 	fprintf(stderr, "decode end t=%lld gap=%f count=%d\n", t4, gap2, count);
 
+    test::request::Delete(req);
+    test::request::Delete(req2);
     return 0;
 }

@@ -18,9 +18,11 @@ the test can be run on Linux
 # How to define a proto
     define the proto just the same as protobuf
 
-# How to use the lua api
+# How to generate a proto file
     in the tool directory, run command to gen a pb file:
         lua gen.lua xxx.proto
+
+# How to use the lua api
     use the api follow to register a file:
         eproto.register_file("xxx.pb")
     user the api follow to register a buffer from pb file:
@@ -57,7 +59,24 @@ the test can be run on Linux
 		 byte[] tb = wb.CopyData();
 		 // 
 		 ReadBuffer rb = new ReadBuffer(tb);
-                 req.Decode(rb);
+		 req.Decode(rb);
 	    
-
-
+# How to Use in C++
+	in the tool directory, after run command to gen a pb file, you can find the hpp file:
+		 xxx.hpp    
+    Copy eproto.hpp and these proto files to your project, and include them:
+		 test::request* req = test::request::New();
+		 eproto::Writer wb;
+		 wb.clear();
+		 req->Encode(wb);
+		 //
+		 eproto::Reader rb(wb.data(), wb.size());
+		 req->Decode(rb);
+		 test::request::Delete(req);
+    You can find some simple test in main.cpp
+    Note: C++中的message对象采用的是裸指针，需要显示New和Delete，挂载到另一个message里面的message会被连带释放，可以看生成源代码中的Clear函数；
+		 由于C++中对数字、字符串、map、vector等没有nil的概念，所以和Lua中的nil会不一致，C++中会给默认值，分别是数字（0）、字符串（空""）、map（空表）、vector（长度为0空数组）。
+		 只有message对象使用指针，NULL和nil保持了一致。这里采用了完全public的class模式（类似struct），对新手不友好，容易造成内存泄漏，注意使用。
+    
+    
+    
