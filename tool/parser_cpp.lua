@@ -372,7 +372,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
     local bodyCode = prettyShow .. "virtual void Decode(eproto::Reader& rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
-    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
+--    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
@@ -410,7 +410,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
+--                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
 --                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)

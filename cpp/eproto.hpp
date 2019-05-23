@@ -487,7 +487,7 @@ public:
         return true;
     }
     inline bool unpack_string(std::string &value){
-        value.clear();
+//        value.clear();
         unsigned char t = moveNext();
         if (t == 0xc0)
         {
@@ -571,7 +571,7 @@ public:
         return true;
     }
     inline bool unpack_bytes(std::vector<char> &value){
-        value.clear();
+//        value.clear();
         unsigned char t = moveNext();
         if (t == 0xc0)
         {

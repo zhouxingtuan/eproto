@@ -23,7 +23,6 @@ namespace test
             }
             virtual void Decode(eproto::Reader& rb)
             {
-                Clear();
                 long long int c = rb.unpack_array();
                 if (c <= 0) { return; }
                 rb.unpack_int(this->t1);
@@ -122,7 +121,6 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            Clear();
             long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->a);
@@ -142,7 +140,6 @@ namespace test
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->h.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         int k=0;
@@ -183,7 +180,6 @@ namespace test
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->k.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
@@ -198,7 +194,6 @@ namespace test
             {
                 long long int n = rb.unpack_map();
                 if (n > 0) {
-                    this->l.clear();
                     for(long long int i=0; i<n; ++i)
                     {
                         std::string k;
@@ -230,7 +225,6 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            Clear();
             long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_discard(c);
@@ -257,7 +251,6 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            Clear();
             long long int c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->error);
