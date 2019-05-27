@@ -552,11 +552,11 @@ function parser_cpp:genCreate(className, prettyShow)
     return str
 end
 function parser_cpp:genNew(className, prettyShow)
-    local str = string.format("%sstatic %s* New() { return new %s(); }\n", prettyShow, className, className)
+    local str = string.format("%sstatic %s* New() { %s* p = new %s(); p->retain(); return p; }\n", prettyShow, className, className, className)
     return str
 end
 function parser_cpp:genDelete(className, prettyShow)
-    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ delete p; }; }", prettyShow, className)
+    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ p->release(); }; }", prettyShow, className)
     return str
 end
 function parser_cpp:hasDefaultDeclValue(cpp_type)

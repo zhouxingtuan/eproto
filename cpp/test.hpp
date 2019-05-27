@@ -24,8 +24,8 @@ namespace test
             rb.unpack_discard(c);
         }
         virtual eproto::Proto* Create() { return new empty(); }
-        static empty* New() { return new empty(); }
-        static void Delete(empty* p) { if(NULL != p){ delete p; }; }
+        static empty* New() { empty* p = new empty(); p->retain(); return p; }
+        static void Delete(empty* p) { if(NULL != p){ p->release(); }; }
     };
     class request : public eproto::Proto
     {
@@ -59,8 +59,8 @@ namespace test
                 rb.unpack_discard(c);
             }
             virtual eproto::Proto* Create() { return new inner(); }
-            static inner* New() { return new inner(); }
-            static void Delete(inner* p) { if(NULL != p){ delete p; }; }
+            static inner* New() { inner* p = new inner(); p->retain(); return p; }
+            static void Delete(inner* p) { if(NULL != p){ p->release(); }; }
         };
         int a;
         long long int b;
@@ -244,8 +244,8 @@ namespace test
             rb.unpack_discard(c);
         }
         virtual eproto::Proto* Create() { return new request(); }
-        static request* New() { return new request(); }
-        static void Delete(request* p) { if(NULL != p){ delete p; }; }
+        static request* New() { request* p = new request(); p->retain(); return p; }
+        static void Delete(request* p) { if(NULL != p){ p->release(); }; }
     };
     class response : public eproto::Proto
     {
@@ -276,8 +276,8 @@ namespace test
             rb.unpack_discard(c);
         }
         virtual eproto::Proto* Create() { return new response(); }
-        static response* New() { return new response(); }
-        static void Delete(response* p) { if(NULL != p){ delete p; }; }
+        static response* New() { response* p = new response(); p->retain(); return p; }
+        static void Delete(response* p) { if(NULL != p){ p->release(); }; }
     };
 
 };

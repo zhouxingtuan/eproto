@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <atomic>
 
 namespace eproto{
 
@@ -1058,7 +1059,21 @@ public:
 
 class Proto
 {
+protected:
+    std::atomic<int> m_referenceCount;
 public:
+    Proto() : m_referenceCount(0) {}
+    virtual ~Proto(){}
+	inline void release(void){
+		if( std::atomic_fetch_sub_explicit(&m_referenceCount, 1, std::memory_order_relaxed) == 1 ){
+			delete this;
+		}
+	}
+	inline void retain(void){
+		std::atomic_fetch_add_explicit(&m_referenceCount, 1, std::memory_order_relaxed);
+	}
+	inline int getRefCount(void){ return (int)m_referenceCount; }
+
     virtual void Encode(Writer& wb) { }
     virtual void Decode(Reader& rb) { }
     virtual Proto* Create() { return NULL; }
