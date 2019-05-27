@@ -49,9 +49,10 @@ local dump = require("dump")
 
 local parser_cpp = class("parser_cpp")
 
-function parser_cpp:ctor(packageName, full_path_info)
+function parser_cpp:ctor(packageName, full_path_info, importPath)
     self.m_packageName = packageName
     self.m_full_path_info = full_path_info
+    self.m_importPath = importPath
 end
 
 function parser_cpp:genCode(cpp_file)
@@ -63,13 +64,18 @@ function parser_cpp:genCode(cpp_file)
 #define %s
 
 #include "eproto.hpp"
-
+%s
 %s
 
 #endif
 ]]
     local file_header = string.gsub(cpp_file, "%.", "_")
     file_header = "__"..file_header.."__"
+    local importHeader = ""
+    for _,headerPath in ipairs(self.m_importPath) do
+        headerPath = string.gsub(headerPath, ".proto", ".hpp")
+        importHeader = importHeader .. "#include " .. headerPath .. "\n"
+    end
     local body
     if next(defaultNSMap.childMap) then
         body = self:genNamespace(nil, defaultNSMap.childMap)
@@ -79,7 +85,7 @@ function parser_cpp:genCode(cpp_file)
             body = body .. self:genNamespace(namespace, info.childMap)
         end
     end
-    local code = string.format(code_template, file_header, file_header, body)
+    local code = string.format(code_template, file_header, file_header, importHeader, body)
     return code
 end
 

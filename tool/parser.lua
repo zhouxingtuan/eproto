@@ -59,6 +59,7 @@ function parser:ctor(path, route)
 	self.m_full_message = {}
 	self.m_current_message = {}
 	self.m_full_path_info = {}
+	self.m_importPath = {}
 end
 
 function parser:parseFile(file, save_file, print_flag)
@@ -70,15 +71,28 @@ function parser:parseFile(file, save_file, print_flag)
 	end
 	local data = self:getFileData(file)
 	-- first 3 byte is something magic
-	local pos = string.find(data, "package")
-	print("package pos", pos)
+	local posp = string.find(data, "package")
+	local posim = string.find(data, "import")
+	print("package posp", posp, "posim", posim)
+	local pos
+	if posp then
+		if posim then
+			pos = math.min(posp, posim)
+		else
+			pos = posp
+		end
+	else
+		if posim then
+			pos = posim
+		end
+	end
 	if pos and pos >= 4 then
 		print("current sub 4 bytes from head")
 		data = string.sub(data, 4, #data)
 	end
 	--    local b,e  = string.find(data, "package")
 	--    print("package", b, e)
-	--    dump(data)
+--	    dump(data)
 	local protos = self:parseData(data)
 	if self.m_error_code ~= nil then
 		print("current parse data failed with error code", self.m_error_code)
@@ -116,7 +130,7 @@ function parser:parseFile(file, save_file, print_flag)
 	self:setFileData(cs_file, cs_buf)
 
 	local parser_cpp = require("parser_cpp")
-	local parser_obj = parser_cpp.new(self.m_package, self.m_full_path_info)
+	local parser_obj = parser_cpp.new(self.m_package, self.m_full_path_info, self.m_importPath)
 	local cpp_file = name..".hpp"
 	local cpp_buf = parser_obj:genCode(cpp_file)
 --	print("csharp code:\n"..cs_buf)
@@ -194,6 +208,8 @@ function parser:findAnyThingInLine(arr)
 	elseif first == "package" then
 		self.m_package = arr[2]
 		print("package_name", self.m_package)
+	elseif first == "import" then
+		self:pushImportHeader(arr)
 	else
 		local info = self:topMessage()
 		if info and info.type == "enum" then
@@ -202,6 +218,15 @@ function parser:findAnyThingInLine(arr)
 			print("current first string is not valid", first)
 		end
 	end
+end
+function parser:pushImportHeader(arr)
+	local headerPath = arr[2]
+	for _,path in ipairs(self.m_importPath) do
+		if path == headerPath then
+			return
+		end
+	end
+	table.insert(self.m_importPath, headerPath)
 end
 function parser:checkElementSingle(arr)
 	local info = self:topMessage()
@@ -515,7 +540,7 @@ function parser:splitLines(data)
 		end
 	end
 	print("lines trim", #lines)
-	--    dump(lines)
+--	    dump(lines)
 	return lines
 end
 function parser:findPackage(linesArr)
