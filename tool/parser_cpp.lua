@@ -553,7 +553,7 @@ function parser_cpp:genCreate(className, prettyShow)
     return str
 end
 function parser_cpp:genDestroy(className, prettyShow)
-    local str = string.format("%svirtual eproto::Proto* Destroy() { return %s::Delete(this); }\n", prettyShow, className)
+    local str = string.format("%svirtual void Destroy() { %s::Delete(this); }\n", prettyShow, className)
     return str
 end
 function parser_cpp:genNew(className, prettyShow)
