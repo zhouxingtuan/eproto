@@ -23,7 +23,8 @@ namespace test
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual eproto::Proto* Create() { return new empty(); }
+        virtual eproto::Proto* Create() { return empty::New(); }
+        virtual eproto::Proto* Destroy() { return empty::Delete(this); }
         static empty* New() { empty* p = new empty(); p->retain(); return p; }
         static void Delete(empty* p) { if(NULL != p){ p->release(); }; }
     };
@@ -58,7 +59,8 @@ namespace test
                 if (--c <= 0) { return; }
                 rb.unpack_discard(c);
             }
-            virtual eproto::Proto* Create() { return new inner(); }
+            virtual eproto::Proto* Create() { return inner::New(); }
+            virtual eproto::Proto* Destroy() { return inner::Delete(this); }
             static inner* New() { inner* p = new inner(); p->retain(); return p; }
             static void Delete(inner* p) { if(NULL != p){ p->release(); }; }
         };
@@ -243,7 +245,8 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual eproto::Proto* Create() { return new request(); }
+        virtual eproto::Proto* Create() { return request::New(); }
+        virtual eproto::Proto* Destroy() { return request::Delete(this); }
         static request* New() { request* p = new request(); p->retain(); return p; }
         static void Delete(request* p) { if(NULL != p){ p->release(); }; }
     };
@@ -275,7 +278,8 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_discard(c);
         }
-        virtual eproto::Proto* Create() { return new response(); }
+        virtual eproto::Proto* Create() { return response::New(); }
+        virtual eproto::Proto* Destroy() { return response::Delete(this); }
         static response* New() { response* p = new response(); p->retain(); return p; }
         static void Delete(response* p) { if(NULL != p){ p->release(); }; }
     };

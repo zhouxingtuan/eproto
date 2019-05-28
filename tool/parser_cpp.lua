@@ -126,7 +126,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- ]]
     local template = [[%sclass %s : public eproto::Proto
 %s{
-%s%s%s%s%s%s%s%s%s%s
+%s%s%s%s%s%s%s%s%s%s%s
 %s};
 ]]
     local nextPrettyShow = prettyShow..prettyStep
@@ -151,12 +151,13 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local Encode = self:genEncode(elementArray, nextPrettyShow)
     local Decode = self:genDecode(elementArray, nextPrettyShow)
     local Create = self:genCreate(className, nextPrettyShow)
+    local Destroy = self:genDestroy(className, nextPrettyShow)
     local New    = self:genNew(className, nextPrettyShow)
     local Delete = self:genDelete(className, nextPrettyShow)
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, New, Delete,
+        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, Destroy, New, Delete,
         prettyShow)
     return classCode
 end
@@ -548,7 +549,11 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     return bodyCode
 end
 function parser_cpp:genCreate(className, prettyShow)
-    local str = string.format("%svirtual eproto::Proto* Create() { return new %s(); }\n", prettyShow, className)
+    local str = string.format("%svirtual eproto::Proto* Create() { return %s::New(); }\n", prettyShow, className)
+    return str
+end
+function parser_cpp:genDestroy(className, prettyShow)
+    local str = string.format("%svirtual eproto::Proto* Destroy() { return %s::Delete(this); }\n", prettyShow, className)
     return str
 end
 function parser_cpp:genNew(className, prettyShow)
