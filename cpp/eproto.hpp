@@ -1077,6 +1077,7 @@ public:
     virtual void Encode(Writer& wb) { }
     virtual void Decode(Reader& rb) { }
     virtual Proto* Create() { return NULL; }
+    virtual void Destroy() { }
 };
 
 };
