@@ -1074,10 +1074,20 @@ public:
 	}
 	inline int getRefCount(void){ return (int)m_referenceCount; }
 
-    virtual void Encode(Writer& wb) { }
-    virtual void Decode(Reader& rb) { }
-    virtual Proto* Create() { return NULL; }
-    virtual void Destroy() { }
+    virtual void Encode(eproto::Writer& wb)
+    {
+        wb.pack_array(0);
+    }
+    virtual void Decode(eproto::Reader& rb)
+    {
+        long long int c = rb.unpack_array();
+        if (c <= 0) { return; }
+        rb.unpack_discard(c);
+    }
+    virtual eproto::Proto* Create() { return Proto::New(); }
+    virtual void Destroy() { Proto::Delete(this); }
+    static Proto* New() { Proto* p = new Proto(); p->retain(); return p; }
+    static void Delete(Proto* p) { if(NULL != p){ p->release(); }; }
 };
 
 };
