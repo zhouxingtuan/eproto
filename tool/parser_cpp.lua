@@ -57,8 +57,8 @@ end
 
 function parser_cpp:genCode(cpp_file)
     local namespaceMap,defaultNSMap = self:splitNamespace()
---    dump(namespaceMap)
---    dump(defaultNSMap)
+    --    dump(namespaceMap)
+    --    dump(defaultNSMap)
     local code_template = [[
 #ifndef %s
 #define %s
@@ -111,7 +111,7 @@ namespace %s
     for _,info in ipairs(childArray) do
         local className = info.className
         local classInfo = info.classInfo
---    for className,classInfo in pairs(childMap) do
+        --    for className,classInfo in pairs(childMap) do
         classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
     end
     local code = string.format(template, namespace, classCode)
@@ -132,7 +132,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local nextPrettyShow = prettyShow..prettyStep
     local beforeClass = prettyShow
     if isPublic then
---        beforeClass = beforeClass .. "public "
+        --        beforeClass = beforeClass .. "public "
     end
     local subClasses = ""
     local publicLine = prettyShow.."public:\n"
@@ -141,7 +141,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     for _,info in ipairs(childArray) do
         local name = info.className
         local classInfo = info.classInfo
---    for name,info in pairs(childMap) do
+        --    for name,info in pairs(childMap) do
         subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true)
     end
     local params = self:genParams(elementArray, nextPrettyShow)
@@ -166,10 +166,12 @@ function parser_cpp:genParams(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        raw_type = string.gsub(raw_type, "%.", "::")
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
             if raw_type == "array" then
                 local raw_key = elementInfo[3]
+                raw_key = string.gsub(raw_key, "%.", "::")
                 local key_type = protobuf_to_cpp[raw_key]
                 if key_type == nil then
                     -- 自定义对象
@@ -179,6 +181,8 @@ function parser_cpp:genParams(elementArray, prettyShow)
             elseif raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
+                raw_key = string.gsub(raw_key, "%.", "::")
+                raw_value = string.gsub(raw_value, "%.", "::")
                 local key_type = protobuf_to_cpp[raw_key]
                 if key_type == nil then
                     key_type = raw_key
@@ -206,6 +210,7 @@ function parser_cpp:genConstructor(elementArray, prettyShow, className)
         for k,elementInfo in ipairs(elementArray) do
             local name = elementInfo[1]
             local raw_type = elementInfo[2]
+            raw_type = string.gsub(raw_type, "%.", "::")
             local cpp_type = protobuf_to_cpp[raw_type]
             local value_default
             if cpp_type == nil then
@@ -242,6 +247,7 @@ function parser_cpp:genClear(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        raw_type = string.gsub(raw_type, "%.", "::")
         local this_name = "this->"..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
@@ -250,6 +256,8 @@ function parser_cpp:genClear(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
+                raw_key = string.gsub(raw_key, "%.", "::")
+                raw_value = string.gsub(raw_value, "%.", "::")
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 local raw_value_cpp_type = protobuf_to_cpp[raw_value]
                 -- 在map里面拥有玩家自定义对象，需要清理指针
@@ -277,6 +285,7 @@ function parser_cpp:genClear(elementArray, prettyShow)
                 end
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
+                raw_key = string.gsub(raw_key, "%.", "::")
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 -- 当前是玩家自定义数据，需要清理指针
                 if raw_key_cpp_type == nil then
@@ -325,6 +334,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        raw_type = string.gsub(raw_type, "%.", "::")
         local this_name = "this->"..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
@@ -333,6 +343,8 @@ function parser_cpp:genEncode(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
+                raw_key = string.gsub(raw_key, "%.", "::")
+                raw_value = string.gsub(raw_value, "%.", "::")
                 local index_name = "i"
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.pack_map(%s.size());\n", this_name)
@@ -361,6 +373,7 @@ function parser_cpp:genEncode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
+                raw_key = string.gsub(raw_key, "%.", "::")
                 local index_name = "i"
                 local value_name = "v"
                 local value_at_index = this_name.."["..index_name.."]"
@@ -412,7 +425,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
     local bodyCode = prettyShow .. "virtual void Decode(eproto::Reader& rb)\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
---    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
+    --    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
@@ -420,6 +433,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
+        raw_type = string.gsub(raw_type, "%.", "::")
         local this_name = "this->"..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
@@ -429,6 +443,8 @@ function parser_cpp:genDecode(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
+                raw_key = string.gsub(raw_key, "%.", "::")
+                raw_value = string.gsub(raw_value, "%.", "::")
                 local index_name = "i"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 local raw_value_cpp_type = protobuf_to_cpp[raw_value]
@@ -445,15 +461,15 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 end
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
                 decl_value_default = self:getDefaultDeclValue(raw_value_cpp_type)
---                cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
+                --                cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
---                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
---                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
+                --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
+                --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
---                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
+                --                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
                 if raw_key_cpp_type == nil then
                     if decl_key_default then
                         bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s* k=%s;\n", decl_key, decl_key_default)
@@ -495,6 +511,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
+                raw_key = string.gsub(raw_key, "%.", "::")
                 local index_name = "i"
                 local value_name = "v"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
@@ -504,11 +521,11 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 else
                     decl_key = raw_key_cpp_type
                 end
---                cpp_type = decl_key.."[n]"
+                --                cpp_type = decl_key.."[n]"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_array();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
---                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
+                --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.resize(n);\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
@@ -585,10 +602,10 @@ function parser_cpp:getDefaultDeclValue(cpp_type)
     else
         if cpp_type == "std::string" then
             return nil
---            return "\"\""
+            --            return "\"\""
         elseif cpp_type == "std::vector<char>" then
             return nil
---            return "std::vector<char>()"
+            --            return "std::vector<char>()"
         elseif cpp_type == "bool" then
             return "false"
         else
@@ -639,7 +656,7 @@ function parser_cpp:getChildMapLevel(childMap)
     local isFind = loopFindLevel()
     while isFind do
         count = count + 1
---        print("loopFindLevel count ", count, "isFind", isFind)
+        --        print("loopFindLevel count ", count, "isFind", isFind)
         isFind = loopFindLevel()
     end
     local childArray= {}
@@ -654,7 +671,7 @@ function parser_cpp:getChildMapLevel(childMap)
         end
     end
     table.sort(childArray, sortFunc)
---    dump(childArray)
+    --    dump(childArray)
     return childArray
 end
 function parser_cpp:splitNamespace()
