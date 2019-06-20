@@ -586,7 +586,7 @@ function parser_cpp:genDelete(className, prettyShow)
     return str
 end
 function parser_cpp:genClassName(className, prettyShow, frontName)
-    local str = string.format("%sstatic void ClassName() { return \"%s::%s\"; }", prettyShow, frontName, className)
+    local str = string.format("%sstatic std::string ClassName() { return \"%s::%s\"; }", prettyShow, frontName, className)
     return str
 end
 function parser_cpp:hasDefaultDeclValue(cpp_type)
