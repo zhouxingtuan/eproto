@@ -91,13 +91,16 @@ end
 
 function parser_cpp:genNamespace(namespace, childMap)
     local template
+    local frontName
     if namespace == nil then
+        frontName = ""
         template = [[
 %s
 %s
 ]]
         namespace = "\n"
     else
+        frontName = namespace
         template = [[
 namespace %s
 {
@@ -112,12 +115,12 @@ namespace %s
         local className = info.className
         local classInfo = info.classInfo
         --    for className,classInfo in pairs(childMap) do
-        classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
+        classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false, namespace)
     end
     local code = string.format(template, namespace, classCode)
     return code
 end
-function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPublic)
+function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPublic, frontName)
     --[[
     -- subClasses
     -- params
@@ -126,7 +129,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     -- ]]
     local template = [[%sclass %s : public eproto::Proto
 %s{
-%s%s%s%s%s%s%s%s%s%s%s
+%s%s%s%s%s%s%s%s%s%s%s%s
 %s};
 ]]
     local nextPrettyShow = prettyShow..prettyStep
@@ -142,7 +145,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
         local name = info.className
         local classInfo = info.classInfo
         --    for name,info in pairs(childMap) do
-        subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true)
+        subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true, frontName.."::"..className)
     end
     local params = self:genParams(elementArray, nextPrettyShow)
     local Constructor = self:genConstructor(elementArray, nextPrettyShow, className)
@@ -154,10 +157,11 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local Destroy = self:genDestroy(className, nextPrettyShow)
     local New    = self:genNew(className, nextPrettyShow)
     local Delete = self:genDelete(className, nextPrettyShow)
+    local ClassName = self:genClassName(className, nextPrettyShow, frontName)
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, Destroy, New, Delete,
+        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, Destroy, New, Delete, ClassName,
         prettyShow)
     return classCode
 end
@@ -578,7 +582,11 @@ function parser_cpp:genNew(className, prettyShow)
     return str
 end
 function parser_cpp:genDelete(className, prettyShow)
-    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ p->release(); }; }", prettyShow, className)
+    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ p->release(); }; }\n", prettyShow, className)
+    return str
+end
+function parser_cpp:genClassName(className, prettyShow, frontName)
+    local str = string.format("%sstatic void ClassName() { return \"%s::%s\"; }", prettyShow, frontName, className)
     return str
 end
 function parser_cpp:hasDefaultDeclValue(cpp_type)
