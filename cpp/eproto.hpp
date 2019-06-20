@@ -1088,6 +1088,7 @@ public:
     virtual void Destroy() { Proto::Delete(this); }
     static Proto* New() { Proto* p = new Proto(); p->retain(); return p; }
     static void Delete(Proto* p) { if(NULL != p){ p->release(); }; }
+    virtual std::string ClassName(){ return "eproto::Proto"; }
 };
 
 };
