@@ -80,10 +80,13 @@ namespace test
         std::unordered_map<std::string, std::vector<char>> l;
         request() : eproto::Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
+        void Append_f(void* p, size_t len){ this->f.resize(this->f.size()+len); memcpy(this->f.data()+this->f.size(), (char*)p, len); }
+        inner* New_g(){ if(NULL!=this->g){ inner::Delete(this->g); } this->g = inner::New(); return this->g; }
         void Set_g(inner* p){ if(NULL!=p){p->retain();} if(NULL!=this->g){ inner::Delete(this->g); } this->g = p; }
         void Add_j(inner* p){ if(NULL!=p){p->retain();} this->j.push_back(p); }
+        inner* New_j(){ inner* p = inner::New(); this->j.push_back(p); return p; }
         void Add_k(const std::string& k, inner* v){ if(NULL!=v){v->retain();} auto it = this->k.find(k); if(it!=this->k.end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } }
-        void New_g(){ if(NULL!=this->g){ inner::Delete(this->g); } this->g = inner::New(); }
+        inner* New_k(const std::string& k){ inner* v = inner::New(); auto it = this->k.find(k); if(it!=this->k.end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } return v; }
         void Clear()
         {
             this->a = 0;
@@ -264,6 +267,7 @@ namespace test
         std::vector<char> buffer;
         response() : eproto::Proto(), error(0) {}
         virtual ~response(){ Clear(); }
+        void Append_buffer(void* p, size_t len){ this->buffer.resize(this->buffer.size()+len); memcpy(this->buffer.data()+this->buffer.size(), (char*)p, len); }
         void Clear()
         {
             this->error = 0;
