@@ -27,6 +27,7 @@ namespace test
         virtual void Destroy() { empty::Delete(this); }
         static empty* New() { empty* p = new empty(); p->retain(); return p; }
         static void Delete(empty* p) { if(NULL != p){ p->release(); }; }
+        virtual std::string ClassName() { return "test::empty"; }
     };
     class request : public eproto::Proto
     {
@@ -63,6 +64,7 @@ namespace test
             virtual void Destroy() { inner::Delete(this); }
             static inner* New() { inner* p = new inner(); p->retain(); return p; }
             static void Delete(inner* p) { if(NULL != p){ p->release(); }; }
+            virtual std::string ClassName() { return "test::request::inner"; }
         };
         int a;
         long long int b;
@@ -253,6 +255,7 @@ namespace test
         virtual void Destroy() { request::Delete(this); }
         static request* New() { request* p = new request(); p->retain(); return p; }
         static void Delete(request* p) { if(NULL != p){ p->release(); }; }
+        virtual std::string ClassName() { return "test::request"; }
     };
     class response : public eproto::Proto
     {
@@ -286,6 +289,7 @@ namespace test
         virtual void Destroy() { response::Delete(this); }
         static response* New() { response* p = new response(); p->retain(); return p; }
         static void Delete(response* p) { if(NULL != p){ p->release(); }; }
+        virtual std::string ClassName() { return "test::response"; }
     };
 
 };
