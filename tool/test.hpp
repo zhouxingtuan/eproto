@@ -81,8 +81,8 @@ namespace test
         request() : eproto::Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
         void Set_g(inner* p){ if(NULL!=p){p->retain();} if(NULL!=this->g){ inner::Delete(this->g); } this->g = p; }
-        void Add_j(inner* p){ if(NULL!=p){p->retain();} this->j->push_back(p); }
-        void Add_k(const std::string& k, inner* v){ if(NULL!=v){v->retain();} auto it = this->k->find(k); if(it!=this->k->end()){ inner::Delete(it->second); it->second = v; }else{ this->k->insert(std::make_pair(k, v)); } }
+        void Add_j(inner* p){ if(NULL!=p){p->retain();} this->j.push_back(p); }
+        void Add_k(const std::string& k, inner* v){ if(NULL!=v){v->retain();} auto it = this->k.find(k); if(it!=this->k->end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } }
         void New_g(){ if(NULL!=this->g){ inner::Delete(this->g); } this->g = inner::New(); }
         void Clear()
         {
