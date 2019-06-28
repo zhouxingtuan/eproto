@@ -196,7 +196,7 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if value_type == nil then
                     -- 自定义对象
                     value_type = raw_value.."*"
-                    local setFunc = prettyShow .. "void Add_%s(const %s& k, %s* v){ if(NULL!=v){v->retain();} auto it = this->%s.find(k); if(it!=this->%s->end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } }\n"
+                    local setFunc = prettyShow .. "void Add_%s(const %s& k, %s* v){ if(NULL!=v){v->retain();} auto it = this->%s.find(k); if(it!=this->%s.end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } }\n"
                     setFunc = string.format(setFunc, name, key_type, raw_value, name, name, raw_value, name)
                     paramSetter = paramSetter .. setFunc
                 end
