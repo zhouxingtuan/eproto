@@ -177,10 +177,10 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if key_type == nil then
                     -- 自定义对象
                     key_type = raw_key.."*"
-                    local setFunc = prettyShow .. "void Add_%s(%s* p){ if(NULL!=p){p->retain();} this->%s.push_back(p); }\n"
+                    local setFunc = prettyShow .. "void %s_Add(%s* p){ if(NULL!=p){p->retain();} this->%s.push_back(p); }\n"
                     setFunc = string.format(setFunc, name, raw_key, name)
                     paramSetter = paramSetter .. setFunc
-                    local setFunc = prettyShow .. "%s* New_%s(){ %s* p = %s::New(); this->%s.push_back(p); return p; }\n"
+                    local setFunc = prettyShow .. "%s* %s_New(){ %s* p = %s::New(); this->%s.push_back(p); return p; }\n"
                     setFunc = string.format(setFunc, raw_key, name, raw_key, raw_key, name)
                     paramSetter = paramSetter .. setFunc
                 end
@@ -198,10 +198,10 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if value_type == nil then
                     -- 自定义对象
                     value_type = raw_value.."*"
-                    local setFunc = prettyShow .. "void Add_%s(const %s& k, %s* v){ if(NULL!=v){v->retain();} auto it = this->%s.find(k); if(it!=this->%s.end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } }\n"
+                    local setFunc = prettyShow .. "void %s_Add(const %s& k, %s* v){ if(NULL!=v){v->retain();} auto it = this->%s.find(k); if(it!=this->%s.end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } }\n"
                     setFunc = string.format(setFunc, name, key_type, raw_value, name, name, raw_value, name)
                     paramSetter = paramSetter .. setFunc
-                    local setFunc = prettyShow .. "%s* New_%s(const %s& k){ %s* v = %s::New(); auto it = this->%s.find(k); if(it!=this->%s.end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } return v; }\n"
+                    local setFunc = prettyShow .. "%s* %s_New(const %s& k){ %s* v = %s::New(); auto it = this->%s.find(k); if(it!=this->%s.end()){ %s::Delete(it->second); it->second = v; }else{ this->%s.insert(std::make_pair(k, v)); } return v; }\n"
                     setFunc = string.format(setFunc, raw_value, name, key_type, raw_value, raw_value, name, name, raw_value, name)
                     paramSetter = paramSetter .. setFunc
                 end
@@ -210,15 +210,15 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 --                print("unsupport protobuf type to cpp type", raw_type)
                 -- 自定义对象
                 cpp_type = raw_type.."*"
-                local newFunc = prettyShow .. "%s* New_%s(){ if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = %s::New(); return this->%s; }\n"
+                local newFunc = prettyShow .. "%s* %s_New(){ if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = %s::New(); return this->%s; }\n"
                 newFunc = string.format(newFunc, raw_type, name, name, raw_type, name, name, raw_type, name)
                 paramSetter = paramSetter .. newFunc
-                local setFunc = prettyShow .. "void Set_%s(%s* p){ if(NULL!=p){p->retain();} if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = p; }\n"
+                local setFunc = prettyShow .. "void %s_Set(%s* p){ if(NULL!=p){p->retain();} if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = p; }\n"
                 setFunc = string.format(setFunc, name, raw_type, name, raw_type, name, name)
                 paramSetter = paramSetter .. setFunc
             end
         elseif raw_type == "bytes" then
-            local setFunc = prettyShow .. "void Append_%s(void* p, size_t len){ this->%s.resize(this->%s.size()+len); memcpy(this->%s.data()+this->%s.size(), (char*)p, len); }\n"
+            local setFunc = prettyShow .. "void %s_Append(void* p, size_t len){ this->%s.resize(this->%s.size()+len); memcpy(this->%s.data()+this->%s.size(), (char*)p, len); }\n"
             setFunc = string.format(setFunc, name, name, name, name, name)
             paramSetter = paramSetter .. setFunc
         end

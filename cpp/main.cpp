@@ -30,17 +30,21 @@ int main(int argc, const char * argv[]) {
     req->c = 3.1415F;
     req->d = 123456.789;
     req->e = "Hello";
-    req->g = test::request::inner::New();
+    req->g_New();
     req->h[1] = "a";
     req->h[2] = "b";
-
-    req->j.resize(1, NULL);
-    for (size_t i = 0; i < req->j.size(); ++i)
-    {
-        req->j[i] = test::request::inner::New();
-        req->j[i]->t1 = 77;
-        req->j[i]->t2 = "w";
+    for(size_t i=0; i<1; ++i){
+        test::request::inner* p = req->j_New();
+        p->t1 = 77;
+        p->t2 = "w";
     }
+//    req->j.resize(1, NULL);
+//    for (size_t i = 0; i < req->j.size(); ++i)
+//    {
+//        req->j[i] = test::request::inner::New();
+//        req->j[i]->t1 = 77;
+//        req->j[i]->t2 = "w";
+//    }
     wb.clear();
     req->Encode(wb);
     fprintf(stderr, "encode size == %d\n", (int)wb.size());
