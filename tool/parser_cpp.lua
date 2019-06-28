@@ -118,17 +118,6 @@ namespace %s
     return code
 end
 function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPublic)
-    --[[
-    -- subClasses
-    -- params
-    -- Encode
-    -- Decode
-    -- ]]
-    local template = [[%sclass %s : public eproto::Proto
-%s{
-%s%s%s%s%s%s%s%s%s%s%s
-%s};
-]]
     local nextPrettyShow = prettyShow..prettyStep
     local beforeClass = prettyShow
     if isPublic then
@@ -144,7 +133,7 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
         --    for name,info in pairs(childMap) do
         subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true)
     end
-    local params = self:genParams(elementArray, nextPrettyShow)
+    local params,paramSetter,paramNew = self:genParams(elementArray, nextPrettyShow)
     local Constructor = self:genConstructor(elementArray, nextPrettyShow, className)
     local Destructor = self:genDestructor(elementArray, nextPrettyShow, className)
     local Clear = self:genClear(elementArray, nextPrettyShow)
@@ -154,15 +143,24 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     local Destroy = self:genDestroy(className, nextPrettyShow)
     local New    = self:genNew(className, nextPrettyShow)
     local Delete = self:genDelete(className, nextPrettyShow)
+    local bodyArr = { subClasses, params, Constructor, Destructor, paramSetter, paramNew, Clear, Encode, Decode, Create, Destroy, New, Delete }
+    local bodyStr = table.concat(bodyArr)
+    local template = [[%sclass %s : public eproto::Proto
+%s{
+%s
+%s};
+]]
     local classCode = string.format(template,
         beforeClass, className,
         prettyShow,
-        subClasses, params, Constructor, Destructor, Clear, Encode, Decode, Create, Destroy, New, Delete,
+        bodyStr,
         prettyShow)
     return classCode
 end
 function parser_cpp:genParams(elementArray, prettyShow)
     local paramCode = ""
+    local paramSetter = ""
+    local paramNew = ""
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
@@ -176,6 +174,9 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if key_type == nil then
                     -- 自定义对象
                     key_type = raw_key.."*"
+                    local setFunc = prettyShow .. "void Add_%s(%s* p){ if(NULL!=p){p->retain();} this->%s->push_back(p); }\n"
+                    setFunc = string.format(setFunc, name, raw_key, name)
+                    paramSetter = paramSetter .. setFunc
                 end
                 cpp_type = "std::vector<"..key_type..">"
             elseif raw_type == "map" then
@@ -191,18 +192,27 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 if value_type == nil then
                     -- 自定义对象
                     value_type = raw_value.."*"
+                    local setFunc = prettyShow .. "void Add_%s(const %s& k, %s* v){ if(NULL!=v){v->retain();} auto it = this->%s->find(k); if(it!=this->%s->end()){ %s::Delete(it->second); it->second = v; }else{ this->%s->insert(std::make_pair(k, v)); } }\n"
+                    setFunc = string.format(setFunc, name, key_type, raw_value, name, name, raw_value, name)
+                    paramSetter = paramSetter .. setFunc
                 end
                 cpp_type = "std::unordered_map<"..key_type..", "..value_type..">"
             else
                 --                print("unsupport protobuf type to cpp type", raw_type)
                 -- 自定义对象
                 cpp_type = raw_type.."*"
+                local newFunc = prettyShow .. "void New_%s(){ if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = %s::New(); }\n"
+                newFunc = string.format(newFunc, name, name, raw_type, name, name, raw_type)
+                paramNew = paramNew .. newFunc
+                local setFunc = prettyShow .. "void Set_%s(%s* p){ if(NULL!=p){p->retain();} if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = p; }\n"
+                setFunc = string.format(setFunc, name, raw_type, name, raw_type, name, name)
+                paramSetter = paramSetter .. setFunc
             end
         end
         local lineCode = prettyShow .. cpp_type .. " " .. name .. ";\n"
         paramCode = paramCode .. lineCode
     end
-    return paramCode
+    return paramCode,paramSetter,paramNew
 end
 function parser_cpp:genConstructor(elementArray, prettyShow, className)
     local paramCode = ""
@@ -614,7 +624,8 @@ function parser_cpp:getDefaultDeclValue(cpp_type)
     end
 end
 function parser_cpp:getUnpackByDefine(name, raw_key)
-    return string.format("if (rb.nextIsNil()) { rb.moveNext(); } else { %s = %s::New(); %s->Decode(rb); }\n", name, raw_key, name)
+    local clearStr = string.format("if(NULL!=%s){ %s::Delete(%s); }", name, raw_key, name)
+    return string.format("if (rb.nextIsNil()) { rb.moveNext(); } else { %s %s = %s::New(); %s->Decode(rb); }\n", clearStr, name, raw_key, name)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
     if cpp_type == "std::string" then
