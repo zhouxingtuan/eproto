@@ -81,8 +81,8 @@ namespace test
         request() : eproto::Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
         void f_Append(void* p, size_t len){ this->f.resize(this->f.size()+len); memcpy(this->f.data()+this->f.size(), (char*)p, len); }
-        inner* g_New(){ if(NULL!=this->g){ inner::Delete(this->g); } this->g = inner::New(); return this->g; }
-        void g_Set(inner* p){ if(NULL!=p){p->retain();} if(NULL!=this->g){ inner::Delete(this->g); } this->g = p; }
+        inner* g_New(){ inner::Delete(this->g); this->g = inner::New(); return this->g; }
+        void g_Set(inner* p){ if(NULL!=p){p->retain();} inner::Delete(this->g); this->g = p; }
         void j_Add(inner* p){ if(NULL!=p){p->retain();} this->j.push_back(p); }
         inner* j_New(){ inner* p = inner::New(); this->j.push_back(p); return p; }
         void k_Add(const std::string& k, inner* v){ if(NULL!=v){v->retain();} auto it = this->k.find(k); if(it!=this->k.end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } }
@@ -102,14 +102,14 @@ namespace test
                 for(size_t i=0; i<this->j.size(); ++i)
                 {
                     inner* v = this->j[i];
-                    if(NULL!=v){ inner::Delete(v); }
+                    inner::Delete(v);
                 }
                 this->j.clear();
             }
             {
                 for(auto &i : this->k)
                 {
-                    if(NULL!=i.second){ inner::Delete(i.second); }
+                    inner::Delete(i.second);
                 }
                 this->k.clear();
             }
@@ -182,7 +182,7 @@ namespace test
             if (--c <= 0) { return; }
             rb.unpack_bytes(this->f);
             if (--c <= 0) { return; }
-            if (rb.nextIsNil()) { rb.moveNext(); } else { if(NULL!=this->g){ inner::Delete(this->g); } this->g = inner::New(); this->g->Decode(rb); }
+            if (rb.nextIsNil()) { rb.moveNext(); } else { inner::Delete(this->g); this->g = inner::New(); this->g->Decode(rb); }
             if (--c <= 0) { return; }
             {
                 long long int n = rb.unpack_map();
@@ -218,7 +218,7 @@ namespace test
                     for(long long int i=0; i<n; ++i)
                     {
                         inner* v=NULL;
-                        if (rb.nextIsNil()) { rb.moveNext(); } else { if(NULL!=v){ inner::Delete(v); } v = inner::New(); v->Decode(rb); }
+                        if (rb.nextIsNil()) { rb.moveNext(); } else { inner::Delete(v); v = inner::New(); v->Decode(rb); }
                         this->j[i] = v;
                     }
                 }
@@ -232,7 +232,7 @@ namespace test
                         std::string k;
                         rb.unpack_string(k);
                         inner* v=NULL;
-                        if (rb.nextIsNil()) { rb.moveNext(); } else { if(NULL!=v){ inner::Delete(v); } v = inner::New(); v->Decode(rb); }
+                        if (rb.nextIsNil()) { rb.moveNext(); } else { inner::Delete(v); v = inner::New(); v->Decode(rb); }
                         this->k[k] = v;
                     }
                 }

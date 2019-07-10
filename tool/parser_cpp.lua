@@ -210,11 +210,11 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 --                print("unsupport protobuf type to cpp type", raw_type)
                 -- 自定义对象
                 cpp_type = raw_type.."*"
-                local newFunc = prettyShow .. "%s* %s_New(){ if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = %s::New(); return this->%s; }\n"
-                newFunc = string.format(newFunc, raw_type, name, name, raw_type, name, name, raw_type, name)
+                local newFunc = prettyShow .. "%s* %s_New(){ %s::Delete(this->%s); this->%s = %s::New(); return this->%s; }\n"
+                newFunc = string.format(newFunc, raw_type, name, raw_type, name, name, raw_type, name)
                 paramSetter = paramSetter .. newFunc
-                local setFunc = prettyShow .. "void %s_Set(%s* p){ if(NULL!=p){p->retain();} if(NULL!=this->%s){ %s::Delete(this->%s); } this->%s = p; }\n"
-                setFunc = string.format(setFunc, name, raw_type, name, raw_type, name, name)
+                local setFunc = prettyShow .. "void %s_Set(%s* p){ if(NULL!=p){p->retain();} %s::Delete(this->%s); this->%s = p; }\n"
+                setFunc = string.format(setFunc, name, raw_type, raw_type, name, name)
                 paramSetter = paramSetter .. setFunc
             end
         elseif raw_type == "bytes" then
@@ -293,12 +293,12 @@ function parser_cpp:genClear(elementArray, prettyShow)
                     if raw_key_cpp_type == nil then
                         -- 自定义对象
                         print("it's not support for self define key for Dictionary")
-                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s.first){ %s::Delete(%s.first); }\n", index_name, raw_key, index_name)
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s::Delete(%s.first);\n", raw_key, index_name)
                     end
                     local raw_value_name = string.format("%s.second", index_name)
                     if raw_value_cpp_type == nil then
                         -- 自定义对象
-                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s.second){ %s::Delete(%s.second); }\n", index_name, raw_value, index_name)
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s::Delete(%s.second);\n", raw_value, index_name)
                     end
                     bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                     bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
@@ -322,7 +322,7 @@ function parser_cpp:genClear(elementArray, prettyShow)
                         -- 自定义对象
 
                         bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s* %s = %s;\n", raw_key, value_name, value_at_index)
-                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("if(NULL!=%s){ %s::Delete(%s); }\n", value_name, raw_key, value_name)
+                        bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s::Delete(%s);\n", raw_key, value_name)
                     end
                     bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                     bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.clear();\n", this_name)
@@ -641,7 +641,7 @@ function parser_cpp:getDefaultDeclValue(cpp_type)
     end
 end
 function parser_cpp:getUnpackByDefine(name, raw_key)
-    local clearStr = string.format("if(NULL!=%s){ %s::Delete(%s); }", name, raw_key, name)
+    local clearStr = string.format("%s::Delete(%s);", raw_key, name)
     return string.format("if (rb.nextIsNil()) { rb.moveNext(); } else { %s %s = %s::New(); %s->Decode(rb); }\n", clearStr, name, raw_key, name)
 end
 function parser_cpp:getUnpackByType(name, cpp_type)
