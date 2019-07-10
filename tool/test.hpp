@@ -10,7 +10,7 @@ namespace test
     public:
         empty() : eproto::Proto() {}
         virtual ~empty(){ Clear(); }
-        void Clear()
+        virtual void Clear()
         {
         }
         virtual void Encode(eproto::Writer& wb)
@@ -39,7 +39,7 @@ namespace test
             std::string t2;
             inner() : eproto::Proto(), t1(0) {}
             virtual ~inner(){ Clear(); }
-            void Clear()
+            virtual void Clear()
             {
                 this->t1 = 0;
                 this->t2 = "";
@@ -87,7 +87,7 @@ namespace test
         inner* j_New(){ inner* p = inner::New(); this->j.push_back(p); return p; }
         void k_Add(const std::string& k, inner* v){ if(NULL!=v){v->retain();} auto it = this->k.find(k); if(it!=this->k.end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } }
         inner* k_New(const std::string& k){ inner* v = inner::New(); auto it = this->k.find(k); if(it!=this->k.end()){ inner::Delete(it->second); it->second = v; }else{ this->k.insert(std::make_pair(k, v)); } return v; }
-        void Clear()
+        virtual void Clear()
         {
             this->a = 0;
             this->b = 0;
@@ -268,7 +268,7 @@ namespace test
         response() : eproto::Proto(), error(0) {}
         virtual ~response(){ Clear(); }
         void buffer_Append(void* p, size_t len){ this->buffer.resize(this->buffer.size()+len); memcpy(this->buffer.data()+this->buffer.size(), (char*)p, len); }
-        void Clear()
+        virtual void Clear()
         {
             this->error = 0;
             this->buffer.clear();

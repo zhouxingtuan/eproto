@@ -1074,6 +1074,7 @@ public:
 	}
 	inline int getRefCount(void){ return (int)m_referenceCount; }
 
+    virtual void Clear(){}
     virtual void Encode(eproto::Writer& wb)
     {
         wb.pack_array(0);

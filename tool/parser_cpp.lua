@@ -265,7 +265,7 @@ function parser_cpp:genDestructor(elementArray, prettyShow, className)
 end
 function parser_cpp:genClear(elementArray, prettyShow)
     local nextPrettyShow = prettyShow..prettyStep
-    local bodyCode = prettyShow .. "void Clear()\n"
+    local bodyCode = prettyShow .. "virtual void Clear()\n"
     bodyCode = bodyCode .. prettyShow .. "{\n"
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
