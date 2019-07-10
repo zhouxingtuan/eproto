@@ -601,7 +601,7 @@ function parser_cpp:genNew(className, prettyShow)
     return str
 end
 function parser_cpp:genDelete(className, prettyShow)
-    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ p->release(); }; }\n", prettyShow, className)
+    local str = string.format("%sstatic void Delete(%s* p) { if(NULL != p){ p->release(); } }\n", prettyShow, className)
     return str
 end
 function parser_cpp:genClassName(className, prettyShow, frontName)
