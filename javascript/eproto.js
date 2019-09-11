@@ -591,7 +591,9 @@ function decode() { // @return Mix:
     case 0xc4:  num += buf[++_idx];
                 var end = ++_idx + num
                 var ret = buf.slice(_idx, end);
-                _idx += num;
+//                _idx += num;
+                // bug fixed 2019.9.11 zxt
+                _idx = end - 1;
                 return ret;
     // 0xdf: map32, 0xde: map16, 0x80: map
     case 0xdf:  num +=  buf[++_idx] * 0x1000000 + (buf[++_idx] << 16);
