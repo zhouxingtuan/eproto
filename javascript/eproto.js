@@ -97,8 +97,15 @@ function copyArray(name, tab){
                 break;
             }
             case 6:{    // ep_type_bytes
+                // 在encode的时候，bytes类型支持： string 、 ArrayBuffer 、 Uint8Array
                 if(_isUint8Array(value)){
                     arr[key[1]] = value;
+                }else if(t === "string"){
+                    value = toByteArray(value);
+                    value = byteArrayToUint8Array(value);
+                    arr[key[1]] = value;
+                }else if(_isArrayBuffer(value)){
+                    arr[key[1]] = new Uint8Array(value);
                 }else{
                     throw new Error("type error string in proto "+name+" "+key[2]+" get "+t);
                 }
