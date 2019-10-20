@@ -218,8 +218,8 @@ function parser_cpp:genParams(elementArray, prettyShow)
                 paramSetter = paramSetter .. setFunc
             end
         elseif raw_type == "bytes" then
-            local setFunc = prettyShow .. "void %s_Append(void* p, size_t len){ this->%s.resize(this->%s.size()+len); memcpy(this->%s.data()+this->%s.size(), (char*)p, len); }\n"
-            setFunc = string.format(setFunc, name, name, name, name, name)
+            local setFunc = prettyShow .. "void %s_Append(void* p, size_t len){ int offset=(int)this->%s.size(); this->%s.resize(offset+len); memcpy(this->%s.data()+offset, (char*)p, len); }\n"
+            setFunc = string.format(setFunc, name, name, name, name)
             paramSetter = paramSetter .. setFunc
         end
         local lineCode = prettyShow .. cpp_type .. " " .. name .. ";\n"
