@@ -1,5 +1,5 @@
 # eproto
-eproto is base on msgpack. support protobuf description file format (.proto). can use in Lua(C++/pure lua),javascript and C#, C++,flutter(dart).eproto是基于msgpack的序列化协议，支持使用protobuf文件格式来定义协议，目前支持的语言有Lua（C++版本高效，纯Lua版本方便），JavaScript，C#，C++,flutter(dart)。
+eproto is base on msgpack. support protobuf description file format (.proto). can use in Lua(C++/pure lua),javascript and C#, C++,flutter(dart).eproto是基于msgpack的序列化协议，支持使用protobuf文件格式来定义协议，目前支持的语言有Lua（C++版本高效，纯Lua版本方便），JavaScript，C#，C++，flutter(dart)。
 
 link https://github.com/zhouxingtuan/eproto
 
