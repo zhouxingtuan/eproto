@@ -73,7 +73,7 @@ link https://github.com/zhouxingtuan/eproto
     
  
 # How to Use in flutter(dart)
-	in the tool directory, after run command to gen a pb file, you can find the hpp file:
+	in the tool directory, after run command to gen a pb file, you can find the dart file:
 	 xxx.dart
 	 Copy eproto.dart and these proto files to your project, and import them. You can use it just like C++.
     
