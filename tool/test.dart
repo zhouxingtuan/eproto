@@ -15,6 +15,7 @@ class empty
     if (c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  empty create() { return empty(); }
 
 }
 class inner
@@ -37,6 +38,7 @@ class inner
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  inner create() { return inner(); }
 
 }
 class request
@@ -190,6 +192,7 @@ class request
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request create() { return request(); }
 
 }
 class response
@@ -212,6 +215,7 @@ class response
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response create() { return response(); }
 
 }
 

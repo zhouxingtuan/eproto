@@ -15,6 +15,7 @@ class DataType
     if (c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  DataType create() { return DataType(); }
 
 }
 class match_price
@@ -53,6 +54,7 @@ class match_price
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  match_price create() { return match_price(); }
 
 }
 class request_create_match
@@ -91,6 +93,7 @@ class request_create_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_create_match create() { return request_create_match(); }
 
 }
 class request_dismiss_match_by_owner
@@ -109,6 +112,7 @@ class request_dismiss_match_by_owner
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_dismiss_match_by_owner create() { return request_dismiss_match_by_owner(); }
 
 }
 class request_invite_config
@@ -131,6 +135,7 @@ class request_invite_config
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_invite_config create() { return request_invite_config(); }
 
 }
 class request_join_match
@@ -149,6 +154,7 @@ class request_join_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_join_match create() { return request_join_match(); }
 
 }
 class request_kick_user
@@ -171,6 +177,7 @@ class request_kick_user
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_kick_user create() { return request_kick_user(); }
 
 }
 class request_leave_match
@@ -189,6 +196,7 @@ class request_leave_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_leave_match create() { return request_leave_match(); }
 
 }
 class request_pull_user_matches
@@ -203,6 +211,7 @@ class request_pull_user_matches
     if (c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_pull_user_matches create() { return request_pull_user_matches(); }
 
 }
 class request_query_match
@@ -221,6 +230,7 @@ class request_query_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_query_match create() { return request_query_match(); }
 
 }
 class request_start_match
@@ -239,6 +249,7 @@ class request_start_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  request_start_match create() { return request_start_match(); }
 
 }
 class response_dismiss_match_by_owner
@@ -261,6 +272,7 @@ class response_dismiss_match_by_owner
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_dismiss_match_by_owner create() { return response_dismiss_match_by_owner(); }
 
 }
 class response_join_match
@@ -279,6 +291,7 @@ class response_join_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_join_match create() { return response_join_match(); }
 
 }
 class response_kick_user
@@ -301,6 +314,7 @@ class response_kick_user
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_kick_user create() { return response_kick_user(); }
 
 }
 class response_leave_match
@@ -319,6 +333,7 @@ class response_leave_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_leave_match create() { return response_leave_match(); }
 
 }
 class response_query_match
@@ -357,6 +372,7 @@ class response_query_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_query_match create() { return response_query_match(); }
 
 }
 class response_start_match
@@ -379,6 +395,7 @@ class response_start_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_start_match create() { return response_start_match(); }
 
 }
 class invite_game
@@ -471,6 +488,7 @@ class invite_game
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  invite_game create() { return invite_game(); }
 
 }
 class user_info
@@ -520,6 +538,7 @@ class user_info
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  user_info create() { return user_info(); }
 
 }
 class response_invite_config
@@ -563,6 +582,7 @@ class response_invite_config
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_invite_config create() { return response_invite_config(); }
 
 }
 class table_info
@@ -638,6 +658,7 @@ class table_info
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  table_info create() { return table_info(); }
 
 }
 class response_create_match
@@ -668,6 +689,7 @@ class response_create_match
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_create_match create() { return response_create_match(); }
 
 }
 class response_pull_user_matches
@@ -703,6 +725,7 @@ class response_pull_user_matches
     if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
+  response_pull_user_matches create() { return response_pull_user_matches(); }
 
 }
 

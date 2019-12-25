@@ -126,12 +126,12 @@ function parser_dart:findLibrary(headerPath, childMap)
                     selfDefineKey = raw_type
                 end
             end
---            print("selfDefineKey", selfDefineKey, "raw_type", raw_type, "raw_key", raw_key, "raw_value", raw_value)
+            --            print("selfDefineKey", selfDefineKey, "raw_type", raw_type, "raw_key", raw_key, "raw_value", raw_value)
             if selfDefineKey and not childMap[selfDefineKey] then
                 -- 从外部引入的message
                 local arr = util.split(selfDefineKey, "%.")
                 local libName = arr[1]
---                print("selfDefineKey", selfDefineKey, "libName", libName, "headerName", headerName)
+                --                print("selfDefineKey", selfDefineKey, "libName", libName, "headerName", headerName)
                 if string.find(headerName, libName) then
                     return libName
                 end
@@ -163,7 +163,7 @@ namespace %s
         prettyShow = prettyStep
     end
     local classCode = ""
---    local prettyShow = prettyStep
+    --    local prettyShow = prettyStep
     local childArray = self:getChildMapLevel(childMap)
     for _,info in ipairs(childArray) do
         local className = info.className
@@ -181,7 +181,7 @@ function parser_dart:genClass(className, elementArray, childMap, prettyShow, isP
         --        beforeClass = beforeClass .. "public "
     end
     local subClasses = ""
---    local publicLine = prettyShow.."public:\n"
+    --    local publicLine = prettyShow.."public:\n"
     local publicLine = ""
     subClasses = subClasses .. publicLine
     local childArray = self:getChildMapLevel(childMap)
@@ -193,7 +193,8 @@ function parser_dart:genClass(className, elementArray, childMap, prettyShow, isP
     local params = self:genParams(elementArray, nextPrettyShow)
     local Encode = self:genEncode(elementArray, nextPrettyShow)
     local Decode = self:genDecode(elementArray, nextPrettyShow)
-    local bodyArr = { params, Encode, Decode }
+    local Create = self:genCreate(className, nextPrettyShow)
+    local bodyArr = { params, Encode, Decode, Create }
     local bodyStr = table.concat(bodyArr)
     local template = [[%s%sclass %s
 %s{
@@ -213,12 +214,12 @@ function parser_dart:genParams(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
---        raw_type = string.gsub(raw_type, "%.", "::")
+        --        raw_type = string.gsub(raw_type, "%.", "::")
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
             if raw_type == "array" then
                 local raw_key = elementInfo[3]
---                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
                 local key_type = protobuf_to_cpp[raw_key]
                 if key_type == nil then
                     -- 自定义对象
@@ -228,8 +229,8 @@ function parser_dart:genParams(elementArray, prettyShow)
             elseif raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
---                raw_key = string.gsub(raw_key, "%.", "::")
---                raw_value = string.gsub(raw_value, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_value = string.gsub(raw_value, "%.", "::")
                 local key_type = protobuf_to_cpp[raw_key]
                 if key_type == nil then
                     key_type = raw_key
@@ -262,7 +263,7 @@ function parser_dart:genEncode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
---        raw_type = string.gsub(raw_type, "%.", "::")
+        --        raw_type = string.gsub(raw_type, "%.", "::")
         local this_name = "this."..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
@@ -271,8 +272,8 @@ function parser_dart:genEncode(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
---                raw_key = string.gsub(raw_key, "%.", "::")
---                raw_value = string.gsub(raw_value, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_value = string.gsub(raw_value, "%.", "::")
                 bodyCode = bodyCode .. nextPrettyShow .. string.format("{\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("wb.packMapHead(%s.length);\n", this_name)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("%s.forEach((k,v)\n", this_name)
@@ -300,7 +301,7 @@ function parser_dart:genEncode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
---                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
                 local index_name = "i"
                 local value_name = "v"
                 local value_at_index = this_name.."["..index_name.."]"
@@ -360,7 +361,7 @@ function parser_dart:genDecode(elementArray, prettyShow)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
         local raw_type = elementInfo[2]
---        raw_type = string.gsub(raw_type, "%.", "::")
+        --        raw_type = string.gsub(raw_type, "%.", "::")
         local this_name = "this."..name
         local cpp_type = protobuf_to_cpp[raw_type]
         if cpp_type == nil then
@@ -370,8 +371,8 @@ function parser_dart:genDecode(elementArray, prettyShow)
             if raw_type == "map" then
                 local raw_key = elementInfo[3]
                 local raw_value = elementInfo[4]
---                raw_key = string.gsub(raw_key, "%.", "::")
---                raw_value = string.gsub(raw_value, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_value = string.gsub(raw_value, "%.", "::")
                 local index_name = "i"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
                 local raw_value_cpp_type = protobuf_to_cpp[raw_value]
@@ -446,7 +447,7 @@ function parser_dart:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
             elseif raw_type == "array" then
                 local raw_key = elementInfo[3]
---                raw_key = string.gsub(raw_key, "%.", "::")
+                --                raw_key = string.gsub(raw_key, "%.", "::")
                 local index_name = "i"
                 local value_name = "v"
                 local raw_key_cpp_type = protobuf_to_cpp[raw_key]
@@ -461,7 +462,7 @@ function parser_dart:genDecode(elementArray, prettyShow)
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("int n = rb.unpackArrayHead();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
                 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
---                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.resize(n);\n", this_name)
+                --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.resize(n);\n", this_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 if raw_key_cpp_type == nil then
@@ -504,6 +505,10 @@ function parser_dart:genDecode(elementArray, prettyShow)
     bodyCode = bodyCode .. prettyShow .. "}\n"
     return bodyCode
 end
+function parser_dart:genCreate(className, prettyShow)
+    local str = string.format("%s%s create() { return %s(); }\n", prettyShow, className, className)
+    return str
+end
 function parser_dart:getDefaultDeclValue(cpp_type)
     if cpp_type == nil then
         return
@@ -524,7 +529,7 @@ function parser_dart:getDefaultDeclValue(cpp_type)
     end
 end
 function parser_dart:getUnpackByDefine(name, raw_key)
---    local clearStr = string.format("%s::Delete(%s);", raw_key, name)
+    --    local clearStr = string.format("%s::Delete(%s);", raw_key, name)
     return string.format("if (rb.nextIsNil()) { rb.moveNext(); } else { %s.decode(rb); }\n", name)
 end
 function parser_dart:getUnpackByType(name, cpp_type)
