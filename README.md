@@ -1,5 +1,5 @@
 # eproto
-eproto is base on msgpack. support protobuf description file format (.proto). can use in Lua(C++/pure lua),javascript and C#, C++.eproto是基于msgpack的序列化协议，支持使用protobuf文件格式来定义协议，目前支持的语言有Lua（C++版本高效，纯Lua版本方便），JavaScript，C#，C++。
+eproto is base on msgpack. support protobuf description file format (.proto). can use in Lua(C++/pure lua),javascript and C#, C++,flutter(dart).eproto是基于msgpack的序列化协议，支持使用protobuf文件格式来定义协议，目前支持的语言有Lua（C++版本高效，纯Lua版本方便），JavaScript，C#，C++,flutter(dart)。
 
 link https://github.com/zhouxingtuan/eproto
 
@@ -71,5 +71,9 @@ link https://github.com/zhouxingtuan/eproto
 		 只有message对象使用指针，NULL和nil保持了一致。这里采用了完全public的class模式（类似struct），对新手
 		 不友好，容易造成内存泄漏，注意使用。
     
-    
+ 
+# How to Use in flutter(dart)
+	in the tool directory, after run command to gen a pb file, you can find the hpp file:
+	 xxx.dart
+	 Copy eproto.dart and these proto files to your project, and import them. You can use it just like C++.
     
