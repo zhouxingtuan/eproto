@@ -41,7 +41,7 @@ message request_create_match
 message response_create_match
 {
     optional int32 result = 1;                      // 创建房间结果
-    optional table_info table_info = 2;              // 桌子信息
+    optional table_info info = 2;              // 桌子信息
     optional int32 prop_type = 3;                   // 扣除的道具的类型
     optional int32 prop_num = 4;                    // 扣除的道具的数量
 }
@@ -86,7 +86,7 @@ message invite_game
     optional int32 player_number = 8;               // 子游戏的人数
     optional int32 is_new = 9;                      // 是否是新游戏 0否 1是
     optional int32 sort_id = 10;                    // 排序的ID
-    repeated match_price match_price = 11;           // 价格数据
+    repeated match_price price = 11;           // 价格数据
 }
 message response_invite_config
 {
@@ -101,7 +101,7 @@ message request_pull_user_matches
 }
 message response_pull_user_matches
 {
-    repeated table_info table_info = 1;             // 玩家创建的桌子数据
+    repeated table_info info = 1;             // 玩家创建的桌子数据
 }
 // 0x2008 加入比赛
 message request_join_match

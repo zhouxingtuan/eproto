@@ -46,7 +46,6 @@ local util = require("util")
 local dump = require("dump")
 local MessagePack = require("MessagePack")
 local json = require("json")
-local parser_csharp = require("parser_csharp")
 
 local parser = class("parser")
 
@@ -123,6 +122,7 @@ function parser:parseFile(file, save_file, print_flag)
 	local js_buf = string.format(js_temp, name, json_buf, name, name)
 	self:setFileData(js_file, js_buf)
 
+	local parser_csharp = require("parser_csharp")
 	local parser_obj = parser_csharp.new(self.m_package, self.m_full_path_info)
 	local cs_buf = parser_obj:genCode()
 --	print("csharp code:\n"..cs_buf)
@@ -135,6 +135,13 @@ function parser:parseFile(file, save_file, print_flag)
 	local cpp_buf = parser_obj:genCode(cpp_file)
 --	print("csharp code:\n"..cs_buf)
 	self:setFileData(cpp_file, cpp_buf)
+
+	local parser_dart = require("parser_dart")
+	local dart_file = name..".dart"
+	local parser_obj = parser_dart.new(self.m_package, self.m_full_path_info, self.m_importPath)
+	local dart_buf = parser_obj:genCode(dart_file)
+	--	print("dart code:\n"..cs_buf)
+	self:setFileData(dart_file, dart_buf)
 
 	return protos
 end

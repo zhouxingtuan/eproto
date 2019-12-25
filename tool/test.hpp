@@ -26,7 +26,7 @@ namespace test
         virtual eproto::Proto* Create() { return empty::New(); }
         virtual void Destroy() { empty::Delete(this); }
         static empty* New() { empty* p = new empty(); p->retain(); return p; }
-        static void Delete(empty* p) { if(NULL != p){ p->release(); }; }
+        static void Delete(empty* p) { if(NULL != p){ p->release(); } }
         virtual std::string ClassName() { return "test::empty"; }
     };
     class request : public eproto::Proto
@@ -63,7 +63,7 @@ namespace test
             virtual eproto::Proto* Create() { return inner::New(); }
             virtual void Destroy() { inner::Delete(this); }
             static inner* New() { inner* p = new inner(); p->retain(); return p; }
-            static void Delete(inner* p) { if(NULL != p){ p->release(); }; }
+            static void Delete(inner* p) { if(NULL != p){ p->release(); } }
             virtual std::string ClassName() { return "test::request::inner"; }
         };
         int a;
@@ -80,7 +80,7 @@ namespace test
         std::unordered_map<std::string, std::vector<char>> l;
         request() : eproto::Proto(), a(0), b(0), c(0), d(0), g(NULL) {}
         virtual ~request(){ Clear(); }
-        void f_Append(void* p, size_t len){ this->f.resize(this->f.size()+len); memcpy(this->f.data()+this->f.size(), (char*)p, len); }
+        void f_Append(void* p, size_t len){ int offset=(int)this->f.size(); this->f.resize(offset+len); memcpy(this->f.data()+offset, (char*)p, len); }
         inner* g_New(){ inner::Delete(this->g); this->g = inner::New(); return this->g; }
         void g_Set(inner* p){ if(NULL!=p){p->retain();} inner::Delete(this->g); this->g = p; }
         void j_Add(inner* p){ if(NULL!=p){p->retain();} this->j.push_back(p); }
@@ -257,7 +257,7 @@ namespace test
         virtual eproto::Proto* Create() { return request::New(); }
         virtual void Destroy() { request::Delete(this); }
         static request* New() { request* p = new request(); p->retain(); return p; }
-        static void Delete(request* p) { if(NULL != p){ p->release(); }; }
+        static void Delete(request* p) { if(NULL != p){ p->release(); } }
         virtual std::string ClassName() { return "test::request"; }
     };
     class response : public eproto::Proto
@@ -267,7 +267,7 @@ namespace test
         std::vector<char> buffer;
         response() : eproto::Proto(), error(0) {}
         virtual ~response(){ Clear(); }
-        void buffer_Append(void* p, size_t len){ this->buffer.resize(this->buffer.size()+len); memcpy(this->buffer.data()+this->buffer.size(), (char*)p, len); }
+        void buffer_Append(void* p, size_t len){ int offset=(int)this->buffer.size(); this->buffer.resize(offset+len); memcpy(this->buffer.data()+offset, (char*)p, len); }
         virtual void Clear()
         {
             this->error = 0;
@@ -292,7 +292,7 @@ namespace test
         virtual eproto::Proto* Create() { return response::New(); }
         virtual void Destroy() { response::Delete(this); }
         static response* New() { response* p = new response(); p->retain(); return p; }
-        static void Delete(response* p) { if(NULL != p){ p->release(); }; }
+        static void Delete(response* p) { if(NULL != p){ p->release(); } }
         virtual std::string ClassName() { return "test::response"; }
     };
 

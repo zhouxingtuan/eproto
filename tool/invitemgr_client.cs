@@ -5,15 +5,15 @@ using Erpc;
 
 namespace invitemgr
 {
-    class request_query_match
+    class request_query_match : Proto
     {
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -21,19 +21,19 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_query_match(); }
     }
-    class request_invite_config
+    class request_invite_config : Proto
     {
         public int region_code;
         public string version;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.region_code);
             Eproto.PackString(wb, this.version);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -43,9 +43,9 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_invite_config(); }
     }
-    class response_query_match
+    class response_query_match : Proto
     {
         public int result;
         public int tid;
@@ -53,7 +53,7 @@ namespace invitemgr
         public int game_id;
         public int node_type;
         public int node_id;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 6);
             Eproto.PackInteger(wb, this.result);
@@ -63,7 +63,7 @@ namespace invitemgr
             Eproto.PackInteger(wb, this.node_type);
             Eproto.PackInteger(wb, this.node_id);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -81,19 +81,19 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_query_match(); }
     }
-    class request_kick_user
+    class request_kick_user : Proto
     {
         public int tid;
         public int uid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.tid);
             Eproto.PackInteger(wb, this.uid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -103,14 +103,14 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_kick_user(); }
     }
-    class response_invite_config
+    class response_invite_config : Proto
     {
         public int result;
         public int region_code;
         public invite_game[] games;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 3);
             Eproto.PackInteger(wb, this.result);
@@ -124,7 +124,7 @@ namespace invitemgr
                 }
             }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -147,9 +147,9 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_invite_config(); }
     }
-    class request_create_match
+    class request_create_match : Proto
     {
         public int region_code;
         public int game_id;
@@ -157,7 +157,7 @@ namespace invitemgr
         public int owner_uid;
         public string owner_name;
         public string game_info;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 6);
             Eproto.PackInteger(wb, this.region_code);
@@ -167,7 +167,7 @@ namespace invitemgr
             Eproto.PackString(wb, this.owner_name);
             Eproto.PackString(wb, this.game_info);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -185,19 +185,19 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_create_match(); }
     }
-    class response_dismiss_match_by_owner
+    class response_dismiss_match_by_owner : Proto
     {
         public int result;
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.result);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -207,9 +207,9 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_dismiss_match_by_owner(); }
     }
-    class match_price
+    class match_price : Proto
     {
         public int id;
         public int type;
@@ -217,7 +217,7 @@ namespace invitemgr
         public string name;
         public int agent_value;
         public string agent_name;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 6);
             Eproto.PackInteger(wb, this.id);
@@ -227,7 +227,7 @@ namespace invitemgr
             Eproto.PackInteger(wb, this.agent_value);
             Eproto.PackString(wb, this.agent_name);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -245,17 +245,17 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new match_price(); }
     }
-    class request_leave_match
+    class request_leave_match : Proto
     {
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -263,17 +263,17 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_leave_match(); }
     }
-    class response_leave_match
+    class response_leave_match : Proto
     {
         public int result;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.result);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -281,33 +281,33 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_leave_match(); }
     }
-    class request_pull_user_matches
+    class request_pull_user_matches : Proto
     {
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 0);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_pull_user_matches(); }
     }
-    class response_start_match
+    class response_start_match : Proto
     {
         public int result;
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.result);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -317,17 +317,17 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_start_match(); }
     }
-    class request_join_match
+    class request_join_match : Proto
     {
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -335,17 +335,17 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_join_match(); }
     }
-    class request_start_match
+    class request_start_match : Proto
     {
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -353,29 +353,29 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_start_match(); }
     }
-    class response_create_match
+    class response_create_match : Proto
     {
         public int result;
-        public table_info table_info;
+        public table_info info;
         public int prop_type;
         public int prop_num;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 4);
             Eproto.PackInteger(wb, this.result);
-            if (this.table_info == null) { Eproto.PackNil(wb); } else { this.table_info.Encode(wb); }
+            if (this.info == null) { Eproto.PackNil(wb); } else { this.info.Encode(wb); }
             Eproto.PackInteger(wb, this.prop_type);
             Eproto.PackInteger(wb, this.prop_num);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
             Eproto.UnpackInteger(rb, ref this.result);
             if (--c <= 0) { return; }
-            if (rb.NextIsNil()) { rb.MoveNext(); } else { this.table_info = new table_info(); this.table_info.Decode(rb); }
+            if (rb.NextIsNil()) { rb.MoveNext(); } else { this.info = new table_info(); this.info.Decode(rb); }
             if (--c <= 0) { return; }
             Eproto.UnpackInteger(rb, ref this.prop_type);
             if (--c <= 0) { return; }
@@ -383,53 +383,53 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_create_match(); }
     }
-    class response_pull_user_matches
+    class response_pull_user_matches : Proto
     {
-        public table_info[] table_info;
-        public void Encode(WriteBuffer wb)
+        public table_info[] info;
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
-            if (this.table_info == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackArray(wb, this.table_info.Length);
-                for(int i=0; i<this.table_info.Length; ++i)
+            if (this.info == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackArray(wb, this.info.Length);
+                for(int i=0; i<this.info.Length; ++i)
                 {
-                    table_info v = this.table_info[i];
+                    table_info v = this.info[i];
                     if (v == null) { Eproto.PackNil(wb); } else { v.Encode(wb); }
                 }
             }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
             {
                 long n = Eproto.UnpackArray(rb);
-                if (n < 0) { this.table_info=null; } else {
-                    this.table_info = new table_info[n];
+                if (n < 0) { this.info=null; } else {
+                    this.info = new table_info[n];
                     for(int i=0; i<n; ++i)
                     {
                         table_info v=null;
                         if (rb.NextIsNil()) { rb.MoveNext(); } else { v = new table_info(); v.Decode(rb); }
-                        this.table_info[i] = v;
+                        this.info[i] = v;
                     }
                 }
             }
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_pull_user_matches(); }
     }
-    class request_dismiss_match_by_owner
+    class request_dismiss_match_by_owner : Proto
     {
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -437,15 +437,15 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new request_dismiss_match_by_owner(); }
     }
-    class user_info
+    class user_info : Proto
     {
         public int uid;
         public int signup_time;
         public Dictionary<int, string> data;
         public DataType dt;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 4);
             Eproto.PackInteger(wb, this.uid);
@@ -460,7 +460,7 @@ namespace invitemgr
             }
             if (this.dt == null) { Eproto.PackNil(wb); } else { this.dt.Encode(wb); }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -486,9 +486,9 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new user_info(); }
     }
-    class table_info
+    class table_info : Proto
     {
         public int game_id;
         public string game_name;
@@ -501,7 +501,7 @@ namespace invitemgr
         public string game_info;
         public user_info[] signup_users;
         public bool ss;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 11);
             Eproto.PackInteger(wb, this.game_id);
@@ -523,7 +523,7 @@ namespace invitemgr
             }
             Eproto.PackBool(wb, this.ss);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -562,23 +562,23 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new table_info(); }
     }
-    class DataType
+    class DataType : Proto
     {
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 0);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new DataType(); }
     }
-    class invite_game
+    class invite_game : Proto
     {
         public int game_id;
         public string game_name;
@@ -590,8 +590,8 @@ namespace invitemgr
         public int player_number;
         public int is_new;
         public int sort_id;
-        public match_price[] match_price;
-        public void Encode(WriteBuffer wb)
+        public match_price[] price;
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 11);
             Eproto.PackInteger(wb, this.game_id);
@@ -604,23 +604,23 @@ namespace invitemgr
                 for(int i=0; i<this.showtag2_version.Length; ++i)
                 {
                     string v = this.showtag2_version[i];
-                Eproto.PackString(wb, v);
+                    Eproto.PackString(wb, v);
                 }
             }
             Eproto.PackString(wb, this.game_info);
             Eproto.PackInteger(wb, this.player_number);
             Eproto.PackInteger(wb, this.is_new);
             Eproto.PackInteger(wb, this.sort_id);
-            if (this.match_price == null) { Eproto.PackNil(wb); } else {
-                Eproto.PackArray(wb, this.match_price.Length);
-                for(int i=0; i<this.match_price.Length; ++i)
+            if (this.price == null) { Eproto.PackNil(wb); } else {
+                Eproto.PackArray(wb, this.price.Length);
+                for(int i=0; i<this.price.Length; ++i)
                 {
-                    match_price v = this.match_price[i];
+                    match_price v = this.price[i];
                     if (v == null) { Eproto.PackNil(wb); } else { v.Encode(wb); }
                 }
             }
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -657,30 +657,30 @@ namespace invitemgr
             if (--c <= 0) { return; }
             {
                 long n = Eproto.UnpackArray(rb);
-                if (n < 0) { this.match_price=null; } else {
-                    this.match_price = new match_price[n];
+                if (n < 0) { this.price=null; } else {
+                    this.price = new match_price[n];
                     for(int i=0; i<n; ++i)
                     {
                         match_price v=null;
                         if (rb.NextIsNil()) { rb.MoveNext(); } else { v = new match_price(); v.Decode(rb); }
-                        this.match_price[i] = v;
+                        this.price[i] = v;
                     }
                 }
             }
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new invite_game(); }
     }
-    class response_join_match
+    class response_join_match : Proto
     {
         public int result;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 1);
             Eproto.PackInteger(wb, this.result);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -688,19 +688,19 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_join_match(); }
     }
-    class response_kick_user
+    class response_kick_user : Proto
     {
         public int result;
         public int tid;
-        public void Encode(WriteBuffer wb)
+        override public void Encode(WriteBuffer wb)
         {
             Eproto.PackArray(wb, 2);
             Eproto.PackInteger(wb, this.result);
             Eproto.PackInteger(wb, this.tid);
         }
-        public void Decode(ReadBuffer rb)
+        override public void Decode(ReadBuffer rb)
         {
             long c = Eproto.UnpackArray(rb);
             if (c <= 0) { return; }
@@ -710,7 +710,7 @@ namespace invitemgr
             if (--c <= 0) { return; }
             Eproto.UnpackDiscard(rb, c);
         }
-
+        override public Proto Create() { return new response_kick_user(); }
     }
 
 }

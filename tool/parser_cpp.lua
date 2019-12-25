@@ -92,13 +92,16 @@ end
 function parser_cpp:genNamespace(namespace, childMap)
     local template
     local frontName
+    local prettyShow
     if namespace == nil then
         frontName = ""
         template = [[
 %s
+
 %s
 ]]
-        namespace = "\n"
+        namespace = ""
+        prettyShow = ""
     else
         frontName = namespace
         template = [[
@@ -107,9 +110,10 @@ namespace %s
 %s
 };
 ]]
+        prettyShow = prettyStep
     end
     local classCode = ""
-    local prettyShow = prettyStep
+--    local prettyShow = prettyStep
     local childArray = self:getChildMapLevel(childMap)
     for _,info in ipairs(childArray) do
         local className = info.className
