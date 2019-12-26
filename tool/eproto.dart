@@ -36,7 +36,7 @@ class DataWriter
     }
   }
   void packInt(int n){
-    if(n >= 0){
+    if(n < 0){
       if (n >= -32) {
         _writeInt8(n);
       } else if (n >= -128) {
@@ -53,15 +53,15 @@ class DataWriter
         _writeInt64(n);
       }
     }else{
-      if (n <= 127) {
+      if (n < 128) {
         _writeUint8(n);
-      } else if (n <= 0xFF) {
+      } else if (n < 0xFF) {
         _writeUint8(0xcc);
         _writeUint8(n);
-      } else if (n <= 0xFFFF) {
+      } else if (n < 0xFFFF) {
         _writeUint8(0xcd);
         _writeUint16(n);
-      } else if (n <= 0xFFFFFFFF) {
+      } else if (n < 0xFFFFFFFF) {
         _writeUint8(0xce);
         _writeUint32(n);
       } else {
@@ -81,15 +81,15 @@ class DataWriter
   void packString(String s){
     final encoded = _codec.encode(s);
     final length = encoded.length;
-    if (length <= 31) {
+    if (length < 32) {
       _writeUint8(0xA0 | length);
-    } else if (length <= 0xFF) {
+    } else if (length < 0xFF) {
       _writeUint8(0xd9);
       _writeUint8(length);
-    } else if (length <= 0xFFFF) {
+    } else if (length < 0xFFFF) {
       _writeUint8(0xda);
       _writeUint16(length);
-    } else if (length <= 0xFFFFFFFF) {
+    } else if (length < 0xFFFFFFFF) {
       _writeUint8(0xdb);
       _writeUint32(length);
     } else {
@@ -99,13 +99,13 @@ class DataWriter
   }
   void packBytes(Uint8List buffer){
     final length = buffer.length;
-    if (length <= 0xFF) {
+    if (length < 0xFF) {
       _writeUint8(0xc4);
       _writeUint8(length);
-    } else if (length <= 0xFFFF) {
+    } else if (length < 0xFFFF) {
       _writeUint8(0xc5);
       _writeUint16(length);
-    } else if (length <= 0xFFFFFFFF) {
+    } else if (length < 0xFFFFFFFF) {
       _writeUint8(0xc6);
       _writeUint32(length);
     } else {
@@ -114,12 +114,12 @@ class DataWriter
     _writeBytes(buffer);
   }
   void packArrayHead(int length){
-    if (length <= 0xF) {
+    if (length < 0xF) {
       _writeUint8(0x90 | length);
-    } else if (length <= 0xFFFF) {
+    } else if (length < 0xFFFF) {
       _writeUint8(0xdc);
       _writeUint16(length);
-    } else if (length <= 0xFFFFFFFF) {
+    } else if (length < 0xFFFFFFFF) {
       _writeUint8(0xdd);
       _writeUint32(length);
     } else {
@@ -127,12 +127,12 @@ class DataWriter
     }
   }
   void packMapHead(int length){
-    if (length <= 0xF) {
+    if (length < 0xF) {
       _writeUint8(0x80 | length);
-    } else if (length <= 0xFFFF) {
+    } else if (length < 0xFFFF) {
       _writeUint8(0xde);
       _writeUint16(length);
-    } else if (length <= 0xFFFFFFFF) {
+    } else if (length < 0xFFFFFFFF) {
       _writeUint8(0xdf);
       _writeUint32(length);
     } else {
@@ -285,9 +285,9 @@ class DataWriter
 class DataReader
 {
   DataReader(Uint8List list, {bool copyBinary=true}) :
-    _list = list,
-    _data = ByteData.view(list.buffer, list.offsetInBytes),
-    copyBinaryData = copyBinary;
+        _list = list,
+        _data = ByteData.view(list.buffer, list.offsetInBytes),
+        copyBinaryData = copyBinary;
 
   bool unpackBool(){
     int t = moveNext();
@@ -315,56 +315,56 @@ class DataReader
       return (256 - t) * -1;
     }
     switch(t){
-      // int8
+    // int8
       case 0xd0:{
         if(left() < 1){
           throw FormatError("unpackInt int8 failed t = " + t.toString());
         }
         return _readInt8();
       }
-      // int16
+    // int16
       case 0xd1:{
         if(left() < 2){
           throw FormatError("unpackInt int16 failed t = " + t.toString());
         }
         return _readInt16();
       }
-      // int32
+    // int32
       case 0xd2:{
         if(left() < 4){
           throw FormatError("unpackInt int32 failed t = " + t.toString());
         }
         return _readInt32();
       }
-      // int64
+    // int64
       case 0xd3:{
         if(left() < 8){
           throw FormatError("unpackInt int64 failed t = " + t.toString());
         }
         return _readInt64();
       }
-      // uint8
+    // uint8
       case 0xcc:{
         if(left() < 1){
           throw FormatError("unpackInt uint8 failed t = " + t.toString());
         }
         return _readUInt8();
       }
-      // uint16
+    // uint16
       case 0xcd:{
         if(left() < 2){
           throw FormatError("unpackInt uint16 failed t = " + t.toString());
         }
         return _readUInt16();
       }
-      // uint
+    // uint
       case 0xce:{
         if(left() < 4){
           throw FormatError("unpackInt uint32 failed t = " + t.toString());
         }
         return _readUInt32();
       }
-      // uint64
+    // uint64
       case 0xcf:{
         if(left() < 8){
           throw FormatError("unpackInt uint64 failed t = " + t.toString());
@@ -379,11 +379,11 @@ class DataReader
   double unpackDouble(){
     int t = moveNext();
     switch(t){
-      // null
+    // null
       case 0xc0:{
         return _defaultDouble;
       }
-      // float
+    // float
       case 0xca:{
         if(left() < 4){
           throw FormatError("unpackDouble float failed t = " + t.toString());
@@ -415,7 +415,7 @@ class DataReader
       return _readString(length);
     }
     switch(t){
-      // str8
+    // str8
       case 0xd9:{
         if (left() < 1){
           throw FormatError("unpackString str8 length failed t = " + t.toString());
@@ -426,7 +426,7 @@ class DataReader
         }
         return _readString(length);
       }
-      // str16
+    // str16
       case 0xda:{
         if (left() < 2){
           throw FormatError("unpackString str16 length failed t = " + t.toString());
@@ -437,7 +437,7 @@ class DataReader
         }
         return _readString(length);
       }
-      // str32
+    // str32
       case 0xdb:{
         if (left() < 4){
           throw FormatError("unpackString str32 length failed t = " + t.toString());
@@ -462,7 +462,7 @@ class DataReader
       return Uint8List.fromList(_defaultBytes);
     }
     switch(t){
-      // bin8
+    // bin8
       case 0xc4:{
         if (left() < 1){
           throw FormatError("unpackBytes bin8 length failed t = " + t.toString());
@@ -473,7 +473,7 @@ class DataReader
         }
         return _readBuffer(length);
       }
-      // bin16
+    // bin16
       case 0xc5:{
         if (left() < 2){
           throw FormatError("unpackBytes bin16 length failed t = " + t.toString());
@@ -484,7 +484,7 @@ class DataReader
         }
         return _readBuffer(length);
       }
-      // bin32
+    // bin32
       case 0xc6:{
         if (left() < 4){
           throw FormatError("unpackBytes bin32 length failed t = " + t.toString());
@@ -510,14 +510,14 @@ class DataReader
       return length;
     }
     switch(t){
-      // array16
+    // array16
       case 0xdc:{
         if (left() < 2){
           throw FormatError("unpackArrayHead array16 length failed t = " + t.toString());
         }
         return _readUInt16();
       }
-      // array32
+    // array32
       case 0xdd:{
         if (left() < 4){
           throw FormatError("unpackArrayHead array16 length failed t = " + t.toString());
@@ -539,14 +539,14 @@ class DataReader
       return length;
     }
     switch(t){
-      // map16
+    // map16
       case 0xde:{
         if (left() < 2){
           throw FormatError("unpackMapHead map16 length failed t = " + t.toString());
         }
         return _readUInt16();
       }
-      // map32
+    // map32
       case 0xdf:{
         if (left() < 4){
           throw FormatError("unpackMapHead map32 length failed t = " + t.toString());
@@ -602,24 +602,24 @@ class DataReader
       return;
     }
     switch(t){
-      // null
+    // null
       case 0xc0:{
         return;
       }
-      // false
+    // false
       case 0xc2:{
         return;
       }
-      // true
+    // true
       case 0xc3:{
         return;
       }
-      // uint8
+    // uint8
       case 0xcc:{
         _moveOffset(1);
         return;
       }
-      // uint16
+    // uint16
       case 0xcd:{
         if (left() < 2){
           throw FormatError("discard uint16 length failed t = " + t.toString());
@@ -627,7 +627,7 @@ class DataReader
         _moveOffset(2);
         return;
       }
-      // uint32
+    // uint32
       case 0xce:{
         if (left() < 4){
           throw FormatError("discard uint32 length failed t = " + t.toString());
@@ -635,7 +635,7 @@ class DataReader
         _moveOffset(4);
         return;
       }
-      // uint64
+    // uint64
       case 0xcf:{
         if (left() < 8){
           throw FormatError("discard uint64 length failed t = " + t.toString());
@@ -643,7 +643,7 @@ class DataReader
         _moveOffset(8);
         return;
       }
-      // int8
+    // int8
       case 0xd0:{
         if (left() < 1){
           throw FormatError("discard int8 length failed t = " + t.toString());
@@ -651,7 +651,7 @@ class DataReader
         _moveOffset(1);
         return;
       }
-      // int16
+    // int16
       case 0xd1:{
         if (left() < 2){
           throw FormatError("discard int16 length failed t = " + t.toString());
@@ -659,7 +659,7 @@ class DataReader
         _moveOffset(2);
         return;
       }
-      // int32
+    // int32
       case 0xd2:{
         if (left() < 4){
           throw FormatError("discard int32 length failed t = " + t.toString());
@@ -667,7 +667,7 @@ class DataReader
         _moveOffset(4);
         return;
       }
-      // int64
+    // int64
       case 0xd3:{
         if (left() < 8){
           throw FormatError("discard int64 length failed t = " + t.toString());
@@ -675,7 +675,7 @@ class DataReader
         _moveOffset(8);
         return;
       }
-      // str8
+    // str8
       case 0xd9:{
         if (left() < 1){
           throw FormatError("discard str8 length failed t = " + t.toString());
@@ -687,7 +687,7 @@ class DataReader
         _moveOffset(length);
         return;
       }
-      // str16
+    // str16
       case 0xda:{
         if (left() < 2){
           throw FormatError("discard str16 length failed t = " + t.toString());
@@ -699,7 +699,7 @@ class DataReader
         _moveOffset(length);
         return;
       }
-      // str32
+    // str32
       case 0xdb:{
         if (left() < 4){
           throw FormatError("discard str32 length failed t = " + t.toString());
@@ -711,7 +711,7 @@ class DataReader
         _moveOffset(length);
         return;
       }
-      // float
+    // float
       case 0xca:{
         if (left() < 4){
           throw FormatError("discard float length failed t = " + t.toString());
@@ -719,7 +719,7 @@ class DataReader
         _moveOffset(4);
         return;
       }
-      // double
+    // double
       case 0xcb:{
         if (left() < 8){
           throw FormatError("discard double length failed t = " + t.toString());
@@ -727,7 +727,7 @@ class DataReader
         _moveOffset(8);
         return;
       }
-      // array16
+    // array16
       case 0xdc:{
         if (left() < 2){
           throw FormatError("discard array16 length failed t = " + t.toString());
@@ -736,7 +736,7 @@ class DataReader
         unpackDiscard(length);
         return;
       }
-      // array32
+    // array32
       case 0xdd:{
         if (left() < 4){
           throw FormatError("discard array32 length failed t = " + t.toString());
@@ -745,7 +745,7 @@ class DataReader
         unpackDiscard(length);
         return;
       }
-      // map16
+    // map16
       case 0xde:{
         if (left() < 2){
           throw FormatError("discard map16 length failed t = " + t.toString());
@@ -754,7 +754,7 @@ class DataReader
         unpackDiscard(length * 2);
         return;
       }
-      // map32
+    // map32
       case 0xdf:{
         if (left() < 4){
           throw FormatError("discard map32 length failed t = " + t.toString());
@@ -763,7 +763,7 @@ class DataReader
         unpackDiscard(length * 2);
         return;
       }
-      // bin8
+    // bin8
       case 0xc4:{
         if (left() < 1){
           throw FormatError("discard bin8 length failed t = " + t.toString());
@@ -775,7 +775,7 @@ class DataReader
         _moveOffset(length);
         return;
       }
-      // bin16
+    // bin16
       case 0xc5:{
         if (left() < 2){
           throw FormatError("discard bin16 length failed t = " + t.toString());
@@ -787,7 +787,7 @@ class DataReader
         _moveOffset(length);
         return;
       }
-      // bin32
+    // bin32
       case 0xc6:{
         if (left() < 4){
           throw FormatError("discard bin32 length failed t = " + t.toString());
