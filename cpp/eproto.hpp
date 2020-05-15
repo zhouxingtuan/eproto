@@ -110,11 +110,13 @@ public:
             add8(topbyte, l, sval);
         } else if(slen<65536){
             topbyte = 0xda;
-            unsigned short l = htons(slen);
+//            unsigned short l = htons(slen);
+			unsigned short l = (unsigned short)(slen);
             add16(topbyte, l, sval);
         } else if(slen<4294967296LL-1){ // TODO: -1 for avoiding (condition is always true warning)
             topbyte = 0xdb;
-            unsigned int l = htonl(slen);
+//            unsigned int l = htonl(slen);
+			unsigned int l = (unsigned int)(slen);
             add32(topbyte, l, sval);
         } else {
             fprintf(stderr, "pack_string length is out of range\n");
@@ -130,11 +132,13 @@ public:
             add8(topbyte, l, sval);
         } else if(slen<65536){
             topbyte = 0xc5;
-            unsigned short l = htons(slen);
+//            unsigned short l = htons(slen);
+			unsigned short l = (unsigned short)(slen);
             add16(topbyte, l, sval);
         } else if(slen<4294967296LL-1){ // TODO: -1 for avoiding (condition is always true warning)
             topbyte = 0xc6;
-            unsigned int l = htonl(slen);
+//            unsigned int l = htonl(slen);
+			unsigned int l = (unsigned int)(slen);
             add32(topbyte, l, sval);
         } else {
             fprintf(stderr, "pack_bytes length is out of range\n");
