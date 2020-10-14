@@ -79,10 +79,17 @@ function copyArray(name, tab){
                 }
                 break;
             }
-            case 3:     // ep_type_float
-            case 4:{    // ep_type_int
+            case 3:{    // ep_type_float
                 if(t === "number"){
                     arr[key[1]] = value;
+                }else{
+                    throw new Error("type error number in proto "+name+" "+key[2]+" get "+t);
+                }
+                break;
+            }
+            case 4:{    // ep_type_int
+                if(t === "number"){
+                    arr[key[1]] = Math.floor(value);    // it will cause type error if value is float
                 }else{
                     throw new Error("type error number in proto "+name+" "+key[2]+" get "+t);
                 }
