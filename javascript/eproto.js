@@ -3,9 +3,11 @@
 // === eproto ===
 // MessagePack -> http://eproto.sourceforge.net/
 
-this.eproto || (function(globalScope) {
+//this.eproto || (function(globalScope) {
+(function(globalScope) {
 
-globalScope.eproto = {
+//globalScope.eproto = {
+window.eproto = {
     pack:       eprotopack,     // eproto.pack(data:Mix,
                                 //              toString:Boolean = false):ByteArray/ByteString/false
                                 //  [1][mix to String]    eproto.pack({}, true) -> "..."
@@ -49,6 +51,7 @@ function eprotoencode(name, tab){
 }
 function eprotodecode(name, buf){
 	var arr = eprotounpack(buf);
+//	console.log("eprotodecode", name, arr, buf);
     return copyTable(name, arr);
 }
 
@@ -237,6 +240,7 @@ function copyTable(name, arr){
                 if(t === "object"){
                     var key4 = key[4];
                     if(typeof key4 === "string"){   // proto
+//                        console.log("key4", key4, "value", value, "key", key)
                         var a = {};
                         for(var j in value){
                             a[j] = copyTable(key4, value[j]);
@@ -615,17 +619,20 @@ function decode() { // @return Mix:
     case 0x80:  hash = {};
                 while (num--) {
                     // make key/value pair
-                    size = buf[++_idx] - 0xa0;
-
-                    for (ary = [], i = _idx, iz = i + size; i < iz; ) {
-                        c = buf[++i]; // lead byte
-                        ary.push(c < 0x80 ? c : // ASCII(0x00 ~ 0x7f)
-                                 c < 0xe0 ? ((c & 0x1f) <<  6 | (buf[++i] & 0x3f)) :
-                                            ((c & 0x0f) << 12 | (buf[++i] & 0x3f) << 6
-                                                              | (buf[++i] & 0x3f)));
-                    }
-                    _idx = i;
-                    hash[_toString.apply(null, ary)] = decode();
+                    // bug fixed 2021.1.21 zxt: key can be any
+//                    var key = decode();
+                    hash[decode()] = decode();
+//                    size = buf[++_idx] - 0xa0;
+//
+//                    for (ary = [], i = _idx, iz = i + size; i < iz; ) {
+//                        c = buf[++i]; // lead byte
+//                        ary.push(c < 0x80 ? c : // ASCII(0x00 ~ 0x7f)
+//                                 c < 0xe0 ? ((c & 0x1f) <<  6 | (buf[++i] & 0x3f)) :
+//                                            ((c & 0x0f) << 12 | (buf[++i] & 0x3f) << 6
+//                                                              | (buf[++i] & 0x3f)));
+//                    }
+//                    _idx = i;
+//                    hash[_toString.apply(null, ary)] = decode();
                 }
                 return hash;
     // 0xdd: array32, 0xdc: array16, 0x90: array
