@@ -408,7 +408,7 @@ public:
                     fprintf(stderr, "unpack_int int8 failed\n");
                     return false;
                 }
-                value = moveNext();
+                value = (char)moveNext();
                 break;
             }
             case 0xd1:// int16
@@ -418,7 +418,7 @@ public:
                     fprintf(stderr, "unpack_int int16 failed\n");
                     return false;
                 }
-                value = ntohs( *(short*)(offsetPtr()) );
+                value = (short)ntohs( *(short*)(offsetPtr()) );
                 moveOffset(2);
                 break;
             }
@@ -429,7 +429,7 @@ public:
                     fprintf(stderr, "unpack_int int32 failed\n");
                     return false;
                 }
-                value = ntohl( *(long*)(offsetPtr()) );
+                value = (int)ntohl( *(long*)(offsetPtr()) );
                 moveOffset(4);
                 break;
             }
