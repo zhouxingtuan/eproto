@@ -434,7 +434,8 @@ public:
                     fprintf(stderr, "unpack_int int64 failed\n");
                     return false;
                 }
-                value = ntohll(*(long long int*)(offsetPtr()));
+                unsigned long long int tempv = *(unsigned long long int*)(offsetPtr());
+                value = (long long int)ntohll(tempv);
                 moveOffset(8);
                 break;
             }
