@@ -85,6 +85,15 @@ int main(int argc, const char * argv[]) {
     req3->Decode(rb);
     fprintf(stderr, "decode winMoney=%lld roomId=%d\n", req3->winMoney, req3->roomId);
 
+    req3->roomId = 123;
+    req3->winMoney = -21474836489LL;
+    fprintf(stderr, "before encode winMoney=%lld roomId=%d\n", req3->winMoney, req3->roomId);
+    wb.clear();
+    req3->Encode(wb);
+    rb.resetBuffer(wb.data(), wb.size());
+    req3->Decode(rb);
+    fprintf(stderr, "decode winMoney=%lld roomId=%d\n", req3->winMoney, req3->roomId);
+
     test::request::Delete(req);
     test::request::Delete(req2);
     test::GameOver::Delete(req3);
