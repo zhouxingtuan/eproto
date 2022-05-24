@@ -59,7 +59,7 @@ inline void ep_pack_bool(WriteBuffer* pwb, bool b){
 		pwb->push(0xc2);
 	}
 }
-inline void ep_pack_int(WriteBuffer* pwb, long long lv){
+inline void ep_pack_int(WriteBuffer* pwb, long long int lv){
 	if(lv>=0){
 	    if(lv<128){
 	        pwb->push((char)lv);
@@ -70,10 +70,10 @@ inline void ep_pack_int(WriteBuffer* pwb, long long lv){
 	        short v = htons((short)lv);
 	        pwb->add(0xcd, (unsigned char*)&v, 2);
 	    } else if(lv<4294967296LL){
-	        long v = htonl((long)lv);
+	        unsigned int v = htonl((unsigned int)lv);
 	        pwb->add(0xce, (unsigned char*)&v, 4);
 	    } else {
-	        long long v = htonll((long long)lv);
+	        unsigned long long int v = htonll((unsigned long long int)lv);
 	        pwb->add(0xcf, (unsigned char*)&v, 8);
 	    }
 	} else {
@@ -90,7 +90,7 @@ inline void ep_pack_int(WriteBuffer* pwb, long long lv){
 	        int v = htonl(lv&0xffffffff);
 	        pwb->add(0xd2, (unsigned char*)&v, 4);
 	    } else{
-	        long long v = htonll(lv);
+	        long long int v = htonll(lv);
 	        pwb->add(0xd3, (unsigned char*)&v, 8);
 	    }
 	}
@@ -149,7 +149,7 @@ inline void ep_pack_bytes(WriteBuffer* pwb, const unsigned char *sval, size_t sl
 }
 inline void ep_pack_number(WriteBuffer* pwb, lua_Number n){
     if(floor(n)==n){
-        long long lv = (long long)n;
+        long long int lv = (long long int)n;
         ep_pack_int(pwb, lv);
     } else { // floating point!
 		ep_pack_float(pwb, n);
@@ -954,7 +954,7 @@ inline void ep_encode_proto_array(ProtoState* ps, lua_State *L, int index, unsig
 				LOG_ERROR("ep_encode_proto_array t != LUA_TNUMBER t=%d", t);
 				return;
 			}
-			long long lv = lua_tonumber(L, value_index);
+			long long int lv = lua_tonumber(L, value_index);
 			ep_pack_int(pwb, lv);
 			lua_pop(L,1); // repair stack
 		}
@@ -1093,7 +1093,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 				LOG_ERROR("ep_encode_proto_map key t != LUA_TNUMBER t=%d", t);
 				return;
 			}
-			long long lv = lua_tonumber(L, key_index);
+			long long int lv = lua_tonumber(L, key_index);
 			ep_pack_int(pwb, lv);
 			break;
 		}
@@ -1153,7 +1153,7 @@ inline void ep_encode_proto_map(ProtoState* ps, lua_State *L, int index, unsigne
 				LOG_ERROR("ep_encode_proto_map value t != LUA_TNUMBER t=%d", t);
 				return;
 			}
-			long long lv = lua_tonumber(L, value_index);
+			long long int lv = lua_tonumber(L, value_index);
 			ep_pack_int(pwb, lv);
 			break;
 		}
@@ -1263,7 +1263,7 @@ static void ep_encode_proto(ProtoState* ps, lua_State *L, int index, ProtoElemen
 				LOG_ERROR("ep_encode_proto t != LUA_TNUMBER t=%d name=%s", t, element.name.c_str());
 				return;
 			}
-			long long lv = lua_tonumber(L, value_index);
+			long long int lv = lua_tonumber(L, value_index);
 			ep_pack_int(pwb, lv);
 			break;
 		}
