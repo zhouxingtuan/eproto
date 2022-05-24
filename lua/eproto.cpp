@@ -465,7 +465,7 @@ inline void ep_unpack_int32(ReadBuffer* prb, lua_State *L, unsigned char t){
         LOG_ERROR("ep_unpack_int32 prb->left()=%d < 4", prb->left());
         return;
     }
-    long v = ntohl( *(long*)(prb->offsetPtr()) );
+    int v = ntohl( *(int*)(prb->offsetPtr()) );
     lua_pushnumber(L,v);
     prb->moveOffset(4);
 }
@@ -475,7 +475,7 @@ inline void ep_unpack_int64(ReadBuffer* prb, lua_State *L, unsigned char t){
         LOG_ERROR("ep_unpack_int64 prb->left()=%d < 8", prb->left());
         return;
     }
-    long long v = *(long long*)(prb->offsetPtr());
+    long long int v = *(long long int*)(prb->offsetPtr());
     v = ntohll(v);
     lua_pushnumber(L, v);
     prb->moveOffset(8);
