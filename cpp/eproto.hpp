@@ -72,7 +72,7 @@ public:
                 unsigned short v = htons((short)lv);
                 add(0xcd, (unsigned char*)&v, 2);
             } else if(lv<4294967296LL){
-                long v = htonl((long)lv);
+                unsigned int v = htonl((unsigned int)lv);
                 add(0xce, (unsigned char*)&v, 4);
             } else {
                 long long int v = htonll((long long int)lv);
@@ -386,7 +386,7 @@ public:
                     fprintf(stderr, "unpack_int uint failed\n");
                     return false;
                 }
-                value = ntohl( *(long*)(offsetPtr()) );
+                value = ntohl( *(unsigned int*)(offsetPtr()) );
                 moveOffset(4);
                 break;
             }
@@ -429,7 +429,7 @@ public:
                     fprintf(stderr, "unpack_int int32 failed\n");
                     return false;
                 }
-                value = (int)ntohl( *(long*)(offsetPtr()) );
+                value = (int)ntohl( *(int*)(offsetPtr()) );
                 moveOffset(4);
                 break;
             }
