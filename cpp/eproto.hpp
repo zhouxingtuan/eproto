@@ -21,8 +21,14 @@
 
 namespace eproto{
 
-#define ntohll(x) ( ( (uint64_t)(ntohl( (uint32_t)((x << 32) >> 32) )) << 32) | ntohl( ((uint32_t)(x >> 32)) ) )
-#define htonll(x) ntohll(x)
+//#define ntohll(x) ( ( (uint64_t)(ntohl( (uint32_t)((x << 32) >> 32) )) << 32) | ntohl( ((uint32_t)(x >> 32)) ) )
+//#define htonll(x) ntohll(x)
+uint64_t htonll(uint64_t val){
+    return ( ((uint64_t)htonl(val)) << 32 ) + htonl(val >> 32);
+}
+uint64_t ntohll(uint64_t val){
+    return ( ((uint64_t)ntohl(val)) << 32 ) + ntohl(val >> 32);
+}
 
 #define WRITE_BUFFER_SIZE 4096
 
