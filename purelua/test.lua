@@ -112,3 +112,15 @@ local function testEproto()
 end
 
 testEproto()
+
+local function testInt64()
+    local GameOver = {
+        roomId = 123;
+        winMoney = -123423123;
+    }
+    local buff = eproto.encode("test.GameOver", GameOver)
+    local newD = eproto.decode("test.GameOver", buff)
+    log_debug("testint64", GameOver, newD)
+end
+testInt64()
+

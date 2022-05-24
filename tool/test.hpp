@@ -5,6 +5,40 @@
 
 namespace test
 {
+    class GameOver : public eproto::Proto
+    {
+    public:
+        int roomId;
+        long long int winMoney;
+        GameOver() : eproto::Proto(), roomId(0), winMoney(0) {}
+        virtual ~GameOver(){ Clear(); }
+        virtual void Clear()
+        {
+            this->roomId = 0;
+            this->winMoney = 0;
+        }
+        virtual void Encode(eproto::Writer& wb)
+        {
+            wb.pack_array(2);
+            wb.pack_int(this->roomId);
+            wb.pack_int(this->winMoney);
+        }
+        virtual void Decode(eproto::Reader& rb)
+        {
+            long long int c = rb.unpack_array();
+            if (c <= 0) { return; }
+            rb.unpack_int(this->roomId);
+            if (--c <= 0) { return; }
+            rb.unpack_int(this->winMoney);
+            if (--c <= 0) { return; }
+            rb.unpack_discard(c);
+        }
+        virtual eproto::Proto* Create() { return GameOver::New(); }
+        virtual void Destroy() { GameOver::Delete(this); }
+        static GameOver* New() { GameOver* p = new GameOver(); p->retain(); return p; }
+        static void Delete(GameOver* p) { if(NULL != p){ p->release(); } }
+        virtual std::string ClassName() { return "test::GameOver"; }
+    };
     class empty : public eproto::Proto
     {
     public:

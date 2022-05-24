@@ -33,3 +33,9 @@ message empty
 
 }
 
+// 游戏结束
+message GameOver
+{
+    optional int32 roomId = 1;          // 房间ID
+    optional int64 winMoney = 2;        // 玩家输赢的金币数
+}

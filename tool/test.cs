@@ -196,6 +196,28 @@ namespace test
         }
         override public Proto Create() { return new empty(); }
     }
+    class GameOver : Proto
+    {
+        public int roomId;
+        public long winMoney;
+        override public void Encode(WriteBuffer wb)
+        {
+            Eproto.PackArray(wb, 2);
+            Eproto.PackInteger(wb, this.roomId);
+            Eproto.PackInteger(wb, this.winMoney);
+        }
+        override public void Decode(ReadBuffer rb)
+        {
+            long c = Eproto.UnpackArray(rb);
+            if (c <= 0) { return; }
+            Eproto.UnpackInteger(rb, ref this.roomId);
+            if (--c <= 0) { return; }
+            Eproto.UnpackInteger(rb, ref this.winMoney);
+            if (--c <= 0) { return; }
+            Eproto.UnpackDiscard(rb, c);
+        }
+        override public Proto Create() { return new GameOver(); }
+    }
     class response : Proto
     {
         public int error;

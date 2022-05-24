@@ -21,10 +21,11 @@ inline int64 get_time_ms(void){
 int main(int argc, const char * argv[]) {
 	// insert code here...
 	std::cout << "Hello, World!\n";
-    int count = 1000000;
+    int count = 10000;
     eproto::Writer wb;
     test::request* req = test::request::New();
     test::request* req2 = test::request::New();
+    test::GameOver* req3 = test::GameOver::New();
     req->a = 100;
     req->b = 123456789;
     req->c = 3.1415F;
@@ -75,7 +76,17 @@ int main(int argc, const char * argv[]) {
     double gap2 = (double)(t4-t3)/1000000;
 	fprintf(stderr, "decode end t=%lld gap=%f count=%d\n", t4, gap2, count);
 
+    req3->roomId = 123;
+    req3->winMoney = -123423123;
+    fprintf(stderr, "before encode winMoney=%lld roomId=%d\n", req3->winMoney, req3->roomId);
+    wb.clear();
+    req3->Encode(wb);
+    rb.resetBuffer(wb.data(), wb.size());
+    req3->Decode(rb);
+    fprintf(stderr, "decode winMoney=%lld roomId=%d\n", req3->winMoney, req3->roomId);
+
     test::request::Delete(req);
     test::request::Delete(req2);
+    test::GameOver::Delete(req3);
     return 0;
 }

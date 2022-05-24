@@ -3,6 +3,29 @@ import 'dart:typed_data';
 import 'eproto.dart' as eproto;
 
 
+class GameOver
+{
+  int roomId = 0;
+  int winMoney = 0;
+  void encode(eproto.DataWriter wb)
+  {
+    wb.packArrayHead(2);
+    wb.packInt(this.roomId);
+    wb.packInt(this.winMoney);
+  }
+  void decode(eproto.DataReader rb)
+  {
+    int c = rb.unpackArrayHead();
+    if (c <= 0) { return; }
+    this.roomId = rb.unpackInt();
+    if (--c <= 0) { return; }
+    this.winMoney = rb.unpackInt();
+    if (--c <= 0) { return; }
+    rb.unpackDiscard(c);
+  }
+  GameOver create() { return GameOver(); }
+
+}
 class empty
 {
   void encode(eproto.DataWriter wb)
