@@ -1677,6 +1677,7 @@ static void ep_decode_proto(ProtoState* ps, ReadBuffer* prb, lua_State *L, Proto
     }else{
         prb->setError(ERRORBIT_TYPE_WRONG_PROTO);
         LOG_ERROR("ep_decode_proto unknown type=%d", t);
+        return;
     }
     ep_decode_proto_element(ps, prb, L, protoVec, arrLen);
 }
