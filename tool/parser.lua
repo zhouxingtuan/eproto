@@ -482,6 +482,8 @@ function parser:splitEmptyMark(lines)
 		line = string.gsub(line, "<", " ")
 		line = string.gsub(line, ">", " ")
 		line = string.gsub(line, ",", " ")
+		line = string.gsub(line, "\r\t", " ")
+		line = string.gsub(line, "\t", " ")
 		local arr = util.split(line, " ", true)
 		if #arr > 0 then
 			for k,v in ipairs(arr) do
@@ -525,7 +527,7 @@ function parser:splitLines(data)
             desc = string.sub(line, e+1, #line)
 			line = string.sub(line, 1, b-1)
 		end
-		line = string.gsub(line, "=", "")
+		line = string.gsub(line, "=", " ")
 		line = string.gsub(line, ";", "")
 		line = util.trim(line)
 		if #line > 0 then
