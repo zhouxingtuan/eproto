@@ -1,3 +1,4 @@
+syntax = "proto3";
 
 package test;
 
@@ -5,16 +6,16 @@ message request
 {
     message inner
     {
-        optional int32 t1 = 1;
-        optional string t2 = 2;
+        int32 t1 = 1;
+        string t2 = 2;
     }
-    optional int32 a = 1;
-    optional int64 b = 2;
-    optional float c = 3;
-    optional double d = 4;
-    optional string e = 5;
-    optional bytes f = 6;
-    optional inner g = 7;
+    int32 a = 1;
+    int64 b = 2;
+    float c = 3;
+    double d = 4;
+    string e = 5;
+    bytes f = 6;
+    inner g = 7;
     map<int32, string> h = 8;
     repeated int32 i = 9;
     repeated inner j = 10;
@@ -24,8 +25,8 @@ message request
 
 message response
 {
-    optional int32 error = 1;
-    optional bytes buffer = 2;
+    int32 error = 1;
+    bytes buffer = 2;
 }
 
 message empty
@@ -36,6 +37,6 @@ message empty
 // 游戏结束
 message GameOver
 {
-    optional int32 roomId = 1;          // 房间ID
-    optional int64 winMoney = 2;        // 玩家输赢的金币数
+    int32 roomId = 1;          // 房间ID
+    int64 winMoney = 2;        // 玩家输赢的金币数
 }

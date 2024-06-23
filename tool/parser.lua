@@ -203,9 +203,9 @@ function parser:findAnyThingInLine(arr)
 	elseif first == "}" then
 		self:popMessage()
 	elseif first == "required" then
-		self:checkElementSingle(arr)
+		self:checkElementSingle(arr, 2)
 	elseif first == "optional" then
-		self:checkElementSingle(arr)
+		self:checkElementSingle(arr, 2)
 	elseif first == "repeated" then
 		self:checkElementArray(arr)
 	elseif first == "map" then
@@ -217,12 +217,24 @@ function parser:findAnyThingInLine(arr)
 		print("package_name", self.m_package)
 	elseif first == "import" then
 		self:pushImportHeader(arr)
+	elseif first == "syntax" then
+		-- do nothing
 	else
 		local info = self:topMessage()
 		if info and info.type == "enum" then
 			self:pushEnum(arr[1], arr[2])
 		else
-			print("current first string is not valid", first)
+			local data_type = protobuf_to_eproto[first]
+			if data_type then
+				self:checkElementSingle(arr, 1)
+			else
+				local msg_info = self:findMessage(first)
+				if msg_info then
+					self:checkElementSingle(arr, 1)
+				else
+					print("current first string is not valid", first)
+				end
+			end
 		end
 	end
 end
@@ -235,11 +247,11 @@ function parser:pushImportHeader(arr)
 	end
 	table.insert(self.m_importPath, headerPath)
 end
-function parser:checkElementSingle(arr)
+function parser:checkElementSingle(arr, startIndex)
 	local info = self:topMessage()
-	local type_name = arr[2]
-	local name = arr[3]
-	local index = tonumber(arr[4])
+	local type_name = arr[startIndex]
+	local name = arr[startIndex+1]
+	local index = tonumber(arr[startIndex+2])
 	if not index then
 		print("current message", info.name, "index is not a number", type(index), index)
 		self.m_error_code = 1
