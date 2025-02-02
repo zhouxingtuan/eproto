@@ -94,10 +94,38 @@ namespace %s
     local classCode = ""
     local prettyShow = prettyStep
     for className,classInfo in pairs(childMap) do
-        classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
+        local classType = classInfo.type
+        if classType == "enum" then
+            classCode = classCode .. self:genEnum(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
+        else
+            classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false)
+        end
     end
     local code = string.format(template, namespace, classCode)
     return code
+end
+function parser_csharp:genEnum(className, elementArray, childMap, prettyShow, isPublic)
+    local nextPrettyShow = prettyShow..prettyStep
+    local beforeClass = prettyShow
+    local bodyArr = {}
+    for k,elementInfo in ipairs(elementArray) do
+        local key = elementInfo[1]
+        local value = elementInfo[2]
+        local lineCode = nextPrettyShow .. key .. " = " .. value ..""
+        table.insert(bodyArr, lineCode)
+    end
+    local bodyStr = table.concat(bodyArr, ",\n")
+    local template = [[%senum %s
+%s{
+%s
+%s};
+]]
+    local classCode = string.format(template,
+            beforeClass, className,
+            prettyShow,
+            bodyStr,
+            prettyShow)
+    return classCode
 end
 function parser_csharp:genClass(className, elementArray, childMap, prettyShow, isPublic)
     --[[
@@ -118,7 +146,12 @@ function parser_csharp:genClass(className, elementArray, childMap, prettyShow, i
     end
     local subClasses = ""
     for name,info in pairs(childMap) do
-        subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow, true)
+        local classType = info.type
+        if classType == "enum" then
+            subClasses = subClasses .. self:genEnum(name, info.elementArray, info.childMap, nextPrettyShow, true)
+        else
+            subClasses = subClasses .. self:genClass(name, info.elementArray, info.childMap, nextPrettyShow, true)
+        end
     end
     local params = self:genParams(elementArray, nextPrettyShow)
     local Encode = self:genEncode(elementArray, nextPrettyShow)
@@ -226,7 +259,7 @@ function parser_csharp:genEncode(elementArray, prettyShow)
                 else
                     -- C#内置数据类型
                     bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s %s = %s;\n", raw_key_csharp_type, value_name, value_at_index)
-                    bodyCode = bodyCode .. nextNextNextPrettyShow .. self:getPackByType(value_name, raw_key_csharp_type)
+                    bodyCode = bodyCode .. nextNextPrettyShow .. self:getPackByType(value_name, raw_key_csharp_type)
                 end
                 bodyCode = bodyCode .. nextNextPrettyShow .. "}\n"
                 bodyCode = bodyCode .. nextPrettyShow .. "}\n"
@@ -433,6 +466,7 @@ function parser_csharp:splitNamespace()
                 end
                 if k == #arr then
                     pMap.elementArray = info.raw_elements
+                    pMap.type = info.type
                 end
                 nsMap = pMap
             end
@@ -450,6 +484,7 @@ function parser_csharp:splitNamespace()
                 end
                 if k == #arr then
                     pMap.elementArray = info.raw_elements
+                    pMap.type = info.type
                 end
                 nsMap = pMap
             end

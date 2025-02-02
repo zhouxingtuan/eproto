@@ -22,12 +22,21 @@ package.path = package.path..";"..path.."tool/?.lua;"
 
 local file = args[1]
 local print_flag = args[2]
+local route = args[3]
+local output_map = {}
+for k=4,#args do
+    output_map[args[k]] = true
+end
+local is_all_output = false
+if next(output_map) == nil then
+    is_all_output = true
+end
 print("param", file, print_flag)
 
 local parser = require("parser")
 
-local obj = parser.new(path)
-obj:parseFile(file, nil, print_flag)
+local obj = parser.new(path, route)
+obj:parseFile(file, nil, print_flag, is_all_output, output_map)
 
 
 

@@ -61,7 +61,7 @@ function parser:ctor(path, route)
 	self.m_importPath = {}
 end
 
-function parser:parseFile(file, save_file, print_flag)
+function parser:parseFile(file, save_file, print_flag, is_all_output, output_map)
 	print_flag = tonumber(print_flag)
 	print_flag = print_flag or 0
 	local name = util.getFileName(file)
@@ -100,14 +100,29 @@ function parser:parseFile(file, save_file, print_flag)
 
 	self:printOutput(protos, print_flag)
 
-	local buf = MessagePack.pack(protos)
-	self:setFileData(save_file, buf)
+	if is_all_output or output_map["pb"] then
+		local buf = MessagePack.pack(protos)
+		self:setFileData(save_file, buf)
+	end
 
-	local json_file = name..".json"
-	local json_buf = json.encode(protos)
-	self:setFileData(json_file, json_buf)
+	if is_all_output or output_map["json"] then
+		local json_file = name..".json"
+		local json_buf = json.encode(protos)
+		self:setFileData(json_file, json_buf)
+	end
 
-	local js_temp = [[
+	if is_all_output or output_map["lua"] then
+		local lua_file = name..".lua"
+		local lua_buf = dump(protos, 10, true, nil)
+		lua_buf = string.format([[
+local data = %s
+return data
+]], lua_buf)
+		self:setFileData(lua_file, lua_buf)
+	end
+
+	if is_all_output or output_map["js"] then
+		local js_temp = [[
 !function(t){
     t();
 }(function () {
@@ -118,30 +133,38 @@ function parser:parseFile(file, save_file, print_flag)
     }
 });
 ]]
-	local js_file = name..".js"
-	local js_buf = string.format(js_temp, name, json_buf, name, name)
-	self:setFileData(js_file, js_buf)
+		local json_buf = json.encode(protos)
+		local js_file = name..".js"
+		local js_buf = string.format(js_temp, name, json_buf, name, name)
+		self:setFileData(js_file, js_buf)
+	end
 
-	local parser_csharp = require("parser_csharp")
-	local parser_obj = parser_csharp.new(self.m_package, self.m_full_path_info)
-	local cs_buf = parser_obj:genCode()
---	print("csharp code:\n"..cs_buf)
-	local cs_file = name..".cs"
-	self:setFileData(cs_file, cs_buf)
+	if is_all_output or output_map["cs"] then
+		local parser_csharp = require("parser_csharp")
+		local parser_obj = parser_csharp.new(self.m_package, self.m_full_path_info)
+		local cs_buf = parser_obj:genCode()
+		--	print("csharp code:\n"..cs_buf)
+		local cs_file = name..".cs"
+		self:setFileData(cs_file, cs_buf)
+	end
 
-	local parser_cpp = require("parser_cpp")
-	local parser_obj = parser_cpp.new(self.m_package, self.m_full_path_info, self.m_importPath)
-	local cpp_file = name..".hpp"
-	local cpp_buf = parser_obj:genCode(cpp_file)
---	print("csharp code:\n"..cs_buf)
-	self:setFileData(cpp_file, cpp_buf)
+	if is_all_output or output_map["cpp"] then
+		local parser_cpp = require("parser_cpp")
+		local parser_obj = parser_cpp.new(self.m_package, self.m_full_path_info, self.m_importPath)
+		local cpp_file = name..".hpp"
+		local cpp_buf = parser_obj:genCode(cpp_file)
+		--	print("csharp code:\n"..cs_buf)
+		self:setFileData(cpp_file, cpp_buf)
+	end
 
-	local parser_dart = require("parser_dart")
-	local dart_file = name..".dart"
-	local parser_obj = parser_dart.new(self.m_package, self.m_full_path_info, self.m_importPath)
-	local dart_buf = parser_obj:genCode(dart_file)
-	--	print("dart code:\n"..cs_buf)
-	self:setFileData(dart_file, dart_buf)
+	if is_all_output or output_map["dart"] then
+		local parser_dart = require("parser_dart")
+		local dart_file = name..".dart"
+		local parser_obj = parser_dart.new(self.m_package, self.m_full_path_info, self.m_importPath)
+		local dart_buf = parser_obj:genCode(dart_file)
+		--	print("dart code:\n"..cs_buf)
+		self:setFileData(dart_file, dart_buf)
+	end
 
 	return protos
 end
@@ -289,7 +312,7 @@ function parser:checkElementArray(arr)
 	local name = arr[3]
 	local index = tonumber(arr[4])
 	if not index then
-		print("current message", info.name, "index is not a number", type(index), index)
+		print("current message", info.name, "index is not a number", type(index), index, arr[1], arr[2], arr[3])
 		self.m_error_code = 2
 		return
 	end
@@ -369,6 +392,7 @@ function parser:pushEnum(key, value)
 	info.index_hash[value] = key
 	local param = {key, value}
 	table.insert(info.elements, param)
+	table.insert(info.raw_elements, {key, value})
 end
 function parser:pushElement(data_type, index, name, key, value, raw_type, raw_key, raw_value)
     -- todo index 为了适配，需要全部从0开始

@@ -20,15 +20,15 @@ local protobuf_to_cpp = {
     double = "double";
     float = "float";
     int32 = "int";
-    int64 = "long long int";
+    int64 = "long long";
     uint32 = "unsigned int";
-    uint64 = "unsigned long long int";
+    uint64 = "unsigned long long";
     sint32 = "int";
-    sint64 = "long long int";
+    sint64 = "long long";
     fixed32 = "unsigned int";
-    fixed64 = "unsigned long long int";
+    fixed64 = "unsigned long long";
     sfixed32 = "int";
-    sfixed64 = "long long int";
+    sfixed64 = "long long";
     bool = "bool";
     string = "std::string";
     bytes = "std::vector<char>";
@@ -118,11 +118,38 @@ namespace %s
     for _,info in ipairs(childArray) do
         local className = info.className
         local classInfo = info.classInfo
-        --    for className,classInfo in pairs(childMap) do
-        classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false, namespace)
+        local classType = classInfo.type
+        if classType == "enum" then
+            classCode = classCode .. self:genEnum(className, classInfo.elementArray, classInfo.childMap, prettyShow, false, namespace)
+        else
+            classCode = classCode .. self:genClass(className, classInfo.elementArray, classInfo.childMap, prettyShow, false, namespace)
+        end
     end
     local code = string.format(template, namespace, classCode)
     return code
+end
+function parser_cpp:genEnum(className, elementArray, childMap, prettyShow, isPublic, frontName)
+    local nextPrettyShow = prettyShow..prettyStep
+    local beforeClass = prettyShow
+    local bodyArr = {}
+    for k,elementInfo in ipairs(elementArray) do
+        local key = elementInfo[1]
+        local value = elementInfo[2]
+        local lineCode = nextPrettyShow .. key .. " = " .. value ..""
+        table.insert(bodyArr, lineCode)
+    end
+    local bodyStr = table.concat(bodyArr, ",\n")
+    local template = [[%senum %s
+%s{
+%s
+%s};
+]]
+    local classCode = string.format(template,
+            beforeClass, className,
+            prettyShow,
+            bodyStr,
+            prettyShow)
+    return classCode
 end
 function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPublic, frontName)
     local nextPrettyShow = prettyShow..prettyStep
@@ -137,8 +164,12 @@ function parser_cpp:genClass(className, elementArray, childMap, prettyShow, isPu
     for _,info in ipairs(childArray) do
         local name = info.className
         local classInfo = info.classInfo
-        --    for name,info in pairs(childMap) do
-        subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true, frontName.."::"..className)
+        local classType = classInfo.type
+        if classType == "enum" then
+            subClasses = subClasses .. self:genEnum(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true, frontName.."::"..className)
+        else
+            subClasses = subClasses .. self:genClass(name, classInfo.elementArray, classInfo.childMap, nextPrettyShow, true, frontName.."::"..className)
+        end
     end
     local params,paramSetter = self:genParams(elementArray, nextPrettyShow)
     local Constructor = self:genConstructor(elementArray, nextPrettyShow, className)
@@ -455,7 +486,7 @@ function parser_cpp:genDecode(elementArray, prettyShow)
     --    bodyCode = bodyCode .. nextPrettyShow .. "Clear();\n"
     local count_name = "c"
     local count_skip = nextPrettyShow .. string.format("if (--%s <= 0) { return; }\n", count_name)
-    bodyCode = bodyCode .. nextPrettyShow .. string.format("long long int %s = rb.unpack_array();\n", count_name)
+    bodyCode = bodyCode .. nextPrettyShow .. string.format("long long %s = rb.unpack_array();\n", count_name)
     bodyCode = bodyCode .. nextPrettyShow .. string.format("if (%s <= 0) { return; }\n", count_name)
     for k,elementInfo in ipairs(elementArray) do
         local name = elementInfo[1]
@@ -490,11 +521,11 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 decl_value_default = self:getDefaultDeclValue(raw_value_cpp_type)
                 --                cpp_type = "Dictionary<"..decl_key..", "..decl_value..">"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_map();\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long n = rb.unpack_map();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
                 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s();\n", this_name, cpp_type)
                 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.clear();\n", this_name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 --                bodyCode = bodyCode .. nextNextNextNextPrettyShow .. string.format("%s k=%s; %s v=%s;\n", decl_key, decl_key_default, decl_value, decl_value_default)
                 if raw_key_cpp_type == nil then
@@ -550,11 +581,11 @@ function parser_cpp:genDecode(elementArray, prettyShow)
                 end
                 --                cpp_type = decl_key.."[n]"
                 bodyCode = bodyCode .. nextPrettyShow .. "{\n"
-                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long int n = rb.unpack_array();\n")
+                bodyCode = bodyCode .. nextNextPrettyShow .. string.format("long long n = rb.unpack_array();\n")
                 bodyCode = bodyCode .. nextNextPrettyShow .. string.format("if (n > 0) {\n", this_name)
                 --                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s = new %s;\n", this_name, cpp_type)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("%s.resize(n);\n", this_name)
-                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long int %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
+                bodyCode = bodyCode .. nextNextNextPrettyShow .. string.format("for(long long %s=0; %s<n; ++%s)\n", index_name, index_name, index_name)
                 bodyCode = bodyCode .. nextNextNextPrettyShow .. "{\n"
                 decl_key_default = self:getDefaultDeclValue(raw_key_cpp_type)
                 if raw_key_cpp_type == nil then
@@ -668,14 +699,14 @@ function parser_cpp:getChildMapLevel(childMap)
     local function loopFindLevel()
         local isFind = false
         for className,classInfo in pairs(childMap) do
-            for k,elementInfo in ipairs(classInfo.elementArray) do
+            for _,elementInfo in ipairs(classInfo.elementArray) do
                 for k=2,#elementInfo do
                     local raw_type = elementInfo[k]
                     local thatInfo = childMap[raw_type]
                     if thatInfo then
                         local protoLevel = thatInfo.protoLevel
-                        if classInfo.protoLevel <= thatInfo.protoLevel then
-                            classInfo.protoLevel = thatInfo.protoLevel + 1
+                        if classInfo.protoLevel <= protoLevel then
+                            classInfo.protoLevel = protoLevel + 1
                             isFind = true
                         end
                     end
@@ -736,6 +767,7 @@ function parser_cpp:splitNamespace()
                 end
                 if k == #arr then
                     pMap.elementArray = info.raw_elements
+                    pMap.type = info.type
                 end
                 nsMap = pMap
             end
@@ -753,6 +785,7 @@ function parser_cpp:splitNamespace()
                 end
                 if k == #arr then
                     pMap.elementArray = info.raw_elements
+                    pMap.type = info.type
                 end
                 nsMap = pMap
             end
