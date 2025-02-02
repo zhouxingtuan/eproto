@@ -5,14 +5,30 @@ import 'eproto.dart' as eproto;
 
 class DataType
 {
+  1 data_type_nil = 1();
+  2 data_type_int = 2();
+  3 data_type_string = 3();
+  4 data_type_double = 4();
   void encode(eproto.DataWriter wb)
   {
-    wb.packArrayHead(0);
+    wb.packArrayHead(4);
+    if (this.data_type_nil == null) { wb.packNil(); } else { this.data_type_nil.encode(wb); }
+    if (this.data_type_int == null) { wb.packNil(); } else { this.data_type_int.encode(wb); }
+    if (this.data_type_string == null) { wb.packNil(); } else { this.data_type_string.encode(wb); }
+    if (this.data_type_double == null) { wb.packNil(); } else { this.data_type_double.encode(wb); }
   }
   void decode(eproto.DataReader rb)
   {
     int c = rb.unpackArrayHead();
     if (c <= 0) { return; }
+    if (rb.nextIsNil()) { rb.moveNext(); } else { this.data_type_nil.decode(rb); }
+    if (--c <= 0) { return; }
+    if (rb.nextIsNil()) { rb.moveNext(); } else { this.data_type_int.decode(rb); }
+    if (--c <= 0) { return; }
+    if (rb.nextIsNil()) { rb.moveNext(); } else { this.data_type_string.decode(rb); }
+    if (--c <= 0) { return; }
+    if (rb.nextIsNil()) { rb.moveNext(); } else { this.data_type_double.decode(rb); }
+    if (--c <= 0) { return; }
     rb.unpackDiscard(c);
   }
   DataType create() { return DataType(); }

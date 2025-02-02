@@ -564,20 +564,13 @@ namespace invitemgr
         }
         override public Proto Create() { return new table_info(); }
     }
-    class DataType : Proto
+    enum DataType
     {
-        override public void Encode(WriteBuffer wb)
-        {
-            Eproto.PackArray(wb, 0);
-        }
-        override public void Decode(ReadBuffer rb)
-        {
-            long c = Eproto.UnpackArray(rb);
-            if (c <= 0) { return; }
-            Eproto.UnpackDiscard(rb, c);
-        }
-        override public Proto Create() { return new DataType(); }
-    }
+        data_type_nil = 1,
+        data_type_int = 2,
+        data_type_string = 3,
+        data_type_double = 4
+    };
     class invite_game : Proto
     {
         public int game_id;
@@ -604,7 +597,7 @@ namespace invitemgr
                 for(int i=0; i<this.showtag2_version.Length; ++i)
                 {
                     string v = this.showtag2_version[i];
-                    Eproto.PackString(wb, v);
+                Eproto.PackString(wb, v);
                 }
             }
             Eproto.PackString(wb, this.game_info);

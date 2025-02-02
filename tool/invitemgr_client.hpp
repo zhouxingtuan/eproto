@@ -5,29 +5,12 @@
 
 namespace invitemgr
 {
-    class DataType : public eproto::Proto
+    enum DataType
     {
-    public:
-        DataType() : eproto::Proto() {}
-        virtual ~DataType(){ Clear(); }
-        virtual void Clear()
-        {
-        }
-        virtual void Encode(eproto::Writer& wb)
-        {
-            wb.pack_array(0);
-        }
-        virtual void Decode(eproto::Reader& rb)
-        {
-            long long int c = rb.unpack_array();
-            if (c <= 0) { return; }
-            rb.unpack_discard(c);
-        }
-        virtual eproto::Proto* Create() { return DataType::New(); }
-        virtual void Destroy() { DataType::Delete(this); }
-        static DataType* New() { DataType* p = new DataType(); p->retain(); return p; }
-        static void Delete(DataType* p) { if(NULL != p){ p->release(); } }
-        virtual std::string ClassName() { return "invitemgr::DataType"; }
+        data_type_nil = 1,
+        data_type_int = 2,
+        data_type_string = 3,
+        data_type_double = 4
     };
     class match_price : public eproto::Proto
     {
@@ -61,7 +44,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->id);
             if (--c <= 0) { return; }
@@ -115,7 +98,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->region_code);
             if (--c <= 0) { return; }
@@ -154,7 +137,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -186,7 +169,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->region_code);
             if (--c <= 0) { return; }
@@ -217,7 +200,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -249,7 +232,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -280,7 +263,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -306,7 +289,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
@@ -333,7 +316,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -362,7 +345,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->tid);
             if (--c <= 0) { return; }
@@ -394,7 +377,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -425,7 +408,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -457,7 +440,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -488,7 +471,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -532,7 +515,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -574,7 +557,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -658,7 +641,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->game_id);
             if (--c <= 0) { return; }
@@ -671,10 +654,10 @@ namespace invitemgr
             rb.unpack_int(this->operate_countdown);
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->showtag2_version.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         std::string v;
                         rb.unpack_string(v);
@@ -692,10 +675,10 @@ namespace invitemgr
             rb.unpack_int(this->sort_id);
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->price.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         match_price* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { match_price::Delete(v); v = match_price::New(); v->Decode(rb); }
@@ -747,16 +730,16 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->uid);
             if (--c <= 0) { return; }
             rb.unpack_int(this->signup_time);
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_map();
+                long long n = rb.unpack_map();
                 if (n > 0) {
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         int k=0;
                         rb.unpack_int(k);
@@ -816,17 +799,17 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
             rb.unpack_int(this->region_code);
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->games.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         invite_game* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { invite_game::Delete(v); v = invite_game::New(); v->Decode(rb); }
@@ -906,7 +889,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->game_id);
             if (--c <= 0) { return; }
@@ -927,10 +910,10 @@ namespace invitemgr
             rb.unpack_string(this->game_info);
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->signup_users.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         user_info* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { user_info::Delete(v); v = user_info::New(); v->Decode(rb); }
@@ -977,7 +960,7 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->result);
             if (--c <= 0) { return; }
@@ -1028,13 +1011,13 @@ namespace invitemgr
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->info.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         table_info* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { table_info::Delete(v); v = table_info::New(); v->Decode(rb); }
