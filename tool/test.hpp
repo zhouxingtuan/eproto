@@ -9,7 +9,7 @@ namespace test
     {
     public:
         int roomId;
-        long long int winMoney;
+        long long winMoney;
         GameOver() : eproto::Proto(), roomId(0), winMoney(0) {}
         virtual ~GameOver(){ Clear(); }
         virtual void Clear()
@@ -25,7 +25,7 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->roomId);
             if (--c <= 0) { return; }
@@ -53,7 +53,7 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_discard(c);
         }
@@ -86,7 +86,7 @@ namespace test
             }
             virtual void Decode(eproto::Reader& rb)
             {
-                long long int c = rb.unpack_array();
+                long long c = rb.unpack_array();
                 if (c <= 0) { return; }
                 rb.unpack_int(this->t1);
                 if (--c <= 0) { return; }
@@ -101,7 +101,7 @@ namespace test
             virtual std::string ClassName() { return "test::request::inner"; }
         };
         int a;
-        long long int b;
+        long long b;
         float c;
         double d;
         std::string e;
@@ -202,7 +202,7 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->a);
             if (--c <= 0) { return; }
@@ -219,9 +219,9 @@ namespace test
             if (rb.nextIsNil()) { rb.moveNext(); } else { inner::Delete(this->g); this->g = inner::New(); this->g->Decode(rb); }
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_map();
+                long long n = rb.unpack_map();
                 if (n > 0) {
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         int k=0;
                         rb.unpack_int(k);
@@ -233,10 +233,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->i.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         int v=0;
                         rb.unpack_int(v);
@@ -246,10 +246,10 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_array();
+                long long n = rb.unpack_array();
                 if (n > 0) {
                     this->j.resize(n);
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         inner* v=NULL;
                         if (rb.nextIsNil()) { rb.moveNext(); } else { inner::Delete(v); v = inner::New(); v->Decode(rb); }
@@ -259,9 +259,9 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_map();
+                long long n = rb.unpack_map();
                 if (n > 0) {
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         std::string k;
                         rb.unpack_string(k);
@@ -273,9 +273,9 @@ namespace test
             }
             if (--c <= 0) { return; }
             {
-                long long int n = rb.unpack_map();
+                long long n = rb.unpack_map();
                 if (n > 0) {
-                    for(long long int i=0; i<n; ++i)
+                    for(long long i=0; i<n; ++i)
                     {
                         std::string k;
                         rb.unpack_string(k);
@@ -315,7 +315,7 @@ namespace test
         }
         virtual void Decode(eproto::Reader& rb)
         {
-            long long int c = rb.unpack_array();
+            long long c = rb.unpack_array();
             if (c <= 0) { return; }
             rb.unpack_int(this->error);
             if (--c <= 0) { return; }

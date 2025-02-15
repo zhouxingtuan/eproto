@@ -597,7 +597,7 @@ namespace invitemgr
                 for(int i=0; i<this.showtag2_version.Length; ++i)
                 {
                     string v = this.showtag2_version[i];
-                Eproto.PackString(wb, v);
+                    Eproto.PackString(wb, v);
                 }
             }
             Eproto.PackString(wb, this.game_info);
